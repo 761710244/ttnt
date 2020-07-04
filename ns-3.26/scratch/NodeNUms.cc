@@ -39,8 +39,8 @@ void TxCallback(Ptr <CounterCalculator<uint32_t>> datac, std::string path,
 
 int main(int argc, char *argv[]) {
     string format("omnet");
-    string experiment("sincgars-stats");
-    string strategy("sincgars-default");
+//    string experiment("sincgars-stats");
+//    string strategy("sincgars-default");
     string input;
     string runID;
     {
@@ -54,11 +54,9 @@ int main(int argc, char *argv[]) {
     // Set up command line parameters used to control the experiment.
     CommandLine cmd;
     cmd.AddValue("format", "Format to use for data output.", format);
-    cmd.AddValue("experiment", "Identifier for experiment.", experiment);
-    cmd.AddValue("strategy", "Identifier for strategy.", strategy);
+//    cmd.AddValue("experiment", "Identifier for experiment.", experiment);
+//    cmd.AddValue("strategy", "Identifier for strategy.", strategy);
     cmd.AddValue("run", "Identifier for run.", runID);
-    cmd.AddValue("Sinc", "Number of  STA devices", ttnt);
-
     cmd.Parse(argc, argv);
 
     if (format != "omnet" && format != "db") {
@@ -85,19 +83,14 @@ int main(int argc, char *argv[]) {
         LogComponentEnable("UdpTraceClient", LOG_LEVEL_ALL);
     }
 
-
-
-    //测试SINCGARS节点
     NodeContainer TTNTNode;
     TTNTNode.Create(ttnt);
 
 
 //*************************************************
 
-//*************************************************
-//	nodeall.Add(listenNode);
 
-//****************************   SINC   *******************************************
+//****************************   TTNT   *******************************************
     sincgars::WifiHelper wifiSinc;
     sincgars::YansWifiChannelHelper channelSinc =
             sincgars::YansWifiChannelHelper::Default();   //使用默认的信道模型
@@ -108,53 +101,48 @@ int main(int argc, char *argv[]) {
     sincgars::NqosWifiMacHelper wifiMacSinc =
             sincgars::NqosWifiMacHelper::Default();
     wifiMacSinc.SetType("ns3::sinc-AdhocWifiMac");
-    NetDeviceContainer sinDevice = wifiSinc.Install(phySinc,
-                                                    wifiMacSinc, TTNTNode);
+    NetDeviceContainer ttntDevice = wifiSinc.Install(phySinc, wifiMacSinc, TTNTNode);
 
     MobilityHelper mobility;
     mobility.SetPositionAllocator("ns3::GridPositionAllocator", "MinX",
                                   DoubleValue(0.0), "MinY", DoubleValue(0.0), "DeltaX",
-                                  DoubleValue(0.01), "DeltaY", DoubleValue(0.01), "GridWidth",
+                                  DoubleValue(5.0), "DeltaY", DoubleValue(5.0), "GridWidth",
                                   UintegerValue(5), "LayoutType", StringValue("RowFirst"));
     mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
-    mobility.Install(TTNTNode);  //EpsNode SincNode
+    mobility.Install(TTNTNode);
 
     InternetStackHelper stack;
 
     DsrHelper Dsr;
     DsrMainHelper DsrMain;
-    Dsr.Set("isMalicious", UintegerValue(0));
     stack.Install(TTNTNode);
     DsrMain.Install(Dsr, TTNTNode);
 
-    //********************************************************
     Ipv4AddressHelper address;
-    //*******************************************************
     address.SetBase("198.3.1.0", "255.255.255.0");
-    Ipv4InterfaceContainer NetSincDevice;
-    NetSincDevice = address.Assign(sinDevice);
+    Ipv4InterfaceContainer NetTTNTDevice;
+    NetTTNTDevice = address.Assign(ttntDevice);
 
     uint16_t workflow[26] = {0};
     for (uint32_t i = 1; i <= (ttnt / 2); i++) {
         workflow[i] = 1;
     }
-    double start_time = (ttnt / 2) * 7, end_time = start_time + 10.0;
-//-------------  SINC0 S-->S  SINC1  -----------------------------11111
-    //  1  //
+    double start_time = (ttnt / 2) * 7, end_time = start_time + 50.0;
+
+    /////////////////////1
     if (workflow[1]) {    //route
 
         uint32_t packetSizev = 1;
         uint32_t maxPacketCountv = 10000000;
         uint32_t packetinterval = 2;
         Time interPacketIntervalv = Seconds((1 / (double) packetinterval)/*1/((double)20)*/);
-//			Time interPacketIntervalv = Seconds(5.0);
 
         UdpServerHelper echoServerv(111);
         ApplicationContainer serv1erAppsv = echoServerv.Install(TTNTNode.Get(1));
         serv1erAppsv.Start(Seconds(0.0));
         serv1erAppsv.Stop(Seconds(5.0));
 
-        UdpClientHelper echoClientv(NetSincDevice.GetAddress(1), 111);
+        UdpClientHelper echoClientv(NetTTNTDevice.GetAddress(1), 111);
         echoClientv.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv));
         echoClientv.SetAttribute("Interval", TimeValue(interPacketIntervalv));
         echoClientv.SetAttribute("PacketSize", UintegerValue(packetSizev));
@@ -165,9 +153,9 @@ int main(int argc, char *argv[]) {
         clientAppsv.Stop(Seconds(5.0));
 
         ////////////////////////data/////////
-        uint32_t packetSizev1 = 1499;
+        uint32_t packetSizev1 = 100;
         uint32_t maxPacketCountv1 = 10000000;
-        uint32_t packetinterval1 = 500;
+        uint32_t packetinterval1 = 2;
         Time interPacketIntervalv1 = Seconds((1 / (double) packetinterval1)/*1/((double)20)*/);
 //			Time interPacketIntervalv1 = Seconds(1.0);
 
@@ -176,7 +164,7 @@ int main(int argc, char *argv[]) {
         serverAppsv1.Start(Seconds(start_time));
         serverAppsv1.Stop(Seconds(end_time));
 
-        UdpClientHelper echoClientv1(NetSincDevice.GetAddress(1), 21);
+        UdpClientHelper echoClientv1(NetTTNTDevice.GetAddress(1), 21);
         echoClientv1.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv1));
         echoClientv1.SetAttribute("Interval", TimeValue(interPacketIntervalv1));
         echoClientv1.SetAttribute("PacketSize", UintegerValue(packetSizev1));
@@ -186,7 +174,7 @@ int main(int argc, char *argv[]) {
         clientAppsv1.Start(Seconds(start_time));
         clientAppsv1.Stop(Seconds(end_time));
     }
-///////////////////////////////2
+    /////////////////////2
     if (workflow[2]) {    //route
 
         uint32_t packetSizev = 1;
@@ -200,7 +188,7 @@ int main(int argc, char *argv[]) {
         serv1erAppsv.Start(Seconds(7.0));
         serv1erAppsv.Stop(Seconds(12.0));
 
-        UdpClientHelper echoClientv(NetSincDevice.GetAddress(3), 222);
+        UdpClientHelper echoClientv(NetTTNTDevice.GetAddress(3), 222);
         echoClientv.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv));
         echoClientv.SetAttribute("Interval", TimeValue(interPacketIntervalv));
         echoClientv.SetAttribute("PacketSize", UintegerValue(packetSizev));
@@ -222,7 +210,7 @@ int main(int argc, char *argv[]) {
         serverAppsv1.Start(Seconds(start_time));
         serverAppsv1.Stop(Seconds(end_time));
 
-        UdpClientHelper echoClientv1(NetSincDevice.GetAddress(3), 22);
+        UdpClientHelper echoClientv1(NetTTNTDevice.GetAddress(3), 22);
         echoClientv1.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv1));
         echoClientv1.SetAttribute("Interval", TimeValue(interPacketIntervalv1));
         echoClientv1.SetAttribute("PacketSize", UintegerValue(packetSizev1));
@@ -233,7 +221,7 @@ int main(int argc, char *argv[]) {
         clientAppsv1.Stop(Seconds(end_time));
     }
 
-    /////////////////////////////////3
+    /////////////////////3
     if (workflow[3]) {    //route
 
         uint32_t packetSizev = 1;
@@ -247,7 +235,7 @@ int main(int argc, char *argv[]) {
         serv1erAppsv.Start(Seconds(14.0));
         serv1erAppsv.Stop(Seconds(19.0));
 
-        UdpClientHelper echoClientv(NetSincDevice.GetAddress(5), 333);
+        UdpClientHelper echoClientv(NetTTNTDevice.GetAddress(5), 333);
         echoClientv.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv));
         echoClientv.SetAttribute("Interval", TimeValue(interPacketIntervalv));
         echoClientv.SetAttribute("PacketSize", UintegerValue(packetSizev));
@@ -269,7 +257,7 @@ int main(int argc, char *argv[]) {
         serverAppsv1.Start(Seconds(start_time));
         serverAppsv1.Stop(Seconds(end_time));
 
-        UdpClientHelper echoClientv1(NetSincDevice.GetAddress(5), 23);
+        UdpClientHelper echoClientv1(NetTTNTDevice.GetAddress(5), 23);
         echoClientv1.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv1));
         echoClientv1.SetAttribute("Interval", TimeValue(interPacketIntervalv1));
         echoClientv1.SetAttribute("PacketSize", UintegerValue(packetSizev1));
@@ -280,8 +268,8 @@ int main(int argc, char *argv[]) {
         clientAppsv1.Stop(Seconds(end_time));
     }
 
-    if (workflow[4])//////////////////////4
-    {    //route
+    /////////////////////4
+    if (workflow[4]) {    //route
 
         uint32_t packetSizev = 1;
         uint32_t maxPacketCountv = 10000000;
@@ -294,7 +282,7 @@ int main(int argc, char *argv[]) {
         serv1erAppsv.Start(Seconds(21.0));
         serv1erAppsv.Stop(Seconds(26.0));
 
-        UdpClientHelper echoClientv(NetSincDevice.GetAddress(7), 444);
+        UdpClientHelper echoClientv(NetTTNTDevice.GetAddress(7), 444);
         echoClientv.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv));
         echoClientv.SetAttribute("Interval", TimeValue(interPacketIntervalv));
         echoClientv.SetAttribute("PacketSize", UintegerValue(packetSizev));
@@ -316,7 +304,7 @@ int main(int argc, char *argv[]) {
         serverAppsv1.Start(Seconds(start_time));
         serverAppsv1.Stop(Seconds(end_time));
 
-        UdpClientHelper echoClientv1(NetSincDevice.GetAddress(7), 24);
+        UdpClientHelper echoClientv1(NetTTNTDevice.GetAddress(7), 24);
         echoClientv1.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv1));
         echoClientv1.SetAttribute("Interval", TimeValue(interPacketIntervalv1));
         echoClientv1.SetAttribute("PacketSize", UintegerValue(packetSizev1));
@@ -327,7 +315,7 @@ int main(int argc, char *argv[]) {
         clientAppsv1.Stop(Seconds(end_time));
     }
 
-    ///////////////////////////5
+    /////////////////////5
     if (workflow[5]) {    //route
 
         uint32_t packetSizev = 1;
@@ -341,7 +329,7 @@ int main(int argc, char *argv[]) {
         serv1erAppsv.Start(Seconds(28.0));
         serv1erAppsv.Stop(Seconds(33.0));
 
-        UdpClientHelper echoClientv(NetSincDevice.GetAddress(9), 555);
+        UdpClientHelper echoClientv(NetTTNTDevice.GetAddress(9), 555);
         echoClientv.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv));
         echoClientv.SetAttribute("Interval", TimeValue(interPacketIntervalv));
         echoClientv.SetAttribute("PacketSize", UintegerValue(packetSizev));
@@ -363,7 +351,7 @@ int main(int argc, char *argv[]) {
         serverAppsv1.Start(Seconds(start_time));
         serverAppsv1.Stop(Seconds(end_time));
 
-        UdpClientHelper echoClientv1(NetSincDevice.GetAddress(9), 25);
+        UdpClientHelper echoClientv1(NetTTNTDevice.GetAddress(9), 25);
         echoClientv1.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv1));
         echoClientv1.SetAttribute("Interval", TimeValue(interPacketIntervalv1));
         echoClientv1.SetAttribute("PacketSize", UintegerValue(packetSizev1));
@@ -373,7 +361,7 @@ int main(int argc, char *argv[]) {
         clientAppsv1.Start(Seconds(start_time));
         clientAppsv1.Stop(Seconds(end_time));
     }
-    ///////////6
+    /////////////////////6
     if (workflow[6]) {    //route
 
         uint32_t packetSizev = 1;
@@ -387,7 +375,7 @@ int main(int argc, char *argv[]) {
         serv1erAppsv.Start(Seconds(35.0));
         serv1erAppsv.Stop(Seconds(40.0));
 
-        UdpClientHelper echoClientv(NetSincDevice.GetAddress(11), 666);
+        UdpClientHelper echoClientv(NetTTNTDevice.GetAddress(11), 666);
         echoClientv.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv));
         echoClientv.SetAttribute("Interval", TimeValue(interPacketIntervalv));
         echoClientv.SetAttribute("PacketSize", UintegerValue(packetSizev));
@@ -409,7 +397,7 @@ int main(int argc, char *argv[]) {
         serverAppsv1.Start(Seconds(start_time));
         serverAppsv1.Stop(Seconds(end_time));
 
-        UdpClientHelper echoClientv1(NetSincDevice.GetAddress(11), 26);
+        UdpClientHelper echoClientv1(NetTTNTDevice.GetAddress(11), 26);
         echoClientv1.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv1));
         echoClientv1.SetAttribute("Interval", TimeValue(interPacketIntervalv1));
         echoClientv1.SetAttribute("PacketSize", UintegerValue(packetSizev1));
@@ -420,7 +408,7 @@ int main(int argc, char *argv[]) {
         clientAppsv1.Stop(Seconds(end_time));
     }
 
-    //////////////7
+    /////////////////////7
     if (workflow[7]) {    //route
 
         uint32_t packetSizev = 1;
@@ -434,7 +422,7 @@ int main(int argc, char *argv[]) {
         serv1erAppsv.Start(Seconds(42.0));
         serv1erAppsv.Stop(Seconds(47.0));
 
-        UdpClientHelper echoClientv(NetSincDevice.GetAddress(13), 777);
+        UdpClientHelper echoClientv(NetTTNTDevice.GetAddress(13), 777);
         echoClientv.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv));
         echoClientv.SetAttribute("Interval", TimeValue(interPacketIntervalv));
         echoClientv.SetAttribute("PacketSize", UintegerValue(packetSizev));
@@ -456,7 +444,7 @@ int main(int argc, char *argv[]) {
         serverAppsv1.Start(Seconds(start_time));
         serverAppsv1.Stop(Seconds(end_time));
 
-        UdpClientHelper echoClientv1(NetSincDevice.GetAddress(13), 27);
+        UdpClientHelper echoClientv1(NetTTNTDevice.GetAddress(13), 27);
         echoClientv1.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv1));
         echoClientv1.SetAttribute("Interval", TimeValue(interPacketIntervalv1));
         echoClientv1.SetAttribute("PacketSize", UintegerValue(packetSizev1));
@@ -481,7 +469,7 @@ int main(int argc, char *argv[]) {
         serv1erAppsv.Start(Seconds(49.0));
         serv1erAppsv.Stop(Seconds(54.0));
 
-        UdpClientHelper echoClientv(NetSincDevice.GetAddress(15), 888);
+        UdpClientHelper echoClientv(NetTTNTDevice.GetAddress(15), 888);
         echoClientv.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv));
         echoClientv.SetAttribute("Interval", TimeValue(interPacketIntervalv));
         echoClientv.SetAttribute("PacketSize", UintegerValue(packetSizev));
@@ -503,7 +491,7 @@ int main(int argc, char *argv[]) {
         serverAppsv1.Start(Seconds(start_time));
         serverAppsv1.Stop(Seconds(end_time));
 
-        UdpClientHelper echoClientv1(NetSincDevice.GetAddress(15), 28);
+        UdpClientHelper echoClientv1(NetTTNTDevice.GetAddress(15), 28);
         echoClientv1.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv1));
         echoClientv1.SetAttribute("Interval", TimeValue(interPacketIntervalv1));
         echoClientv1.SetAttribute("PacketSize", UintegerValue(packetSizev1));
@@ -528,7 +516,7 @@ int main(int argc, char *argv[]) {
         serv1erAppsv.Start(Seconds(56.0));
         serv1erAppsv.Stop(Seconds(61.0));
 
-        UdpClientHelper echoClientv(NetSincDevice.GetAddress(17), 999);
+        UdpClientHelper echoClientv(NetTTNTDevice.GetAddress(17), 999);
         echoClientv.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv));
         echoClientv.SetAttribute("Interval", TimeValue(interPacketIntervalv));
         echoClientv.SetAttribute("PacketSize", UintegerValue(packetSizev));
@@ -550,7 +538,7 @@ int main(int argc, char *argv[]) {
         serverAppsv1.Start(Seconds(start_time));
         serverAppsv1.Stop(Seconds(end_time));
 
-        UdpClientHelper echoClientv1(NetSincDevice.GetAddress(17), 29);
+        UdpClientHelper echoClientv1(NetTTNTDevice.GetAddress(17), 29);
         echoClientv1.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv1));
         echoClientv1.SetAttribute("Interval", TimeValue(interPacketIntervalv1));
         echoClientv1.SetAttribute("PacketSize", UintegerValue(packetSizev1));
@@ -575,7 +563,7 @@ int main(int argc, char *argv[]) {
         serv1erAppsv.Start(Seconds(63.0));
         serv1erAppsv.Stop(Seconds(68.0));
 
-        UdpClientHelper echoClientv(NetSincDevice.GetAddress(19), 1110);
+        UdpClientHelper echoClientv(NetTTNTDevice.GetAddress(19), 1110);
         echoClientv.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv));
         echoClientv.SetAttribute("Interval", TimeValue(interPacketIntervalv));
         echoClientv.SetAttribute("PacketSize", UintegerValue(packetSizev));
@@ -597,7 +585,7 @@ int main(int argc, char *argv[]) {
         serverAppsv1.Start(Seconds(start_time));
         serverAppsv1.Stop(Seconds(end_time));
 
-        UdpClientHelper echoClientv1(NetSincDevice.GetAddress(19), 30);
+        UdpClientHelper echoClientv1(NetTTNTDevice.GetAddress(19), 30);
         echoClientv1.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv1));
         echoClientv1.SetAttribute("Interval", TimeValue(interPacketIntervalv1));
         echoClientv1.SetAttribute("PacketSize", UintegerValue(packetSizev1));
@@ -622,7 +610,7 @@ int main(int argc, char *argv[]) {
         serv1erAppsv.Start(Seconds(70.0));
         serv1erAppsv.Stop(Seconds(75.0));
 
-        UdpClientHelper echoClientv(NetSincDevice.GetAddress(21), 1221);
+        UdpClientHelper echoClientv(NetTTNTDevice.GetAddress(21), 1221);
         echoClientv.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv));
         echoClientv.SetAttribute("Interval", TimeValue(interPacketIntervalv));
         echoClientv.SetAttribute("PacketSize", UintegerValue(packetSizev));
@@ -644,7 +632,7 @@ int main(int argc, char *argv[]) {
         serverAppsv1.Start(Seconds(start_time));
         serverAppsv1.Stop(Seconds(end_time));
 
-        UdpClientHelper echoClientv1(NetSincDevice.GetAddress(21), 31);
+        UdpClientHelper echoClientv1(NetTTNTDevice.GetAddress(21), 31);
         echoClientv1.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv1));
         echoClientv1.SetAttribute("Interval", TimeValue(interPacketIntervalv1));
         echoClientv1.SetAttribute("PacketSize", UintegerValue(packetSizev1));
@@ -669,7 +657,7 @@ int main(int argc, char *argv[]) {
         serv1erAppsv.Start(Seconds(77.0));
         serv1erAppsv.Stop(Seconds(82.0));
 
-        UdpClientHelper echoClientv(NetSincDevice.GetAddress(23), 1332);
+        UdpClientHelper echoClientv(NetTTNTDevice.GetAddress(23), 1332);
         echoClientv.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv));
         echoClientv.SetAttribute("Interval", TimeValue(interPacketIntervalv));
         echoClientv.SetAttribute("PacketSize", UintegerValue(packetSizev));
@@ -691,7 +679,7 @@ int main(int argc, char *argv[]) {
         serverAppsv1.Start(Seconds(start_time));
         serverAppsv1.Stop(Seconds(end_time));
 
-        UdpClientHelper echoClientv1(NetSincDevice.GetAddress(23), 32);
+        UdpClientHelper echoClientv1(NetTTNTDevice.GetAddress(23), 32);
         echoClientv1.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv1));
         echoClientv1.SetAttribute("Interval", TimeValue(interPacketIntervalv1));
         echoClientv1.SetAttribute("PacketSize", UintegerValue(packetSizev1));
@@ -716,7 +704,7 @@ int main(int argc, char *argv[]) {
         serv1erAppsv.Start(Seconds(84.0));
         serv1erAppsv.Stop(Seconds(89.0));
 
-        UdpClientHelper echoClientv(NetSincDevice.GetAddress(25), 1443);
+        UdpClientHelper echoClientv(NetTTNTDevice.GetAddress(25), 1443);
         echoClientv.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv));
         echoClientv.SetAttribute("Interval", TimeValue(interPacketIntervalv));
         echoClientv.SetAttribute("PacketSize", UintegerValue(packetSizev));
@@ -738,7 +726,7 @@ int main(int argc, char *argv[]) {
         serverAppsv1.Start(Seconds(start_time));
         serverAppsv1.Stop(Seconds(end_time));
 
-        UdpClientHelper echoClientv1(NetSincDevice.GetAddress(25), 33);
+        UdpClientHelper echoClientv1(NetTTNTDevice.GetAddress(25), 33);
         echoClientv1.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv1));
         echoClientv1.SetAttribute("Interval", TimeValue(interPacketIntervalv1));
         echoClientv1.SetAttribute("PacketSize", UintegerValue(packetSizev1));
@@ -763,7 +751,7 @@ int main(int argc, char *argv[]) {
         serv1erAppsv.Start(Seconds(91.0));
         serv1erAppsv.Stop(Seconds(96.0));
 
-        UdpClientHelper echoClientv(NetSincDevice.GetAddress(27), 1554);
+        UdpClientHelper echoClientv(NetTTNTDevice.GetAddress(27), 1554);
         echoClientv.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv));
         echoClientv.SetAttribute("Interval", TimeValue(interPacketIntervalv));
         echoClientv.SetAttribute("PacketSize", UintegerValue(packetSizev));
@@ -785,7 +773,7 @@ int main(int argc, char *argv[]) {
         serverAppsv1.Start(Seconds(start_time));
         serverAppsv1.Stop(Seconds(end_time));
 
-        UdpClientHelper echoClientv1(NetSincDevice.GetAddress(27), 34);
+        UdpClientHelper echoClientv1(NetTTNTDevice.GetAddress(27), 34);
         echoClientv1.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv1));
         echoClientv1.SetAttribute("Interval", TimeValue(interPacketIntervalv1));
         echoClientv1.SetAttribute("PacketSize", UintegerValue(packetSizev1));
@@ -810,7 +798,7 @@ int main(int argc, char *argv[]) {
         serv1erAppsv.Start(Seconds(98.0));
         serv1erAppsv.Stop(Seconds(103.0));
 
-        UdpClientHelper echoClientv(NetSincDevice.GetAddress(29), 1665);
+        UdpClientHelper echoClientv(NetTTNTDevice.GetAddress(29), 1665);
         echoClientv.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv));
         echoClientv.SetAttribute("Interval", TimeValue(interPacketIntervalv));
         echoClientv.SetAttribute("PacketSize", UintegerValue(packetSizev));
@@ -832,7 +820,7 @@ int main(int argc, char *argv[]) {
         serverAppsv1.Start(Seconds(start_time));
         serverAppsv1.Stop(Seconds(end_time));
 
-        UdpClientHelper echoClientv1(NetSincDevice.GetAddress(29), 35);
+        UdpClientHelper echoClientv1(NetTTNTDevice.GetAddress(29), 35);
         echoClientv1.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv1));
         echoClientv1.SetAttribute("Interval", TimeValue(interPacketIntervalv1));
         echoClientv1.SetAttribute("PacketSize", UintegerValue(packetSizev1));
@@ -857,7 +845,7 @@ int main(int argc, char *argv[]) {
         serv1erAppsv.Start(Seconds(105.0));
         serv1erAppsv.Stop(Seconds(110.0));
 
-        UdpClientHelper echoClientv(NetSincDevice.GetAddress(31), 1776);
+        UdpClientHelper echoClientv(NetTTNTDevice.GetAddress(31), 1776);
         echoClientv.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv));
         echoClientv.SetAttribute("Interval", TimeValue(interPacketIntervalv));
         echoClientv.SetAttribute("PacketSize", UintegerValue(packetSizev));
@@ -879,7 +867,7 @@ int main(int argc, char *argv[]) {
         serverAppsv1.Start(Seconds(start_time));
         serverAppsv1.Stop(Seconds(end_time));
 
-        UdpClientHelper echoClientv1(NetSincDevice.GetAddress(31), 36);
+        UdpClientHelper echoClientv1(NetTTNTDevice.GetAddress(31), 36);
         echoClientv1.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv1));
         echoClientv1.SetAttribute("Interval", TimeValue(interPacketIntervalv1));
         echoClientv1.SetAttribute("PacketSize", UintegerValue(packetSizev1));
@@ -904,7 +892,7 @@ int main(int argc, char *argv[]) {
         serv1erAppsv.Start(Seconds(112.0));
         serv1erAppsv.Stop(Seconds(117.0));
 
-        UdpClientHelper echoClientv(NetSincDevice.GetAddress(33), 1887);
+        UdpClientHelper echoClientv(NetTTNTDevice.GetAddress(33), 1887);
         echoClientv.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv));
         echoClientv.SetAttribute("Interval", TimeValue(interPacketIntervalv));
         echoClientv.SetAttribute("PacketSize", UintegerValue(packetSizev));
@@ -926,7 +914,7 @@ int main(int argc, char *argv[]) {
         serverAppsv1.Start(Seconds(start_time));
         serverAppsv1.Stop(Seconds(end_time));
 
-        UdpClientHelper echoClientv1(NetSincDevice.GetAddress(33), 37);
+        UdpClientHelper echoClientv1(NetTTNTDevice.GetAddress(33), 37);
         echoClientv1.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv1));
         echoClientv1.SetAttribute("Interval", TimeValue(interPacketIntervalv1));
         echoClientv1.SetAttribute("PacketSize", UintegerValue(packetSizev1));
@@ -951,7 +939,7 @@ int main(int argc, char *argv[]) {
         serv1erAppsv.Start(Seconds(119.0));
         serv1erAppsv.Stop(Seconds(124.0));
 
-        UdpClientHelper echoClientv(NetSincDevice.GetAddress(35), 1998);
+        UdpClientHelper echoClientv(NetTTNTDevice.GetAddress(35), 1998);
         echoClientv.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv));
         echoClientv.SetAttribute("Interval", TimeValue(interPacketIntervalv));
         echoClientv.SetAttribute("PacketSize", UintegerValue(packetSizev));
@@ -973,7 +961,7 @@ int main(int argc, char *argv[]) {
         serverAppsv1.Start(Seconds(start_time));
         serverAppsv1.Stop(Seconds(end_time));
 
-        UdpClientHelper echoClientv1(NetSincDevice.GetAddress(35), 38);
+        UdpClientHelper echoClientv1(NetTTNTDevice.GetAddress(35), 38);
         echoClientv1.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv1));
         echoClientv1.SetAttribute("Interval", TimeValue(interPacketIntervalv1));
         echoClientv1.SetAttribute("PacketSize", UintegerValue(packetSizev1));
@@ -998,7 +986,7 @@ int main(int argc, char *argv[]) {
         serv1erAppsv.Start(Seconds(126.0));
         serv1erAppsv.Stop(Seconds(131.0));
 
-        UdpClientHelper echoClientv(NetSincDevice.GetAddress(37), 2109);
+        UdpClientHelper echoClientv(NetTTNTDevice.GetAddress(37), 2109);
         echoClientv.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv));
         echoClientv.SetAttribute("Interval", TimeValue(interPacketIntervalv));
         echoClientv.SetAttribute("PacketSize", UintegerValue(packetSizev));
@@ -1020,7 +1008,7 @@ int main(int argc, char *argv[]) {
         serverAppsv1.Start(Seconds(start_time));
         serverAppsv1.Stop(Seconds(end_time));
 
-        UdpClientHelper echoClientv1(NetSincDevice.GetAddress(37), 39);
+        UdpClientHelper echoClientv1(NetTTNTDevice.GetAddress(37), 39);
         echoClientv1.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv1));
         echoClientv1.SetAttribute("Interval", TimeValue(interPacketIntervalv1));
         echoClientv1.SetAttribute("PacketSize", UintegerValue(packetSizev1));
@@ -1045,7 +1033,7 @@ int main(int argc, char *argv[]) {
         serv1erAppsv.Start(Seconds(133.0));
         serv1erAppsv.Stop(Seconds(138.0));
 
-        UdpClientHelper echoClientv(NetSincDevice.GetAddress(39), 2220);
+        UdpClientHelper echoClientv(NetTTNTDevice.GetAddress(39), 2220);
         echoClientv.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv));
         echoClientv.SetAttribute("Interval", TimeValue(interPacketIntervalv));
         echoClientv.SetAttribute("PacketSize", UintegerValue(packetSizev));
@@ -1067,7 +1055,7 @@ int main(int argc, char *argv[]) {
         serverAppsv1.Start(Seconds(start_time));
         serverAppsv1.Stop(Seconds(end_time));
 
-        UdpClientHelper echoClientv1(NetSincDevice.GetAddress(39), 40);
+        UdpClientHelper echoClientv1(NetTTNTDevice.GetAddress(39), 40);
         echoClientv1.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv1));
         echoClientv1.SetAttribute("Interval", TimeValue(interPacketIntervalv1));
         echoClientv1.SetAttribute("PacketSize", UintegerValue(packetSizev1));
@@ -1092,7 +1080,7 @@ int main(int argc, char *argv[]) {
         serv1erAppsv.Start(Seconds(140.0));
         serv1erAppsv.Stop(Seconds(145.0));
 
-        UdpClientHelper echoClientv(NetSincDevice.GetAddress(41), 2331);
+        UdpClientHelper echoClientv(NetTTNTDevice.GetAddress(41), 2331);
         echoClientv.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv));
         echoClientv.SetAttribute("Interval", TimeValue(interPacketIntervalv));
         echoClientv.SetAttribute("PacketSize", UintegerValue(packetSizev));
@@ -1114,7 +1102,7 @@ int main(int argc, char *argv[]) {
         serverAppsv1.Start(Seconds(start_time));
         serverAppsv1.Stop(Seconds(end_time));
 
-        UdpClientHelper echoClientv1(NetSincDevice.GetAddress(41), 41);
+        UdpClientHelper echoClientv1(NetTTNTDevice.GetAddress(41), 41);
         echoClientv1.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv1));
         echoClientv1.SetAttribute("Interval", TimeValue(interPacketIntervalv1));
         echoClientv1.SetAttribute("PacketSize", UintegerValue(packetSizev1));
@@ -1139,7 +1127,7 @@ int main(int argc, char *argv[]) {
         serv1erAppsv.Start(Seconds(147.0));
         serv1erAppsv.Stop(Seconds(152.0));
 
-        UdpClientHelper echoClientv(NetSincDevice.GetAddress(43), 2442);
+        UdpClientHelper echoClientv(NetTTNTDevice.GetAddress(43), 2442);
         echoClientv.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv));
         echoClientv.SetAttribute("Interval", TimeValue(interPacketIntervalv));
         echoClientv.SetAttribute("PacketSize", UintegerValue(packetSizev));
@@ -1161,7 +1149,7 @@ int main(int argc, char *argv[]) {
         serverAppsv1.Start(Seconds(start_time));
         serverAppsv1.Stop(Seconds(end_time));
 
-        UdpClientHelper echoClientv1(NetSincDevice.GetAddress(43), 42);
+        UdpClientHelper echoClientv1(NetTTNTDevice.GetAddress(43), 42);
         echoClientv1.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv1));
         echoClientv1.SetAttribute("Interval", TimeValue(interPacketIntervalv1));
         echoClientv1.SetAttribute("PacketSize", UintegerValue(packetSizev1));
@@ -1186,7 +1174,7 @@ int main(int argc, char *argv[]) {
         serv1erAppsv.Start(Seconds(154.0));
         serv1erAppsv.Stop(Seconds(159.0));
 
-        UdpClientHelper echoClientv(NetSincDevice.GetAddress(45), 2553);
+        UdpClientHelper echoClientv(NetTTNTDevice.GetAddress(45), 2553);
         echoClientv.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv));
         echoClientv.SetAttribute("Interval", TimeValue(interPacketIntervalv));
         echoClientv.SetAttribute("PacketSize", UintegerValue(packetSizev));
@@ -1208,7 +1196,7 @@ int main(int argc, char *argv[]) {
         serverAppsv1.Start(Seconds(start_time));
         serverAppsv1.Stop(Seconds(end_time));
 
-        UdpClientHelper echoClientv1(NetSincDevice.GetAddress(45), 43);
+        UdpClientHelper echoClientv1(NetTTNTDevice.GetAddress(45), 43);
         echoClientv1.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv1));
         echoClientv1.SetAttribute("Interval", TimeValue(interPacketIntervalv1));
         echoClientv1.SetAttribute("PacketSize", UintegerValue(packetSizev1));
@@ -1233,7 +1221,7 @@ int main(int argc, char *argv[]) {
         serv1erAppsv.Start(Seconds(161.0));
         serv1erAppsv.Stop(Seconds(166.0));
 
-        UdpClientHelper echoClientv(NetSincDevice.GetAddress(47), 2664);
+        UdpClientHelper echoClientv(NetTTNTDevice.GetAddress(47), 2664);
         echoClientv.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv));
         echoClientv.SetAttribute("Interval", TimeValue(interPacketIntervalv));
         echoClientv.SetAttribute("PacketSize", UintegerValue(packetSizev));
@@ -1255,7 +1243,7 @@ int main(int argc, char *argv[]) {
         serverAppsv1.Start(Seconds(start_time));
         serverAppsv1.Stop(Seconds(end_time));
 
-        UdpClientHelper echoClientv1(NetSincDevice.GetAddress(47), 44);
+        UdpClientHelper echoClientv1(NetTTNTDevice.GetAddress(47), 44);
         echoClientv1.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv1));
         echoClientv1.SetAttribute("Interval", TimeValue(interPacketIntervalv1));
         echoClientv1.SetAttribute("PacketSize", UintegerValue(packetSizev1));
@@ -1280,7 +1268,7 @@ int main(int argc, char *argv[]) {
         serv1erAppsv.Start(Seconds(168.0));
         serv1erAppsv.Stop(Seconds(173.0));
 
-        UdpClientHelper echoClientv(NetSincDevice.GetAddress(49), 2775);
+        UdpClientHelper echoClientv(NetTTNTDevice.GetAddress(49), 2775);
         echoClientv.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv));
         echoClientv.SetAttribute("Interval", TimeValue(interPacketIntervalv));
         echoClientv.SetAttribute("PacketSize", UintegerValue(packetSizev));
@@ -1302,7 +1290,7 @@ int main(int argc, char *argv[]) {
         serverAppsv1.Start(Seconds(start_time));
         serverAppsv1.Stop(Seconds(end_time));
 
-        UdpClientHelper echoClientv1(NetSincDevice.GetAddress(49), 45);
+        UdpClientHelper echoClientv1(NetTTNTDevice.GetAddress(49), 45);
         echoClientv1.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv1));
         echoClientv1.SetAttribute("Interval", TimeValue(interPacketIntervalv1));
         echoClientv1.SetAttribute("PacketSize", UintegerValue(packetSizev1));
@@ -1314,85 +1302,10 @@ int main(int argc, char *argv[]) {
     }
 
     if (1) {
-        phySinc.EnablePcap("NodeNumTPS", sinDevice.Get(1));
+        phySinc.EnablePcap("NodeNumTPS", ttntDevice.Get(1));
     }
 
     Simulator::Stop(Seconds(end_time + 1.0));
-
-    //------------------------------------------------------------
-    //-- Setup stats and data collection
-    //--------------------------------------------
-//		   stringstream od;
-//		   int num = Sinc+9;
-//		   od << num;
-//		   string num1 = od.str();
-
-    DataCollector data;
-    data.DescribeRun(experiment,
-                     strategy,
-                     input,
-                     runID);
-    data.AddMetadata("Sinc: ", ttnt);
-
-
-    Ptr <CounterCalculator<uint32_t>> totalTx =
-            CreateObject < CounterCalculator < uint32_t > > ();
-    totalTx->SetKey("tx-frames");
-    totalTx->SetContext("NodeTx");
-    Config::Connect("/NodeList/0/DeviceList/*/$ns3::sinc-WifiNetDevice/Mac/MacTx",
-                    MakeBoundCallback(&TxCallback, totalTx));
-    data.AddDataCalculator(totalTx);
-
-    Ptr <PacketCounterCalculator> totalRx =
-            CreateObject<PacketCounterCalculator>();
-    totalRx->SetKey("rx-frames");
-    totalRx->SetContext("NodeRx");
-    Config::Connect("/NodeList/1/DeviceList/*/$ns3::sinc-WifiNetDevice/Mac/MacRx",
-                    MakeCallback(&PacketCounterCalculator::PacketUpdate,
-                                 totalRx));
-    data.AddDataCalculator(totalRx);
-
-    Ptr <PacketCounterCalculator> appTx =
-            CreateObject<PacketCounterCalculator>();
-    appTx->SetKey("tx-packets");
-    appTx->SetContext("NodeTx");
-    Config::Connect("/NodeList/0/ApplicationList/*/$ns3::UdpClient/Tx",
-                    MakeCallback(&PacketCounterCalculator::PacketUpdate,
-                                 appTx));
-    data.AddDataCalculator(appTx);
-
-    Ptr <PacketCounterCalculator> appRx =
-            CreateObject<PacketCounterCalculator>();
-    appRx->SetKey("rx-packets");
-    appRx->SetContext("NodeRx");
-    Config::Connect("/NodeList/1/ApplicationList/*/$ns3::UdpServer/Rx",
-                    MakeCallback(&PacketCounterCalculator::PacketUpdate,
-                                 appRx));
-    data.AddDataCalculator(appRx);
-
-
-//	          Ptr<PacketSizeMinMaxAvgTotalCalculator> appTxPkts =
-//	            CreateObject<PacketSizeMinMaxAvgTotalCalculator>();
-//	          appTxPkts->SetKey ("tx-pkt-size");
-//	          appTxPkts->SetContext ("NodeTx");
-//	          Config::Connect ("/NodeList/10/ApplicationList/*/$ns3::UdpClient/Tx",
-//	                           MakeCallback
-//	                             (&PacketSizeMinMaxAvgTotalCalculator::PacketUpdate,
-//	                             appTxPkts));
-//	          data.AddDataCalculator (appTxPkts);
-
-    ////******************************** stat delay
-    {
-        Ptr <MinMaxAvgTotalCalculator<uint64_t>> appTxPktsDelay =
-                CreateObject < MinMaxAvgTotalCalculator < uint64_t >> ();
-        appTxPktsDelay->SetKey("rx-pkt-delay4");
-        appTxPktsDelay->SetContext("NodeRx");
-        Config::ConnectWithoutContext("/NodeList/1/ApplicationList/*/$ns3::UdpServer/Delay",
-                                      MakeCallback
-                                              (&MinMaxAvgTotalCalculator<uint64_t>::Update,
-                                               appTxPktsDelay));
-        data.AddDataCalculator(appTxPktsDelay);
-    }
 
     AnimationInterface anim("amix.xml");
 
@@ -1456,11 +1369,6 @@ int main(int argc, char *argv[]) {
     } else {
         NS_LOG_ERROR("Unknown output format " << format);
     }
-
-    // Finally, have that writer interrogate the DataCollector and save
-    // the results.
-    if (output != 0)
-        output->Output(data);
 
     Simulator::Destroy();
     return 0;
