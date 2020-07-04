@@ -184,6 +184,7 @@ CsmaChannel::TransmitStart (Ptr<Packet> p, uint32_t srcId)
     }
 
   cout << "pinganzhang::::::::csma Transmit Uid is:" << p->GetUid() << endl;
+
   if (!IsActive (srcId))
     {
       NS_LOG_ERROR ("CsmaChannel::TransmitStart(): Seclected source is not currently attached to network");
