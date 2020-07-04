@@ -197,11 +197,11 @@ namespace ns3 {
                  * change!!!
                  */
                 uint16_t recordtime = 5;
-                uint16_t endtime = 20;
+                uint16_t endtime = recordtime + 400;
                 srand((int) time(0));
 
                 static uint16_t rxcnt0 = 1, rxcnt21 = 1;
-                static Time firstRx0, firstRx21;
+
                 vector <uint64_t> delay21;
 
                 if (1) //同时测量多条业务流
@@ -210,7 +210,7 @@ namespace ns3 {
                     if (UdpServer::m_port == 21) {
 
                         static int a21 = 0;
-
+                        static Time firstRx21;
                         std::cout << "pinganzhang:::::::: UdpSever Rev Count = " << ++a21 << " Now ********* "
                                   << Simulator::Now()
                                   << std::endl;
@@ -224,8 +224,7 @@ namespace ns3 {
                         }
 
                         std::cout << "pinganzhang::::::::first arrived time = " << firstRx21.GetSeconds() << std::endl;
-                        std::cout << "pinganzhang::::::::pureAppPayLoadSize = " << packetOdcp->GetSize() - 39
-                                  << std::endl;
+                        std::cout << "pinganzhang::::::::AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl;
 
                         packetSizeVec21.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
 
@@ -239,14 +238,16 @@ namespace ns3 {
                             if (Simulator::Now() > Seconds(recordtime)) {
                                 uint32_t sumPacketSize = accumulate(packetSizeVec21.begin(), packetSizeVec21.end(),
                                                                     0.0);
-                                double packetThroughput =
+//                                double randomValue = rand() % 2000 + 2000;
+//                                cout << "random value is :" << randomValue << endl;
+                                double packetThroughput = /*(sumPacketSize - randomValue)*/
                                         sumPacketSize / (Seconds(endtime).GetSeconds() - firstRx21.GetSeconds()) /
                                         1024 / 1024;
-                                cout << "Throughput: " << packetThroughput << " Mbps\n";
+                                cout << "Throughput: " << packetThroughput * 1000 << " Kbps\n";
                                 ofstream udpThoughputFile21("udpThroughput21.txt");
                                 if (udpThoughputFile21.good()) {
                                     cout << "udpThroughput is OK!\n" << endl;
-                                    udpThoughputFile21 << packetThroughput << " Mbps\n";
+                                    udpThoughputFile21 << packetThroughput * 1000 << " Kbps\n";
                                     udpThoughputFile21.close();
                                 } else {
                                     cout << "Cannot create udpThroughput.txt !\n";
@@ -294,6 +295,7 @@ namespace ns3 {
                 } else {
                     if (UdpServer::m_port == 21) {
                         static int a0 = 0;
+                        static Time firstRx0;
                         std::cout << "pinganzhang:::::::: UdpSever Rev Count = " << ++a0 << " Now ********* "
                                   << Simulator::Now()
                                   << std::endl;
