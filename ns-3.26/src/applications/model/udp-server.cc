@@ -34,6 +34,11 @@
 #include "seq-ts-header.h"
 #include "udp-server.h"
 
+#include "vector"
+#include "set"
+#include "fstream"
+#include "numeric"
+#include "udp-trace-client.h"
 using namespace std;
 
 namespace ns3 {
@@ -41,7 +46,6 @@ namespace ns3 {
     NS_LOG_COMPONENT_DEFINE ("UdpServer");
 
     NS_OBJECT_ENSURE_REGISTERED (UdpServer);
-
 
     TypeId
     UdpServer::GetTypeId(void) {
@@ -138,12 +142,32 @@ namespace ns3 {
         }
     }
 
+    /**************************************************************************************/
+    vector <uint32_t> UdpServer::packetSizeVec21;
+
     void
     UdpServer::HandleRead(Ptr <Socket> socket) {
         NS_LOG_FUNCTION(this << socket);
         Ptr <Packet> packet;
         Address from;
-        static uint64_t a21 = 0;
+
+        uint16_t ttnt = 2;
+        uint16_t record_start[30] = {0};
+        uint16_t record_end[30] = {0};
+
+        for (uint16_t i = 1; i <= (ttnt / 2); i++) {
+
+            record_start[i] = (i - 1) * 57 + 6;
+            record_end[i] = record_start[i] + 50;
+        }
+
+        /**************************************************************************************/
+        static uint16_t rxcnt21 = 1;
+
+        static Time firstRx21;
+
+        vector <uint64_t> delay21;
+
 
         /**************************************************************************************/
         while ((packet = socket->RecvFrom(from))) {
@@ -157,11 +181,59 @@ namespace ns3 {
                 packet->RemoveHeader(seqTs);
                 uint32_t currentSequenceNumber = seqTs.GetSeq();
 
+                /**
+                 * workflow[1]
+                 */
+                if (UdpServer::m_port == 21) {
 
-                std::cout << "pinganzhang:::::::: UdpSever Rev Count = " << ++a21 << " Now ********* "
-                          << Simulator::Now()
-                          << std::endl;
+                    static int a21 = 0;
 
+                    cout << "pinganzhang:: UdpSever Rev Count = " << ++a21 << " Now ********* " << Simulator::Now()
+                         << std::endl;
+
+                    PidSet21.insert(a21);
+
+                    if (rxcnt21 == 1) //记录吞吐量的时间
+                    {
+                        firstRx21 = Simulator::Now();
+                        ++rxcnt21;
+                    }
+
+                    cout << "port :" << m_port << " first arrived time = " << firstRx21.GetSeconds() << std::endl;
+                    cout << "pureAppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl;
+                    packetSizeVec21.push_back((packetOdcp->GetSize() - 39)/*purePacketSize*/ * 8);//应用层负载
+
+                    //  get throughput
+                    if (1) {
+
+                        if (Simulator::Now() > Seconds(record_start[1])) {
+                            uint32_t sumPacketSize = accumulate(packetSizeVec21.begin(), packetSizeVec21.end(), 0.0);
+                            double packetThroughput =
+                                    sumPacketSize / (Seconds(record_end[1]).GetSeconds() - firstRx21.GetSeconds()) /
+                                    1024;
+                            cout << "Throughput: " << packetThroughput << " Kbps\n";
+                            ofstream udpThoughputFile21("udpThroughput21.txt");
+                            if (udpThoughputFile21.good()) {
+                                cout << "udpThroughput is good!\n" << endl;
+                                udpThoughputFile21 << packetThroughput << " Kbps\n";
+                                udpThoughputFile21.close();
+                            } else {
+                                cout << "Cannot create udpThroughput.txt !\n";
+                            }
+                        }
+
+                        if (Simulator::Now() > Seconds(record_start[1])) {
+                            std::ofstream PidSizeFile21("PidSetSize21.txt");
+                            if (PidSizeFile21.good()) {
+                                PidSizeFile21 << PidSet21.size() << endl;
+                            }
+                            PidSizeFile21.close();
+                        }
+                    }
+                }
+
+
+                /**************************************************************************************/
                 if (InetSocketAddress::IsMatchingType(from)) {
                     NS_LOG_INFO("TraceDelay: RX " << packet->GetSize() <<
                                                   " bytes from " << InetSocketAddress::ConvertFrom(from).GetIpv4() <<

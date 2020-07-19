@@ -28,6 +28,11 @@
 #include "ns3/ptr.h"
 #include "ns3/address.h"
 #include "packet-loss-counter.h"
+
+#include "vector"
+#include "set"
+using namespace std;
+
 namespace ns3 {
 /**
  * \ingroup applications
@@ -43,64 +48,78 @@ namespace ns3 {
  * stamp in their payloads. The application uses the sequence number
  * to determine if a packet is lost, and the time stamp to compute the delay.
  */
-class UdpServer : public Application
-{
-public:
-  /**
-   * \brief Get the type ID.
-   * \return the object TypeId
-   */
-  static TypeId GetTypeId (void);
-  UdpServer ();
-  virtual ~UdpServer ();
-  /**
-   * \brief Returns the number of lost packets
-   * \return the number of lost packets
-   */
-  uint32_t GetLost (void) const;
+    class UdpServer : public Application {
+    public:
+        /**
+         * \brief Get the type ID.
+         * \return the object TypeId
+         */
+        static TypeId GetTypeId(void);
 
-  /**
-   * \brief Returns the number of received packets
-   * \return the number of received packets
-   */
-  uint64_t GetReceived (void) const;
+        UdpServer();
 
-  /**
-   * \brief Returns the size of the window used for checking loss.
-   * \return the size of the window used for checking loss.
-   */
-  uint16_t GetPacketWindowSize () const;
+        virtual ~UdpServer();
 
-  /**
-   * \brief Set the size of the window used for checking loss. This value should
-   *  be a multiple of 8
-   * \param size the size of the window used for checking loss. This value should
-   *  be a multiple of 8
-   */
-  void SetPacketWindowSize (uint16_t size);
-protected:
-  virtual void DoDispose (void);
+        /**
+         * \brief Returns the number of lost packets
+         * \return the number of lost packets
+         */
+        uint32_t GetLost(void) const;
 
-private:
+        /**
+         * \brief Returns the number of received packets
+         * \return the number of received packets
+         */
+        uint64_t GetReceived(void) const;
 
-  virtual void StartApplication (void);
-  virtual void StopApplication (void);
+        /**
+         * \brief Returns the size of the window used for checking loss.
+         * \return the size of the window used for checking loss.
+         */
+        uint16_t GetPacketWindowSize() const;
 
-  /**
-   * \brief Handle a packet reception.
-   *
-   * This function is called by lower layers.
-   *
-   * \param socket the socket the packet was received to.
-   */
-  void HandleRead (Ptr<Socket> socket);
+        /**
+         * \brief Set the size of the window used for checking loss. This value should
+         *  be a multiple of 8
+         * \param size the size of the window used for checking loss. This value should
+         *  be a multiple of 8
+         */
+        void SetPacketWindowSize(uint16_t size);
 
-  uint16_t m_port; //!< Port on which we listen for incoming packets.
-  Ptr<Socket> m_socket; //!< IPv4 Socket
-  Ptr<Socket> m_socket6; //!< IPv6 Socket
-  uint64_t m_received; //!< Number of received packets
-  PacketLossCounter m_lossCounter; //!< Lost packet counter
-};
+        /*
+         * set for size
+         */
+        set <uint32_t> PidSet21;
+
+        /*
+         * vector for through
+         */
+        static vector <uint32_t> packetSizeVec21;
+
+    protected:
+        virtual void DoDispose(void);
+
+    private:
+
+        virtual void StartApplication(void);
+
+        virtual void StopApplication(void);
+
+        /**
+         * \brief Handle a packet reception.
+         *
+         * This function is called by lower layers.
+         *
+         * \param socket the socket the packet was received to.
+         */
+        void HandleRead(Ptr <Socket> socket);
+
+        uint16_t m_port; //!< Port on which we listen for incoming packets.
+        Ptr <Socket> m_socket; //!< IPv4 Socket
+        Ptr <Socket> m_socket6; //!< IPv6 Socket
+        uint64_t m_received; //!< Number of received packets
+        PacketLossCounter m_lossCounter; //!< Lost packet counter
+    };
 
 } // namespace ns3
 
