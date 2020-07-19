@@ -281,36 +281,4 @@ NetDevice::~NetDevice ()
   NS_LOG_FUNCTION (this);
 }
 
-void
-NetDevice::setSwitch (uint16_t s)
-{
-	d_switch = s;
-}
-
-uint16_t
-NetDevice::getSwitch (void)
-{
-	return d_switch;
-}
-
-bool
-NetDevice::GetXnpTimeState(void)
-{
-	return XnpTimerState;
-}
-
-void
-NetDevice::SetXnpTimeState(bool a)
-{
-	XnpTimerState = a;
-}
-
-Time
-NetDevice::CalculateXnpTime(void)
-{
-	return XnpRepTime - XnpReqTime;
-}
-
-
-
 } // namespace ns3

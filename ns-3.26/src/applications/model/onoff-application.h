@@ -31,7 +31,6 @@
 #include "ns3/ptr.h"
 #include "ns3/data-rate.h"
 #include "ns3/traced-callback.h"
-#include "udp-trace-client.h"
 
 namespace ns3 {
 
@@ -96,12 +95,6 @@ public:
   OnOffApplication ();
 
   virtual ~OnOffApplication();
-
-
-  void SetNodeID (uint32_t NodeID);
-  uint32_t GetNodeID(void);
-
-  std::map<uint16_t, uint32_t> od_PID; //map<Port, od_packetId>
 
   /**
    * \brief Set the total number of bytes to send.
@@ -171,14 +164,8 @@ private:
   EventId         m_sendEvent;    //!< Event id of pending "send packet" event
   TypeId          m_tid;          //!< Type of the socket used
 
-  Time od_interval; //!< Packet inter-send time
-  uint32_t m_sent; //!< Counter for sent packets
-  uint32_t m_NodeID;
-
   /// Traced Callback: transmitted packets.
   TracedCallback<Ptr<const Packet> > m_txTrace;
-  TracedCallback<Ptr<const Packet> > m_rxTrace;
-
 
 private:
   /**

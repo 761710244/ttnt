@@ -31,19 +31,12 @@
 #include "ns3/trace-source-accessor.h"
 #include "ns3/udp-socket-factory.h"
 #include "packet-sink.h"
-#include <numeric>
-#include "seq-ts-header.h"
-#include "application-header.h"
-#include "application-user-data.h"
 
-
-using namespace std;
 namespace ns3 {
 
 NS_LOG_COMPONENT_DEFINE ("PacketSink");
 
 NS_OBJECT_ENSURE_REGISTERED (PacketSink);
-vector<uint32_t> PacketSink::packetSizeVec;
 
 TypeId 
 PacketSink::GetTypeId (void)
@@ -66,11 +59,6 @@ PacketSink::GetTypeId (void)
                      "A packet has been received",
                      MakeTraceSourceAccessor (&PacketSink::m_rxTrace),
                      "ns3::Packet::AddressTracedCallback")
-					 .AddTraceSource ("Rxx", "A new packet is created and is sent",
-					    		MakeTraceSourceAccessor (&PacketSink::m_rxxTrace),
-								"ns3::Packet::TracedCallback")
-							    .AddTraceSource ("Delay", "A new packet is created and is sent",
-							    		MakeTraceSourceAccessor (&PacketSink::m_delay))
   ;
   return tid;
 }
@@ -174,111 +162,12 @@ void PacketSink::HandleRead (Ptr<Socket> socket)
   NS_LOG_FUNCTION (this << socket);
   Ptr<Packet> packet;
   Address from;
-  uint64_t aaa;
-
   while ((packet = socket->RecvFrom (from)))
     {
       if (packet->GetSize () == 0)
         { //EOF
           break;
         }
-
-	  static uint16_t rxcnt = 1;
-	  static Time firstRx;
-	  Ptr<Packet> packetOdcp;
-	  packetOdcp = packet->Copy();
-
-      od_TimestampTag timestamp;
-      std::cout<<"m_localm_local = "<<InetSocketAddress::ConvertFrom (m_local).GetPort ()<<std::endl;
-      if(/*Simulator::Now()>=Seconds(0.0)&&Simulator::Now()<=Seconds(51.0)&&*/
-    		  InetSocketAddress::ConvertFrom (m_local).GetPort () == 10)
-      {
-       	  if(packet->FindFirstMatchingByteTag (timestamp))
-        	  {
-        			Time tx = timestamp.GetTimestamp();
-        			Time dx = Simulator::Now() - tx;
-        			aaa = dx.GetMicroSeconds();
-        			m_delay(aaa);
-        	  }
-          m_rxxTrace (packet);
-      }
-
-      SeqTsHeader seqTs;
-       packet->RemoveHeader (seqTs);
-       uint32_t currentSequenceNumber = seqTs.GetSeq ();
-       ApplicationHeader AppHdr;       //调用packet对象中的RemoveHeader（）方法
-       ApplicationUserData AppUD;      //使得header对象中的Desirelized()方法被触发
-       packet->RemoveHeader(AppHdr);
-
-      if(InetSocketAddress::ConvertFrom (m_local).GetPort () == 10)
-      {
-
-          static int a = 0;
-          std::cout<<"-------> PacketSink Rev Count = "<<++a<<std::endl;
-
-          ofstream actuallyRevCntFile("actuallyRevCnt.txt");
-                     if(actuallyRevCntFile.good())
-                     {
-                     	actuallyRevCntFile << a;
-                     }
-                     actuallyRevCntFile.close();
-
-          PidSet.insert(AppHdr.ReadPacketId());
-
-
-
-
-          if(rxcnt == 1) //记录吞吐量的时间
-          {
-          	firstRx = Simulator::Now();
-          	++rxcnt;
-          }
-
-          std::cout<<"first arrived time = "<<firstRx.GetSeconds()<<std::endl;
-          std::cout<<"pureAppPayLoadSize = "<<packetOdcp->GetSize ()-39<<std::endl;
-          packetSizeVec.push_back((packetOdcp->GetSize ()-39)/*purePacketSize*/ * 8);//应用层负载
-
-          //Odie get throughput
-          if(Simulator::Now()>Seconds(495.0))
-          {
-          	uint32_t sumPacketSize = accumulate(packetSizeVec.begin(), packetSizeVec.end(), 0.0);
-          	double packetThroughput = sumPacketSize / (Seconds(500.0).GetSeconds() - firstRx.GetSeconds()) / 1024 / 1024;
-          	cout<<"Throughput: "<<packetThroughput<<" Mbps\n";
-          	ofstream udpThoughputFile("tcpThroughput.txt");
-          	if(udpThoughputFile.good())
-          	{
-          		cout<<"tcpThroughput is good!\n"<<endl;
-          		udpThoughputFile << packetThroughput;
-          		udpThoughputFile <<" Mbps\n";
-          		udpThoughputFile.close();
-          	}
-          	else
-          	{
-          		cout<<"Cannot create udpThroughput.txt !\n";
-          	}
-          }
-      }
-
-      if(Simulator::Now()>Seconds(495.0))
-      {
-    	  std::ofstream PidSizeFile("PidSetSize.txt");
-    	  if(PidSizeFile.good())
-    	  {
-    		  PidSizeFile << PidSet.size();
-    	  }
-          PidSizeFile.close();
-
-          std::ofstream PidFile("Pid.txt", std::ios::app);
-          if(PidFile.good())
-          {
-        	  for(std::set<uint32_t>::iterator i = PidSet.begin(); i != PidSet.end(); i++)
-        	  {
-        		  PidFile << *i <<" ";
-        	  }
-        	  PidFile << "\n-----------------------------------------------------------------------\n";
-          }
-      }
-
       m_totalRx += packet->GetSize ();
       if (InetSocketAddress::IsMatchingType (from))
         {
@@ -287,7 +176,7 @@ void PacketSink::HandleRead (Ptr<Socket> socket)
                        <<  packet->GetSize () << " bytes from "
                        << InetSocketAddress::ConvertFrom(from).GetIpv4 ()
                        << " port " << InetSocketAddress::ConvertFrom (from).GetPort ()
-                       << " total Rx " << m_totalRx << " bytes" << " currentSequenceNumber "<<currentSequenceNumber);
+                       << " total Rx " << m_totalRx << " bytes");
         }
       else if (Inet6SocketAddress::IsMatchingType (from))
         {

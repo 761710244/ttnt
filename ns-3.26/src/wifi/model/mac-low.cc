@@ -1941,8 +1941,6 @@ MacLow::StartDataTxTimers (WifiTxVector dataTxVector)
   Time txDuration = m_phy->CalculateTxDuration (GetSize (m_currentPacket, &m_currentHdr), dataTxVector, preamble, m_phy->GetFrequency ());
   if (m_txParams.MustWaitNormalAck ())
     {
-	  //Odie
-//	  std::cout << "StartDataTxTimers  GetAckTimeout () = " << GetAckTimeout () << std::endl;
       Time timerDelay = txDuration + GetAckTimeout ();
       NS_ASSERT (m_normalAckTimeoutEvent.IsExpired ());
       NotifyAckTimeoutStartNow (timerDelay);

@@ -39,8 +39,6 @@
 #include "ns3/header.h"
 #include "ns3/ipv4-address.h"
 #include "dsr-option-header.h"
-#include "ns3/address-utils.h"
-
 
 namespace ns3 {
 namespace dsr {
@@ -123,22 +121,22 @@ public:
    * brief Set the source ID of the header.
    * \param sourceId the source ID of the header
    */
-  void SetSourceId (Ipv4Address sourceId);
+  void SetSourceId (uint16_t sourceId);
   /**
    * brief Get the source ID of the header.
    * \return source ID the source ID of the header
    */
-  Ipv4Address GetSourceId () const;
+  uint16_t GetSourceId () const;
   /**
    * brief Set the dest ID of the header.
    * \param destId the destination ID of the header
    */
-  void SetDestId (Ipv4Address destId);
+  void SetDestId (uint16_t destId);
   /**
    * brief Get the dest ID of the header.
    * \return dest ID the dest ID of the header
    */
-  Ipv4Address GetDestId () const;
+  uint16_t GetDestId () const;
   /**
    * brief Set the payload length of the header.
    * \param length the payload length of the header in bytes
@@ -188,11 +186,11 @@ private:
   /**
    * \brief The source node id
    */
-  Ipv4Address m_sourceId;
+  uint16_t m_sourceId;
   /**
    * \brief The destination node id
    */
-  Ipv4Address m_destId;
+  uint16_t m_destId;
   /**
    * \brief The data of the extension.
    */

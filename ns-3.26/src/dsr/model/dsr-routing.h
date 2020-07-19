@@ -38,7 +38,6 @@
 #include <stdint.h>
 #include <cassert>
 #include <sys/types.h>
-#include <vector>
 
 #include "ns3/callback.h"
 #include "ns3/object.h"
@@ -87,7 +86,7 @@ class Ipv4L3Protocol;
 class Time;
 
 namespace dsr {
-static std::map<Ipv4Address, Ptr<Ipv4L3Protocol>> nodeInterface;
+
 class DsrOptions;
 /**
  * \class DsrRouting
@@ -100,17 +99,6 @@ public:
    * \brief Get the type identificator.
    * \return type identificator
    */
-	Time rreqInterval = MilliSeconds(0);
-	std::map<std::map<Ipv4Address, Ipv4Address>, int> packetCntMap;
-	std::set<int> packet_set;
-	std::map<Ipv4Address, bool> malicious_RREQ_Once;
-	Ipv4Address commonTargetAddr = Ipv4Address("1.1.1.1");
-	void SetMaliciousEnable (uint16_t m);
-	uint16_t GetMaliciousEnable (void);
-
-  uint16_t FindRadioType (Ipv4Address ipv4addr);
-  void SetInitialDsrReqTime (Time t);
-
   static TypeId GetTypeId ();
   /**
     * \brief Define the dsr protocol number.
@@ -134,8 +122,6 @@ public:
    * \param node the node to set
    */
   void SetNode (Ptr<Node> node);
-
-  Ipv4Address SearchMainAddress (Ipv4Address ipv4Address, std::vector<Ipv4Address>& vec);
   /**
    * \brief Set the route cache.
    * \param r the route cache to set
@@ -196,13 +182,13 @@ public:
     * \param address IPv4 address
     * \return the node id
     */
-  /*std::vector<uint16_t>*/Ipv4Address GetIDfromIP (Ipv4Address address);
+  uint16_t GetIDfromIP (Ipv4Address address);
   /**
     * \brief Get the ip address from id.
     * \param id unique ID
     * \return the ip address for the id
     */
-  Ipv4Address GetIPfromID (Ipv4Address id);
+  Ipv4Address GetIPfromID (uint16_t id);
   /**
     * \brief Get the Ip address from mac address.
     * \param address Mac48Address
@@ -388,7 +374,7 @@ public:
    */
   void ForwardPacket (Ptr<const Packet> packet,
                       DsrOptionSRHeader &sourceRoute,
-                      Ipv4Header & ipv4Header,
+                      Ipv4Header const& ipv4Header,
                       Ipv4Address source,
                       Ipv4Address destination,
                       Ipv4Address targetAddress,
@@ -417,7 +403,7 @@ public:
    * \brief Schedule the intermediate route request
    * \param packet the original packet
    */
-  void ScheduleInterRequest (Ptr<Packet> packet, Ipv4Address ipv4Address);
+  void ScheduleInterRequest (Ptr<Packet> packet);
   /**
    * \brief Send the gratuitous reply
    * \param replyTo The destination address to send the reply to
@@ -613,9 +599,7 @@ private:
   typedef std::list<Ptr<DsrOptions> > DsrOptionList_t;
   /**
    * \brief List of DSR Options supported.
-   *
    */
-
   DsrOptionList_t m_options;
 
   Ptr<Ipv4L3Protocol> m_ipv4;                           ///< Ipv4l3Protocol
@@ -730,10 +714,6 @@ private:
 
   Time m_retransIncr;                                   ///< the increase time for retransmission timer when face network congestion
 
-  std::vector<Ipv4Address> od_addressVector;  			//We put this vector to substitute m_mainAddress ODDD
-  std::vector<Ipv4Address> od_broadcastVector;  			//We put this vector to substitute broadcast ODDD
-
-
   std::vector<Ipv4Address> m_finalRoute;                ///< The route cache
 
   std::map<Ipv4Address, Timer> m_addressReqTimer;       ///< Map IP address + RREQ timer.
@@ -775,9 +755,6 @@ private:
   std::map <std::string, uint32_t> m_macToNodeIdMap;    ///< The map of mac address to node id
 
   Ptr<UniformRandomVariable> m_uniformRandomVariable;    ///< Provides uniform random variables.
-  Time initialDsrReqTime;
-  uint16_t isMalicious = 0;
-  uint16_t Loss_Rate;
 };
 }  /* namespace dsr */
 }  /* namespace ns3 */

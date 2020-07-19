@@ -23,8 +23,6 @@
 #include "ns3/event-id.h"
 #include "ns3/ptr.h"
 #include "ns3/address.h"
-#include "ns3/traced-callback.h"
-#include "ns3/stats-module.h"
 
 namespace ns3 {
 
@@ -74,10 +72,6 @@ private:
   Ptr<Socket> m_socket; //!< IPv4 Socket
   Ptr<Socket> m_socket6; //!< IPv6 Socket
   Address m_local; //!< local multicast address
-
-  /// Callbacks for tracing the packet Tx events
-  TracedCallback<Ptr<const Packet> > m_rxTrace;
-  TracedCallback<uint64_t> m_delay;
 };
 
 } // namespace ns3

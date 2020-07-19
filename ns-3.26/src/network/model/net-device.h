@@ -31,7 +31,6 @@
 #include "address.h"
 #include "ns3/ipv4-address.h"
 #include "ns3/ipv6-address.h"
-#include "ns3/nstime.h"
 
 namespace ns3 {
 
@@ -406,19 +405,6 @@ private:
 class NetDevice : public Object
 {
 public:
-	  void setSwitch (uint16_t s);
-	  uint16_t getSwitch (void);
-
-
-	  void SetXnpTimeState(bool a);
-	  bool GetXnpTimeState(void);
-
-	  Time CalculateXnpTime(void);
-
-	  Time XnpReqTime = Seconds(0.0);
-	  Time XnpRepTime = Seconds(0.0);
-
-
   /**
    * \brief Get the type ID.
    * \return the object TypeId
@@ -682,9 +668,7 @@ public:
    * \return true if this interface supports a bridging mode, false otherwise.
    */
   virtual bool SupportsSendFrom (void) const = 0;
-private:
-  uint16_t d_switch = 0; //*******************ODD
-  bool XnpTimerState = 0;
+
 };
 
 } // namespace ns3

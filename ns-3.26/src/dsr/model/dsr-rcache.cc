@@ -401,9 +401,7 @@ DsrRouteCache::RebuildBestRouteTable (Ipv4Address source)
         }
     }
   // clean the best route table
-  //m_bestRoutesTable_link.clear ();    //如果不屏蔽，当中间节点同时向两边发送时会有很多InitialRequest包
-
-
+  m_bestRoutesTable_link.clear ();
   for (std::map<Ipv4Address, Ipv4Address>::iterator i = pre.begin (); i != pre.end (); ++i)
     {
       // loop for all vertexes
@@ -414,7 +412,7 @@ DsrRouteCache::RebuildBestRouteTable (Ipv4Address source)
         {
           while (iptemp != source)
             {
-              route.push_back (iptemp);////////////////////////routeeeee
+              route.push_back (iptemp);
               iptemp = pre[iptemp];
             }
           route.push_back (source);
@@ -438,7 +436,6 @@ DsrRouteCache::LookupRoute_Link (Ipv4Address id, DsrRouteCacheEntry & rt)
   /// We need to purge the link node cache
   PurgeLinkNode ();
   std::map<Ipv4Address, DsrRouteCacheEntry::IP_VECTOR>::const_iterator i = m_bestRoutesTable_link.find (id);
-
   if (i == m_bestRoutesTable_link.end ())
     {
       NS_LOG_INFO ("No route find to " << id);

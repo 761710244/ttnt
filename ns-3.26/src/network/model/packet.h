@@ -228,12 +228,6 @@ class Packet : public SimpleRefCount<Packet>
 {
 public:
 
-	void SetPacketCount (uint16_t s);
-	void UpdatePacketCount (void);
-	uint16_t GetPacketCount (void);
-	uint16_t maliciousTag = 0;
-	void SetMaliciousType (uint16_t m);
-	uint16_t GetMaliciousType (void) const;
   /**
    * \brief Create an empty packet with a new uid (as returned
    * by getUid).
@@ -704,9 +698,6 @@ public:
    */
   typedef void (* SinrTracedCallback)
     (Ptr<const Packet> packet, double sinr);
-
-  void SetTag(uint32_t t);
-   uint32_t GetTag(void) const;
     
   
 private:
@@ -728,7 +719,6 @@ private:
    */
   uint32_t Deserialize (uint8_t const*buffer, uint32_t size);
 
-  uint32_t od_tag = 0;
   Buffer m_buffer;                //!< the packet buffer (it's actual contents)
   ByteTagList m_byteTagList;      //!< the ByteTag list
   PacketTagList m_packetTagList;  //!< the packet's Tag list
@@ -738,9 +728,6 @@ private:
   Ptr<NixVector> m_nixVector; //!< the packet's Nix vector
 
   static uint32_t m_globalUid; //!< Global counter of packets Uid
-
-  uint16_t maliciousType = 0;
-  static uint16_t m_packetCnt;
 };
 
 /**

@@ -29,7 +29,7 @@
 #include "ns3/uinteger.h"
 #include "ns3/trace-source-accessor.h"
 #include "ns3/object-vector.h"
-#include "ns3/ipv4-header.h"////////////////////////////
+#include "ns3/ipv4-header.h"
 #include "ns3/boolean.h"
 #include "ns3/ipv4-routing-table-entry.h"
 #include "ns3/traffic-control-layer.h"
@@ -41,9 +41,6 @@
 #include "icmpv4-l4-protocol.h"
 #include "ipv4-interface.h"
 #include "ipv4-raw-socket-impl.h"
-
-#include <fstream>
-#include <sstream>
 
 namespace ns3 {
 
@@ -555,45 +552,6 @@ Ipv4L3Protocol::Receive ( Ptr<NetDevice> device, Ptr<const Packet> p, uint16_t p
   NS_LOG_LOGIC ("Packet from " << from << " received on node " << 
                 m_node->GetId ());
 
-  Ptr<Packet> packet1 = p->Copy ();
-  Ipv4Header ipHeader1;
-  Ipv4Address winTNodesIP1, winTNodesIP2;
-   Ipv4Mask stdMask;
-   stdMask.Set(0xffff0000);
-   winTNodesIP1.Set(0xc6010000);
-   winTNodesIP2.Set(0xc6060000);
-
-   packet1->RemoveHeader (ipHeader1);
-
-//  device->setSwitch(1);
-
-Ipv4Address detectXnpRep;
-detectXnpRep.Set(0xa000002);
-device->setSwitch(1);
-// if(ipHeader1.GetSource() == detectXnpRep)
-if(0)
- {
-	  //Put d_switch on when detected XNP_rep has been sended.
-	  device->setSwitch(1);
-double xnpdelay = 20.9865 + (3
- / 2 - 1) * 9.25;
-	  if(ipHeader1.GetDestination()==Ipv4Address("198.3.1.3"))
-	  {
-		  device->XnpRepTime = Simulator::Now();
-		  std::cout<<"---> XNP REP TIME: "<<device->XnpRepTime<<
-				  " XNP TIME ******** "<<device->CalculateXnpTime()<<std::endl;
-		  std::ofstream XNPFILE("/mnt/hgfs/VMwareShareFile/joinNetDelay.txt");
-		  if(XNPFILE.good())
-		  {
-//			  XNPFILE << "XNP REQ: "<<
-//					  device->XnpReqTime<<" XNP REP: "<<
-//					  device->XnpRepTime<<
-//					  " XNP TIME @ "<<device->CalculateXnpTime().GetMilliSeconds() << " ms\n";
-			  XNPFILE << xnpdelay <<"ms \n";
-			  XNPFILE.close();
-		  }
-	  }
- }
 
   int32_t interface = GetInterfaceForDevice(device);
   NS_ASSERT_MSG (interface != -1, "Received a packet from an interface that is not known to IPv4");
@@ -620,14 +578,13 @@ double xnpdelay = 20.9865 + (3
     {
       ipHeader.EnableChecksum ();
     }
-
   packet->RemoveHeader (ipHeader);
 
   // Trim any residual frame padding from underlying devices
-//  if (ipHeader.GetPayloadSize () < packet->GetSize ())
-//    {
-//      packet->RemoveAtEnd (packet->GetSize () - ipHeader.GetPayloadSize ());
-//    }
+  if (ipHeader.GetPayloadSize () < packet->GetSize ())
+    {
+      packet->RemoveAtEnd (packet->GetSize () - ipHeader.GetPayloadSize ());
+    }
 
   if (!ipHeader.IsChecksumOk ()) 
     {
@@ -668,7 +625,6 @@ double xnpdelay = 20.9865 + (3
 
   for (SocketList::iterator i = m_sockets.begin (); i != m_sockets.end (); ++i)
     {
-	  std::cout << "Forwarding to raw socketForwarding to raw socketForwarding to raw socketForwarding to raw socket" << std::endl;
       NS_LOG_LOGIC ("Forwarding to raw socket"); 
       Ptr<Ipv4RawSocketImpl> socket = *i;
       socket->ForwardUp (packet, ipHeader, ipv4Interface);
@@ -767,9 +723,6 @@ Ipv4L3Protocol::Send (Ptr<Packet> packet,
                       uint8_t protocol,
                       Ptr<Ipv4Route> route)
 {
-	static Ptr<Ipv4Route> routeCopy;
-	if(source==Ipv4Address("198.3.1.1")&&packet->GetSize()>200)
-//	std::cout<<"Ipv4L3Protocol::SEND PACKETTAG----------------------- "<<packet->GetTag()<<std::endl;
   NS_LOG_FUNCTION (this << packet << source << destination << uint32_t (protocol) << route);
 
   Ipv4Header ipHeader;
@@ -779,7 +732,7 @@ Ipv4L3Protocol::Send (Ptr<Packet> packet,
   bool found = packet->RemovePacketTag (tag);
   if (found)
     {
-	  ttl = tag.GetTtl ();
+      ttl = tag.GetTtl ();
     }
 
   uint8_t tos = 0;
@@ -859,9 +812,8 @@ Ipv4L3Protocol::Send (Ptr<Packet> packet,
 
   // 3) packet is not broadcast, and is passed in with a route entry
   //    with a valid Ipv4Address as the gateway
-  if ((route && route->GetGateway () != Ipv4Address ()) || (destination == Ipv4Address("198.1.1.9")))
+  if (route && route->GetGateway () != Ipv4Address ())
     {
-	  routeCopy = route;
       NS_LOG_LOGIC ("Ipv4L3Protocol::Send case 3:  passed in with route");
       ipHeader = BuildHeader (source, destination, protocol, packet->GetSize (), ttl, tos, mayFragment);
       int32_t interface = GetInterfaceForDevice (route->GetOutputDevice ());
@@ -879,21 +831,6 @@ Ipv4L3Protocol::Send (Ptr<Packet> packet,
       NS_FATAL_ERROR ("Ipv4L3Protocol::Send case 4: This case not yet implemented");
     }
   // 5) packet is not broadcast, and route is NULL (e.g., a raw socket call)
-
-  //虽然伪造的SYN请求没有路由，尝试创造一条路由将其包能够发送出去
-//  if((!route) || (destination == Ipv4Address("198.1.9.1")))
-//  {
-//	  static int l = 0;
-//	  std::cout<<"ll = "<< ++l <<std::endl;
-//	  route = routeCopy;
-//      int32_t interface = GetInterfaceForDevice (route->GetOutputDevice ());
-//      m_sendOutgoingTrace (ipHeader, packet, interface);
-//      SendRealOut (route, packet->Copy (), ipHeader);
-//	  return;
-//  }
-
-
-
   NS_LOG_LOGIC ("Ipv4L3Protocol::Send case 5:  passed in with no route " << destination);
   Socket::SocketErrno errno_; 
   Ptr<NetDevice> oif (0); // unused for now
@@ -934,93 +871,40 @@ Ipv4L3Protocol::BuildHeader (
   bool mayFragment)
 {
   NS_LOG_FUNCTION (this << source << destination << (uint16_t)protocol << payloadSize << (uint16_t)ttl << (uint16_t)tos << mayFragment);
+  Ipv4Header ipHeader;
+  ipHeader.SetSource (source);
+  ipHeader.SetDestination (destination);
+  ipHeader.SetProtocol (protocol);
+  ipHeader.SetPayloadSize (payloadSize);
+  ipHeader.SetTtl (ttl);
+  ipHeader.SetTos (tos);
 
-  //********************************************************OD
-  Ipv4Address winTNodesIP1, winTNodesIP2;
-  Ipv4Mask stdMask;
-  stdMask.Set(0xffff0000);
-  winTNodesIP1.Set(0xc6010000);
-  winTNodesIP2.Set(0xc6060000);
+  uint64_t src = source.Get ();
+  uint64_t dst = destination.Get ();
+  uint64_t srcDst = dst | (src << 32);
+  std::pair<uint64_t, uint8_t> key = std::make_pair (srcDst, protocol);
 
-  if(stdMask.IsMatch(winTNodesIP1, source)||stdMask.IsMatch(winTNodesIP2, source))
-  {
-	  Ipv4Header ipHeader;
-	    ipHeader.SetSource (source);
-	    ipHeader.SetDestination (destination);
-	    ipHeader.SetProtocol (protocol);
-	    ipHeader.SetPayloadSize (payloadSize);
-	    ipHeader.SetTtl (ttl);
-	    ipHeader.SetTos (tos);
-
-	    uint64_t src = source.Get ();
-	    uint64_t dst = destination.Get ();
-	    uint64_t srcDst = dst | (src << 32);
-	    std::pair<uint64_t, uint8_t> key = std::make_pair (srcDst, protocol);
-
-	    if (mayFragment == true)
-	      {
-	        ipHeader.SetMayFragment ();
-	        ipHeader.SetIdentification (m_identification[key]);
-	        m_identification[key]++;
-	      }
-	    else
-	      {
-	        ipHeader.SetDontFragment ();
-	        ipHeader.SetIdentification (m_identification[key]);
-	        m_identification[key]++;
-	      }
-	    if (Node::ChecksumEnabled ())
-	      {
-	        ipHeader.EnableChecksum ();
-	      }
-	    return ipHeader;
-
-  }
+  if (mayFragment == true)
+    {
+      ipHeader.SetMayFragment ();
+      ipHeader.SetIdentification (m_identification[key]);
+      m_identification[key]++;
+    }
   else
-  {
-	  Ipv4Header ipHeader;
-	  ipHeader.SetSource (source);
-	    ipHeader.SetDestination (destination);
-	    ipHeader.SetProtocol (protocol);
-
-	    ipHeader.SetTtl (ttl);
-	    ipHeader.SetTos (tos);
-	  //***********************************************OD
-	    ipHeader.Set_i_MessageType();
-	    ipHeader.Set_i_Version();
-	    ipHeader.Set_i_HeaderLength();
-	    ipHeader.Set_i_ServeType();
-	    ipHeader.Set_i_InfoRecognize();
-	    ipHeader.Set_i_FrameNum();
-	    ipHeader.Set_i_frameCounts();
-	    ipHeader.Set_i_MaxHoop();
-	  //***********************************************OD
-	    uint64_t src = source.Get ();
-	    uint64_t dst = destination.Get ();
-	    uint64_t srcDst = dst | (src << 32);
-	    std::pair<uint64_t, uint8_t> key = std::make_pair (srcDst, protocol);
-
-	    if (mayFragment == true)
-	      {
-	        ipHeader.SetMayFragment ();
-	        ipHeader.SetIdentification (m_identification[key]);
-	        m_identification[key]++;
-	      }
-	    else
-	      {
-	        ipHeader.SetDontFragment ();
-	        ipHeader.SetIdentification (m_identification[key]);
-	        m_identification[key]++;
-	      }
-	    if (Node::ChecksumEnabled ())
-	      {
-	        ipHeader.EnableChecksum ();
-	      }
-	    //**************************************************vv
-	    ipHeader.SetPayloadSize (payloadSize);
-
-	    return ipHeader;
-  }
+    {
+      ipHeader.SetDontFragment ();
+      // RFC 6864 does not state anything about atomic datagrams
+      // identification requirement:
+      // >> Originating sources MAY set the IPv4 ID field of atomic datagrams
+      //    to any value.
+      ipHeader.SetIdentification (m_identification[key]);
+      m_identification[key]++;
+    }
+  if (Node::ChecksumEnabled ())
+    {
+      ipHeader.EnableChecksum ();
+    }
+  return ipHeader;
 }
 
 void

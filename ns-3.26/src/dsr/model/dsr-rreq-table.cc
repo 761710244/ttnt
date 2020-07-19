@@ -291,7 +291,7 @@ DsrRreqTable::FindSourceEntry (Ipv4Address src, Ipv4Address dst, uint16_t id)
         {
           if (*j == rreqEntry)          /// Check if we have found one duplication entry or not
             {
-           //   return true;
+              return true;
             }
         }
       /// if this entry is not found, we need to save the entry in the cache, and then return false for the check

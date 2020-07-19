@@ -28,7 +28,6 @@
 #include "ns3/traced-callback.h"
 #include "ns3/random-variable-stream.h"
 
-
 namespace ns3 {
 
 class ArpCache;
@@ -53,12 +52,6 @@ class Ipv4Interface;
 class ArpL3Protocol : public Object
 {
 public:
-
-//*****************************************OD
-void SendXnpRequest(Ptr<const ArpCache>cache);
-void SendXnpReply(Ptr<const ArpCache>cache);
-//*****************************************OD
-
   /**
    * \brief Get the type ID.
    * \return the object TypeId

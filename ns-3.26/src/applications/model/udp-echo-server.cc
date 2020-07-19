@@ -29,10 +29,8 @@
 #include "ns3/socket-factory.h"
 #include "ns3/packet.h"
 #include "ns3/uinteger.h"
-#include "ns3/trace-source-accessor.h"
 
 #include "udp-echo-server.h"
-#include "udp-trace-client.h"
 
 namespace ns3 {
 
@@ -51,12 +49,6 @@ UdpEchoServer::GetTypeId (void)
                    UintegerValue (9),
                    MakeUintegerAccessor (&UdpEchoServer::m_port),
                    MakeUintegerChecker<uint16_t> ())
-				    .AddTraceSource ("Rx", "A new packet is created and is sent",
-				    			   MakeTraceSourceAccessor (&UdpEchoServer::m_rxTrace),
-								   	"ns3::Packet::TracedCallback")
-					.AddTraceSource ("Delay", "A new packet is created and is sent",
-							MakeTraceSourceAccessor (&UdpEchoServer::m_delay))
-
   ;
   return tid;
 }
@@ -155,17 +147,8 @@ UdpEchoServer::HandleRead (Ptr<Socket> socket)
 
   Ptr<Packet> packet;
   Address from;
-  uint64_t aaa;
   while ((packet = socket->RecvFrom (from)))
     {
-	  od_TimestampTag timestamp;
-	 	         if(packet->FindFirstMatchingByteTag (timestamp))
-	 	         {
-	 	        	 Time tx = timestamp.GetTimestamp ();
-	 	        	 Time dx = Simulator::Now () - tx;
-	 	        	 aaa = dx.GetMilliSeconds();
-	 	       		m_delay(aaa);
-	 	         }
       if (InetSocketAddress::IsMatchingType (from))
         {
           NS_LOG_INFO ("At time " << Simulator::Now ().GetSeconds () << "s server received " << packet->GetSize () << " bytes from " <<
@@ -183,7 +166,6 @@ UdpEchoServer::HandleRead (Ptr<Socket> socket)
       packet->RemoveAllByteTags ();
 
       NS_LOG_LOGIC ("Echoing packet");
-      m_rxTrace (packet); //ODD
       socket->SendTo (packet, 0, from);
 
       if (InetSocketAddress::IsMatchingType (from))

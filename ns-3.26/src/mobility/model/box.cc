@@ -114,60 +114,26 @@ Box::CalculateIntersection (const Vector &current, const Vector &speed) const
   double xMinY = current.y + (this->xMin - current.x) / speed.x * speed.y;
   double yMaxX = current.x + (this->yMax - current.y) / speed.y * speed.x;
   double yMinX = current.x + (this->yMin - current.y) / speed.y * speed.x;
-
-  double xMaxZ = current.z + (this->xMax - current.x) / speed.x * speed.z;
-  double xMinZ = current.z + (this->xMin - current.x) / speed.x * speed.z;
-  double yMaxZ = current.z + (this->yMax - current.y) / speed.y * speed.z;
-  double yMinZ = current.z + (this->yMin - current.y) / speed.y * speed.z;
-
-  double zMaxY = current.y + (this->zMax - current.z) / speed.z * speed.y;
-  double zMinY = current.y + (this->zMin - current.z) / speed.z * speed.y;
-  double zMaxX = current.x + (this->zMax - current.z) / speed.z * speed.x;
-  double zMinX = current.x + (this->zMin - current.z) / speed.z * speed.x;
-
   bool xMaxYOk = (xMaxY <= this->yMax && xMaxY >= this->yMin);
   bool xMinYOk = (xMinY <= this->yMax && xMinY >= this->yMin);
   bool yMaxXOk = (yMaxX <= this->xMax && yMaxX >= this->xMin);
   bool yMinXOk = (yMinX <= this->xMax && yMinX >= this->xMin);
-
-  bool xMaxZOk = (xMaxZ <= this->zMax && xMaxZ >= this->zMin);
-  bool xMinZOk = (xMinZ <= this->zMax && xMinZ >= this->zMin);
-  bool yMaxZOk = (yMaxZ <= this->zMax && yMaxZ >= this->zMin);
-  bool yMinZOk = (yMinZ <= this->zMax && yMinZ >= this->zMin);
-
-  bool zMaxYOk = (zMaxY <= this->yMax && zMaxY >= this->yMin);
-  bool zMinYOk = (zMinY <= this->yMax && zMinY >= this->yMin);
-  bool zMaxXOk = (zMaxX <= this->xMax && zMaxX >= this->xMin);
-  bool zMinXOk = (zMinX <= this->xMax && zMinX >= this->xMin);
-
-  if (xMaxYOk && xMaxZOk && speed.x >= 0)
+  if (xMaxYOk && speed.x >= 0)
     {
-      return Vector (this->xMax, xMaxY, xMaxZ);
+      return Vector (this->xMax, xMaxY, 0.0);
     }
-  else if (xMinYOk && xMinZOk && speed.x <= 0)
+  else if (xMinYOk && speed.x <= 0)
     {
-      return Vector (this->xMin, xMinY, xMinZ);
+      return Vector (this->xMin, xMinY, 0.0);
     }
-
-  else if (yMaxXOk && yMaxZOk && speed.y >= 0)
+  else if (yMaxXOk && speed.y >= 0)
     {
-      return Vector (yMaxX, this->yMax, yMaxZ);
+      return Vector (yMaxX, this->yMax, 0.0);
     }
-  else if (yMinXOk && yMinZOk && speed.y <= 0)
+  else if (yMinXOk && speed.y <= 0)
     {
-      return Vector (yMinX, this->yMin, yMinZ);
+      return Vector (yMinX, this->yMin, 0.0);
     }
-
-
-  else if (zMaxXOk && zMaxYOk && speed.z >= 0)
-    {
-      return Vector (zMaxX, zMaxY, this->zMax);
-    }
-  else if (zMinXOk && zMinYOk && speed.z <= 0)
-    {
-      return Vector (zMinX, zMinY, this->zMin);
-    }
-
   else
     {
       NS_ASSERT (false);

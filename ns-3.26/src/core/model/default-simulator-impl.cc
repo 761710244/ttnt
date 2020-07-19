@@ -227,10 +227,11 @@ DefaultSimulatorImpl::Stop (Time const &delay)
 EventId
 DefaultSimulatorImpl::Schedule (Time const &delay, EventImpl *event)
 {
-	NS_LOG_FUNCTION (this << delay.GetTimeStep () << event);
+  NS_LOG_FUNCTION (this << delay.GetTimeStep () << event);
   NS_ASSERT_MSG (SystemThread::Equals (m_main), "Simulator::Schedule Thread-unsafe invocation!");
 
   Time tAbsolute = delay + TimeStep (m_currentTs);
+
   NS_ASSERT (tAbsolute.IsPositive ());
   NS_ASSERT (tAbsolute >= TimeStep (m_currentTs));
   Scheduler::Event ev;

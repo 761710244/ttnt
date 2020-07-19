@@ -102,11 +102,6 @@ public:
    *
    * \return the chunk success rate of the differential encoded QPSK for
    */
-
-
-  static double GetDsssDqpskCck5SuccessRate (double sinr, uint32_t nbits);
-
-
   static double GetDsssDqpskCck5_5SuccessRate (double sinr,uint32_t nbits);
   /**
    * Return the chunk success rate of the differential encoded QPSK for

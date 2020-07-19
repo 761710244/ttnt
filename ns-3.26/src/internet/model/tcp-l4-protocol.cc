@@ -642,15 +642,6 @@ TcpL4Protocol::SendPacket (Ptr<Packet> pkt, const TcpHeader &outgoing,
                            Ptr<NetDevice> oif) const
 {
   NS_LOG_FUNCTION (this << pkt << outgoing << saddr << daddr << oif);
-
-//  if(outgoing.GetFlags() == 4)
-//  {
-//	  static int y = 0;
-//	  std::cout << "TcpHeader.flags == " << (uint16_t)outgoing.GetFlags()
-//			  << " y **** " << ++y << "　Now::::: " << Simulator::Now() << std::endl;
-//  }
-
-
   if (Ipv4Address::IsMatchingType (saddr))
     {
       NS_ASSERT (Ipv4Address::IsMatchingType (daddr));

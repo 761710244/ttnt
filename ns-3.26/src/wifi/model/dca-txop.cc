@@ -17,7 +17,6 @@
  *
  * Author: Mathieu Lacage <mathieu.lacage@sophia.inria.fr>
  */
-#define M_CW 31
 
 #include "ns3/assert.h"
 #include "ns3/packet.h"
@@ -34,28 +33,13 @@
 #include "wifi-mac-trailer.h"
 #include "wifi-mac.h"
 #include "random-stream.h"
-#include "string"
-#include "sstream"
-#include "algorithm"
 
 #undef NS_LOG_APPEND_CONTEXT
 #define NS_LOG_APPEND_CONTEXT if (m_low != 0) { std::clog << "[mac=" << m_low->GetAddress () << "] "; }
 
 namespace ns3 {
-using namespace std;
+
 NS_LOG_COMPONENT_DEFINE ("DcaTxop");
-
-
-//vector<string> maliciousMacAddrVec = {"00:00:00:00:00:0a", "00:00:00:00:00:0b"};
-//vector<string> toMacAttackVec = {"00:00:00:00:00:01", "00:00:00:00:00:07"};
-
-bool isMACDosAttack = false;
-uint16_t recordtime = 112.0;
-vector<string> maliciousMacAddrVec = {"00:00:00:00:00:1a", "00:00:00:00:00:1b", "00:00:00:00:00:1c",
-"00:00:00:00:00:1d", "00:00:00:00:00:1e", "00:00:00:00:00:1f"};
-vector<string> toMacAttackVec = {"00:00:00:00:00:01", "00:00:00:00:00:05", "00:00:00:00:00:0c"
-, "00:00:00:00:00:0e", "00:00:00:00:00:15", "00:00:00:00:00:19"};
-
 
 class DcaTxop::Dcf : public DcfState
 {
@@ -330,7 +314,6 @@ void
 DcaTxop::RestartAccessIfNeeded (void)
 {
   NS_LOG_FUNCTION (this);
-
   if ((m_currentPacket != 0
        || !m_queue->IsEmpty ())
       && !m_dcf->IsAccessRequested ())
@@ -378,7 +361,6 @@ DcaTxop::NeedRtsRetransmission (void)
 bool
 DcaTxop::NeedDataRetransmission (void)
 {
-	std::cout << "DcaTxop::NeedDataRetransmission " << std::endl;
   NS_LOG_FUNCTION (this);
   return m_stationManager->NeedDataRetransmission (m_currentHdr.GetAddr1 (), &m_currentHdr,
                                                    m_currentPacket);
@@ -536,34 +518,7 @@ void
 DcaTxop::NotifyCollision (void)
 {
   NS_LOG_FUNCTION (this);
-  uint32_t randomVal =m_rng->GetNext (0, m_dcf->GetCw ());
-  std::cout << "randomVal = " << randomVal << " m_dcf->GetCw () = " << m_dcf->GetCw () << std::endl;
-
-  bool fromMalicious = false, toAttacking = false;
-  stringstream ssFrom, ssTo;
-  string strFrom, strTo;
-  ssFrom << m_currentHdr.GetAddr2();
-  ssTo << m_currentHdr.GetAddr1();
-  strFrom = ssFrom.str();
-  strTo = ssTo.str();
-  auto fromMaliciousIter = find(maliciousMacAddrVec.begin(), maliciousMacAddrVec.end(), strFrom);
-  auto toMaliciousIter = find(toMacAttackVec.begin(), toMacAttackVec.end(), strTo);
-  if(fromMaliciousIter != maliciousMacAddrVec.end())
-	  fromMalicious = true;
-  if(toMaliciousIter != toMacAttackVec.end())
-	  toAttacking = true;
-
-  if(toAttacking && fromMalicious && (Simulator::Now() > Seconds(recordtime)) && isMACDosAttack)
-//  if(0)
-  {
-//	  static uint64_t ii = 0;
-//	  std::cout << "iiiiiiiiiiiiiiiiiiiiiiiii === " << ++ii << std::endl;
-	  m_dcf->StartBackoffNow (M_CW);
-  }
-  else
-  {
-	  m_dcf->StartBackoffNow (randomVal);
-  }
+  m_dcf->StartBackoffNow (m_rng->GetNext (0, m_dcf->GetCw ()));
   RestartAccessIfNeeded ();
 }
 
@@ -643,35 +598,7 @@ DcaTxop::GotAck (double snr, WifiMode txMode)
        */
       m_currentPacket = 0;
       m_dcf->ResetCw ();
-
-      //*******************************************odie
-      bool fromMalicious = false, toAttacking = false;
-      stringstream ssFrom, ssTo;
-      string strFrom, strTo;
-      ssFrom << m_currentHdr.GetAddr2();
-      ssTo << m_currentHdr.GetAddr1();
-      strFrom = ssFrom.str();
-      strTo = ssTo.str();
-      auto fromMaliciousIter = find(maliciousMacAddrVec.begin(), maliciousMacAddrVec.end(), strFrom);
-      auto toMaliciousIter = find(toMacAttackVec.begin(), toMacAttackVec.end(), strTo);
-      if(fromMaliciousIter != maliciousMacAddrVec.end())
-    	  fromMalicious = true;
-      if(toMaliciousIter != toMacAttackVec.end())
-    	  toAttacking = true;
-
-       if(toAttacking && fromMalicious && (Simulator::Now() > Seconds(recordtime)) && isMACDosAttack)
-//       if(0)
-       {
-    	   m_dcf->StartBackoffNow (M_CW);
-       }
-       else
-       {
-    	      uint32_t random = m_rng->GetNext (0, m_dcf->GetCw ());
-//    	      cout << "DcaTxop::GotAck m_dcf->GetCw () = " << m_dcf->GetCw () << " random = " << random << endl;
-    	      m_dcf->StartBackoffNow (random);
-       }
-      //*******************************************odie
-
+      m_dcf->StartBackoffNow (m_rng->GetNext (0, m_dcf->GetCw ()));
       RestartAccessIfNeeded ();
     }
   else
@@ -703,35 +630,7 @@ DcaTxop::MissedAck (void)
       m_currentHdr.SetRetry ();
       m_dcf->UpdateFailedCw ();
     }
-
-  //*******************************************odie
-  bool fromMalicious = false, toAttacking = false;
-  stringstream ssFrom, ssTo;
-  string strFrom, strTo;
-  ssFrom << m_currentHdr.GetAddr2();
-  ssTo << m_currentHdr.GetAddr1();
-  strFrom = ssFrom.str();
-  strTo = ssTo.str();
-  auto fromMaliciousIter = find(maliciousMacAddrVec.begin(), maliciousMacAddrVec.end(), strFrom);
-  auto toMaliciousIter = find(toMacAttackVec.begin(), toMacAttackVec.end(), strTo);
-  if(fromMaliciousIter != maliciousMacAddrVec.end())
-	  fromMalicious = true;
-  if(toMaliciousIter != toMacAttackVec.end())
-	  toAttacking = true;
-
-  if(toAttacking && fromMalicious && (Simulator::Now() > Seconds(recordtime)) && isMACDosAttack)
-// 	if(0)
-   {
-	   m_dcf->StartBackoffNow (M_CW);
-   }
-   else
-   {
-	      uint32_t random = m_rng->GetNext (0, m_dcf->GetCw ());
-//    	      cout << "DcaTxop::MissedAck m_dcf->GetCw () = " << m_dcf->GetCw () << " random = " << random << endl;
-	      m_dcf->StartBackoffNow (random);
-   }
-  //*******************************************odie
-
+  m_dcf->StartBackoffNow (m_rng->GetNext (0, m_dcf->GetCw ()));
   RestartAccessIfNeeded ();
 }
 
@@ -798,35 +697,7 @@ DcaTxop::EndTxNoAck (void)
   NS_LOG_DEBUG ("a transmission that did not require an ACK just finished");
   m_currentPacket = 0;
   m_dcf->ResetCw ();
-
-  //*******************************************odie
-  bool fromMalicious = false, toAttacking = false;
-  stringstream ssFrom, ssTo;
-  string strFrom, strTo;
-  ssFrom << m_currentHdr.GetAddr2();
-  ssTo << m_currentHdr.GetAddr1();
-  strFrom = ssFrom.str();
-  strTo = ssTo.str();
-  auto fromMaliciousIter = find(maliciousMacAddrVec.begin(), maliciousMacAddrVec.end(), strFrom);
-  auto toMaliciousIter = find(toMacAttackVec.begin(), toMacAttackVec.end(), strTo);
-  if(fromMaliciousIter != maliciousMacAddrVec.end())
-	  fromMalicious = true;
-  if(toMaliciousIter != toMacAttackVec.end())
-	  toAttacking = true;
-
-  if(toAttacking && fromMalicious && (Simulator::Now() > Seconds(recordtime)) && isMACDosAttack)
-//  if(0)
-    {
- 	   m_dcf->StartBackoffNow (M_CW);
-    }
-    else
-    {
- 	      uint32_t random = m_rng->GetNext (0, m_dcf->GetCw ());
-//     	      cout << "DcaTxop::EndTxNoAck m_dcf->GetCw () = " << m_dcf->GetCw () << " random = " << random << endl;
- 	      m_dcf->StartBackoffNow (random);
-    }
-   //*******************************************odie
-
+  m_dcf->StartBackoffNow (m_rng->GetNext (0, m_dcf->GetCw ()));
   StartAccessIfNeeded ();
 }
 

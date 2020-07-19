@@ -28,7 +28,6 @@
 #include "ns3/uinteger.h"
 #include "ns3/trace-source-accessor.h"
 #include "udp-echo-client.h"
-#include "udp-trace-client.h"
 
 namespace ns3 {
 
@@ -315,14 +314,6 @@ UdpEchoClient::Send (void)
     }
   // call to the trace sinks before the packet is actually sent,
   // so that tags added to the packet can be sent as well
-
-  //**********************************************ODD
-   	   od_TimestampTag timestamp;
-   	   timestamp.SetTimestamp (Simulator::Now ());
-   	   p->AddByteTag (timestamp);
-
-    // call to the trace sinks before the packet is actually sent,
-    // so that tags added to the packet can be sent as well
   m_txTrace (p);
   m_socket->Send (p);
 

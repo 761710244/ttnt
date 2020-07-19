@@ -20,18 +20,9 @@
 
 #ifndef IPV4_HEADER_H
 #define IPV4_HEADER_H
-// internet -----> ipv4
+
 #include "ns3/header.h"
 #include "ns3/ipv4-address.h"
-
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <vector>
-#include <sstream>
-#include <string.h>
-#include <stdlib.h>
-#define NOdie 200
 
 namespace ns3 {
 /**
@@ -123,8 +114,6 @@ public:
       ECN_ECT0 = 0x02,
       ECN_CE = 0x03
     }; 
-
-
   /**
    * \brief Set ECN Field
    * \param ecn ECN Type
@@ -246,32 +235,6 @@ public:
   virtual uint32_t GetSerializedSize (void) const;
   virtual void Serialize (Buffer::Iterator start) const;
   virtual uint32_t Deserialize (Buffer::Iterator start);
-
-
-  void setIpHdrType(uint16_t tag);
-  uint16_t getIpHdrType(void);
-//************* IntraHeader is nested in front of Ipv4 *************OD
-  void Set_i_MessageType(void);
-  void Set_i_Version(void);
-  void Set_i_HeaderLength(void);
-  void Set_i_ServeType(void);
-  void Set_i_InfoRecognize(void);
-  void Set_i_FrameNum(void);
-  void Set_i_frameCounts(void);
-  void Set_i_MaxHoop(void);
-
-  void Set_i_Field_1(uint8_t field_1);
-  void Set_i_Field_2(uint8_t field_2);
-  void Set_i_Field_3(uint8_t field_3);
-
-  uint8_t Get_i_Field_1(void) const;
-  uint8_t Get_i_Field_2(void) const;
-  uint8_t Get_i_Field_3(void) const;
-
-  std::vector<Ipv4Address> getReadAddrFile(void);
-  uint32_t getRouteSize(void);
-//******************************************************************OD
-
 private:
 
   /// flags related to IP fragmentation
@@ -294,24 +257,6 @@ private:
   uint16_t m_checksum; //!< checksum
   bool m_goodChecksum; //!< true if checksum is correct
   uint16_t m_headerSize; //!< IP header size
-
-  uint16_t IpHdrType = 0;
-  //************* IntraHeader is nested in front of Ipv4 *************OD
-  uint8_t i_messageType;
-  uint8_t i_version;
-  uint8_t i_headerLength;
-  uint8_t i_serveType;
-  uint8_t i_infoRecognize;
-  uint8_t i_frameNum;
-  uint8_t i_frameCounts;
-  uint8_t i_vacancy = 0;
-  uint8_t i_maxHoop;
-
-  uint8_t i_sourceAddr;
-  uint8_t i_desAddr;
-  std::vector<Ipv4Address> i_addlist;
-  //******************************************************************OD
-
 };
 
 } // namespace ns3

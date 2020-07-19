@@ -57,55 +57,6 @@ DsssErrorRateModel::GetDsssDqpskSuccessRate (double sinr, uint32_t nbits)
   return std::pow ((1.0 - ber), static_cast<double> (nbits));
 }
 
-
-double
-DsssErrorRateModel::GetDsssDqpskCck5SuccessRate (double sinr, uint32_t nbits)
-{
-	  NS_LOG_FUNCTION_NOARGS ();
-	#ifdef HAVE_GSL
-	  //symbol error probability
-	  double EbN0 = sinr * 22000000.0 / 1375000.0 / 4.0;
-	  double sep = SymbolErrorProb16Cck (4.0 * EbN0 / 2.0);
-	  return std::pow (1.0 - sep, nbits / 4.0);
-	#else
-	  NS_LOG_WARN ("Running a 802.11b CCK Matlab model less accurate than GSL model");
-	  //The matlab model
-	  double ber;
-	  if (sinr > WLAN_SIR_PERFECT)
-	    {
-	      ber = 0;
-	    }
-	  else if (sinr < WLAN_SIR_IMPOSSIBLE)
-	    {
-	      ber = 0.5;
-	    }
-	  else
-	    {
-	      //fitprops.coeff from matlab berfit
-	      double a1 = 5.3681634344056195e-001;
-	      double a2 = 3.3092430025608586e-003;
-	      double a3 = 4.1654372361004000e-001;
-	      double a4 = 1.0288981434358866e+000;
-	      ber = a1 * std::exp (-std::pow ((sinr - a2) / a3, a4));
-	    }
-	  return std::pow ((1.0 - ber), static_cast<double> (nbits));
-	#endif
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 double
 DsssErrorRateModel::GetDsssDqpskCck5_5SuccessRate (double sinr, uint32_t nbits)
 {

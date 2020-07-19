@@ -118,15 +118,11 @@ WifiMode::GetDataRate (uint32_t channelWidth, bool isShortGuardInterval, uint8_t
   uint32_t numberOfBitsPerSubcarrier = log2 (GetConstellationSize ());
   if (item->modClass == WIFI_MOD_CLASS_DSSS)
     {
-//      dataRate = ((11000000 / 11) * numberOfBitsPerSubcarrier);
-//	  dataRate = 5000000;
-dataRate = 5000000;
+      dataRate = ((11000000 / 11) * numberOfBitsPerSubcarrier);
     }
   else if (item->modClass == WIFI_MOD_CLASS_HR_DSSS)
     {
-//      dataRate = ((11000000 / 8) * numberOfBitsPerSubcarrier);
-//	  dataRate = 5000000;
-dataRate = 5000000;
+      dataRate = ((11000000 / 8) * numberOfBitsPerSubcarrier);
     }
   else if (item->modClass == WIFI_MOD_CLASS_OFDM || item->modClass == WIFI_MOD_CLASS_ERP_OFDM)
     {
