@@ -49,7 +49,7 @@ TcpSocket::GetTypeId (void)
     .SetGroupName ("Internet")
     .AddAttribute ("SndBufSize",
                    "TcpSocket maximum transmit buffer size (bytes)",
-                   UintegerValue (131072), // 128k
+                   UintegerValue (131072), // 128k  131072
                    MakeUintegerAccessor (&TcpSocket::GetSndBufSize,
                                          &TcpSocket::SetSndBufSize),
                    MakeUintegerChecker<uint32_t> ())
@@ -61,7 +61,7 @@ TcpSocket::GetTypeId (void)
                    MakeUintegerChecker<uint32_t> ())
     .AddAttribute ("SegmentSize",
                    "TCP maximum segment size in bytes (may be adjusted based on MTU discovery)",
-                   UintegerValue (536),
+                   UintegerValue (536),	//536
                    MakeUintegerAccessor (&TcpSocket::GetSegSize,
                                          &TcpSocket::SetSegSize),
                    MakeUintegerChecker<uint32_t> ())

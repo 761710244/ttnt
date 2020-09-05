@@ -29,6 +29,9 @@
 #include <string>
 #include <iomanip>
 #include <map>
+#include "cmath"
+//#include "ReTopology.h"
+
 
 // ns3 includes
 #include "ns3/animation-interface.h"
@@ -50,6 +53,9 @@
 #include "ns3/ipv4.h"
 #include "ns3/ipv4-routing-protocol.h"
 #include "ns3/energy-source-container.h"
+
+
+uint16_t node_range = 1500;
 
 namespace ns3 {
 
@@ -87,6 +93,24 @@ AnimationInterface::AnimationInterface (const std::string fn)
 AnimationInterface::~AnimationInterface ()
 {
   StopAnimation ();
+}
+
+std::map<std::string, uint32_t>
+AnimationInterface::getIpv4AddressNodeIdTable(void)
+{
+	return m_ipv4ToNodeIdMap;
+}
+
+std::multimap<uint32_t,std::string>
+AnimationInterface::GetIpv4AddressNodeIdTable(void)
+{
+	return m_Ipv4ToNodeIdMap;
+}
+
+std::map<uint32_t, Vector>
+AnimationInterface::getNodePosition(void)
+{
+	return m_nodeLocation;
 }
 
 void 
@@ -1293,6 +1317,8 @@ void
 AnimationInterface::AddToIpv4AddressNodeIdTable (std::string ipv4Address, uint32_t nodeId)
 {
   m_ipv4ToNodeIdMap[ipv4Address] = nodeId;
+  m_Ipv4ToNodeIdMap.insert(std::pair<uint32_t,std::string>(nodeId,ipv4Address));
+//  std::cout << "ipv4Address " << ipv4Address << " nodeId = " << nodeId << std::endl;
 }
 
 
@@ -1545,6 +1571,7 @@ AnimationInterface::WriteLinkProperties ()
         {
           Ptr<NetDevice> dev = n->GetDevice (i);
  	  NS_ASSERT (dev);
+
           Ptr<Channel>   ch = dev->GetChannel ();
           if (!ch) 
             {
@@ -1610,17 +1637,84 @@ AnimationInterface::WriteNodes ()
 void 
 AnimationInterface::WriteNodeColors ()
 {
-  for (NodeList::Iterator i = NodeList::Begin (); i != NodeList::End (); ++i)
-    {
-      Ptr<Node> n = *i;
-      Rgb rgb = {255, 0, 0};
-      if (m_nodeColors.find (n->GetId ()) == m_nodeColors.end ())
-      {
-        m_nodeColors[n->GetId ()] = rgb;
-      }
-      UpdateNodeColor (n, rgb.r, rgb.g, rgb.b);
-    }
+	std::map<uint32_t, Vector> abc = getNodePosition();
+//	cout << "HSSSSSSSSSSHHHHH" << abc.size() <<endl;
+	if(abc.size() == 205)
+	{
+		std::vector<uint32_t> belistened;
+		std::vector<uint32_t> listen={200,201,202,203,204};
+		std::vector<double> listennodex;
+		std::vector<double> listennodey;
+		for(auto i = listen.begin();i != listen.end();i++)
+		{
+			auto it = abc.find(*i);
+			if(it != abc.end())
+			{
+				listennodex.push_back(it->second.x);
+				listennodey.push_back(it->second.y);
+			}
+		}
+		for(auto i = abc.begin();i != abc.end();i++)
+		{
+			for(uint32_t j = 0;j != listennodex.size();j++)
+			{
+				if(abs(i->second.x - listennodex[j]) * abs(i->second.x - listennodex[j]) + abs(i->second.y - listennodey[j])
+						* abs(i->second.y - listennodey[j]) <= node_range * node_range)
+				{
+					belistened.push_back(i->first);
+				}
+			}
+
+		}
+
+		for (NodeList::Iterator i = NodeList::Begin (); i != NodeList::End (); ++i)
+		{
+			Ptr<Node> n = *i;
+			Rgb rgb = {255, 0, 0};
+			if (m_nodeColors.find (n->GetId ()) == m_nodeColors.end ())
+			{
+				m_nodeColors[n->GetId ()] = rgb;
+			}
+			UpdateNodeColor (n, rgb.r, rgb.g, rgb.b);
+		}
+
+		for(auto i = belistened.begin();i != belistened.end();i++)
+		{
+			Ptr<Node> n = NodeList::GetNode(*i);
+			Rgb rgb = {0, 255, 0};
+			if (m_nodeColors.find (n->GetId ()) == m_nodeColors.end ())
+			{
+				m_nodeColors[n->GetId ()] = rgb;
+			}
+			UpdateNodeColor (n, rgb.r, rgb.g, rgb.b);
+		}
+
+		for(auto i = listen.begin();i != listen.end();i++)
+		{
+			Ptr<Node> n = NodeList::GetNode(*i);
+			Rgb rgb = {0, 0, 255};
+			if (m_nodeColors.find (n->GetId ()) == m_nodeColors.end ())
+			{
+				m_nodeColors[n->GetId ()] = rgb;
+			}
+			UpdateNodeColor (n, rgb.r, rgb.g, rgb.b);
+		}
+	}
+	else
+	{
+		for (NodeList::Iterator i = NodeList::Begin (); i != NodeList::End (); ++i)
+			{
+				Ptr<Node> n = *i;
+				Rgb rgb = {255, 0, 0};
+				if (m_nodeColors.find (n->GetId ()) == m_nodeColors.end ())
+				{
+					m_nodeColors[n->GetId ()] = rgb;
+				}
+				UpdateNodeColor (n, rgb.r, rgb.g, rgb.b);
+			}
+	}
 }
+
 
 void 
 AnimationInterface::WriteNodeSizes ()

@@ -29,6 +29,7 @@
 #include "ns3/packet.h"
 #include "ns3/node.h"
 #include "ns3/pointer.h"
+#include <fstream>
 
 
 namespace ns3 {
@@ -49,6 +50,8 @@ Ipv4Interface::GetTypeId (void)
                    MakePointerAccessor (&Ipv4Interface::SetArpCache, 
                                         &Ipv4Interface::GetArpCache),
                    MakePointerChecker<ArpCache> ())
+					.AddTraceSource ("Delay", "A new packet is created and is sent",
+							MakeTraceSourceAccessor (&Ipv4Interface::m_delay))
   ;
   ;
   return tid;
@@ -211,90 +214,117 @@ Ipv4Interface::SetForwarding (bool val)
 void
 Ipv4Interface::Send (Ptr<Packet> p, const Ipv4Header & hdr, Ipv4Address dest)
 {
-  NS_LOG_FUNCTION (this << *p << dest);
-  if (!IsUp ())
-    {
-      return;
-    }
+	  NS_LOG_FUNCTION (this << *p << dest);
+	  Ipv4Address ttntNodesIP;
+	  Ipv4Mask stdMask;
+	  stdMask.Set(0xffff0000);
+	  ttntNodesIP.Set(0xc6030000);///////////////////////
+	  if (!IsUp ())
+	    {
+	      return;
+	    }
 
-  // Check for a loopback device, if it's the case we don't pass through
-  // traffic control layer
-  if (DynamicCast<LoopbackNetDevice> (m_device))
-    {
-      /// \todo additional checks needed here (such as whether multicast
-      /// goes to loopback)?
-      p->AddHeader (hdr);
-      m_device->Send (p, m_device->GetBroadcast (), Ipv4L3Protocol::PROT_NUMBER);
-      return;
-    } 
+	  // Check for a loopback device, if it's the case we don't pass through
+	  // traffic control layer
+	  if (DynamicCast<LoopbackNetDevice> (m_device))
+	    {
+	      /// \todo additional checks needed here (such as whether multicast
+	      /// goes to loopback)?
+	      p->AddHeader (hdr);
+	      ///////////////////////////////////////////////////////////////////////////////////ODD
+	      m_device->Send (p, m_device->GetBroadcast (), Ipv4L3Protocol::PROT_NUMBER);
+	      return;
+	    }
 
-  NS_ASSERT (m_tc != 0);
+	  NS_ASSERT (m_tc != 0);
 
-  // is this packet aimed at a local interface ?
-  for (Ipv4InterfaceAddressListCI i = m_ifaddrs.begin (); i != m_ifaddrs.end (); ++i)
-    {
-      if (dest == (*i).GetLocal ())
-        {
-          p->AddHeader (hdr);
-          m_tc->Receive (m_device, p, Ipv4L3Protocol::PROT_NUMBER,
-                         m_device->GetBroadcast (),
-                         m_device->GetBroadcast (),
-                         NetDevice::PACKET_HOST);
-          return;
-        }
-    }
-  if (m_device->NeedsArp ())
-    {
-      NS_LOG_LOGIC ("Needs ARP" << " " << dest);
-      Ptr<ArpL3Protocol> arp = m_node->GetObject<ArpL3Protocol> ();
-      Address hardwareDestination;
-      bool found = false;
-      if (dest.IsBroadcast ())
-        {
-          NS_LOG_LOGIC ("All-network Broadcast");
-          hardwareDestination = m_device->GetBroadcast ();
-          found = true;
-        }
-      else if (dest.IsMulticast ())
-        {
-          NS_LOG_LOGIC ("IsMulticast");
-          NS_ASSERT_MSG (m_device->IsMulticast (),
-                         "ArpIpv4Interface::SendTo (): Sending multicast packet over "
+	  // is this packet aimed at a local interface ?
+	  for (Ipv4InterfaceAddressListCI i = m_ifaddrs.begin (); i != m_ifaddrs.end (); ++i)
+	    {
+	      if (dest == (*i).GetLocal ())
+	        {
+	          p->AddHeader (hdr);
+	          m_tc->Receive (m_device, p, Ipv4L3Protocol::PROT_NUMBER,
+	                         m_device->GetBroadcast (),
+	                         m_device->GetBroadcast (),
+	                         NetDevice::PACKET_HOST);
+	          return;
+	        }
+	    }
+	  if (m_device->NeedsArp ())
+	  {
+		  //std::cout<<"xxxxxxxxxxxxxxxnnnnnnnnnnpppppp = "<<m_device->getSwitch()<<std::endl;
+		  NS_LOG_LOGIC ("Needs ARP" << " " << dest);
+		  Ptr<ArpL3Protocol> arp = m_node->GetObject<ArpL3Protocol> ();
+		  Address hardwareDestination;
+		  bool found = false;
+		  if (dest.IsBroadcast ())
+		  {
+			  NS_LOG_LOGIC ("All-network Broadcast");
+			  hardwareDestination = m_device->GetBroadcast ();
+			  found = true;
+		  }
+		  else if (dest.IsMulticast ())
+		  {
+			  NS_LOG_LOGIC ("IsMulticast");
+			  NS_ASSERT_MSG (m_device->IsMulticast (),
+                         	 "ArpIpv4Interface::SendTo (): Sending multicast packet over "
                          "non-multicast device");
 
-          hardwareDestination = m_device->GetMulticast (dest);
-          found = true;
-        }
-      else
-        {
-          for (Ipv4InterfaceAddressListCI i = m_ifaddrs.begin (); i != m_ifaddrs.end (); ++i)
-            {
-              if (dest.IsSubnetDirectedBroadcast ((*i).GetMask ()))
-                {
-                  NS_LOG_LOGIC ("Subnetwork Broadcast");
-                  hardwareDestination = m_device->GetBroadcast ();
-                  found = true;
-                  break;
-                }
-            }
-          if (!found)
-            {
-              NS_LOG_LOGIC ("ARP Lookup");
-              found = arp->Lookup (p, hdr, dest, m_device, m_cache, &hardwareDestination);
-            }
-        }
+			  hardwareDestination = m_device->GetMulticast (dest);
+			  found = true;
+		  }
+		  else
+		  {
+			  for (Ipv4InterfaceAddressListCI i = m_ifaddrs.begin (); i != m_ifaddrs.end (); ++i)
+			  {
+				  if (dest.IsSubnetDirectedBroadcast ((*i).GetMask ()))
+				  {
+					  NS_LOG_LOGIC ("Subnetwork Broadcast");
+					  hardwareDestination = m_device->GetBroadcast ();
+					  found = true;
+					  break;
+				  }
+			  }
+if(0)
+{
+				  if( ((!m_device->getSwitch()) && (stdMask.IsMatch(ttntNodesIP, hdr.GetSource()))
+						  && m_device->GetXnpTimeState()==0 && hdr.GetSource() == Ipv4Address("198.3.1.3")
+						)  || ((!m_device->getSwitch()) && (stdMask.IsMatch(ttntNodesIP, hdr.GetSource()))
+								  && m_device->GetXnpTimeState()==0 && Simulator::Now()>=Seconds(19.8)))// if(!m_device->getSwitch()&&IP地址是ttnt节点)
+				  {
+					  Ptr<ArpL3Protocol> arp = m_node->GetObject<ArpL3Protocol> ();
+					  //std::cout<<"XNP REQ ---->>>> "<<++aaa<<std::endl;
+					  arp->SendXnpRequest(m_cache);
+					  m_device->SetXnpTimeState(true);
+					  if(hdr.GetSource()==Ipv4Address("198.3.1.3"))
+					  {
+						  m_device->XnpReqTime = Simulator::Now();
+						  std::cout<<" XNP REQ <---- "<<m_device->XnpReqTime<<std::endl;
+					  }
+					  Simulator::Schedule(MilliSeconds(1000.0), &NetDevice::SetXnpTimeState, m_device, false);
+				  	  }
+}
 
-      if (found)
-        {
-          NS_LOG_LOGIC ("Address Resolved.  Send.");
-          m_tc->Send (m_device, Create<Ipv4QueueDiscItem> (p, hardwareDestination, Ipv4L3Protocol::PROT_NUMBER, hdr));
-        }
-    }
-  else
-    {
-      NS_LOG_LOGIC ("Doesn't need ARP");
-      m_tc->Send (m_device, Create<Ipv4QueueDiscItem> (p, m_device->GetBroadcast (), Ipv4L3Protocol::PROT_NUMBER, hdr));
-    }
+			  if (!found)
+			  {
+				  NS_LOG_LOGIC ("ARP Lookup");
+				  found = arp->Lookup (p, hdr, dest, m_device, m_cache, &hardwareDestination);
+			  }
+		  }
+
+		  if ( (found /*&& m_device->getSwitch() && stdMask.IsMatch(ttntNodesIP, hdr.GetSource())
+				  ) || (found && !stdMask.IsMatch(ttntNodesIP, hdr.GetSource())*/) ) //if ((found && m_device->getSwitch()&&IP地址是ttnt节点) || (节点的IP地址不是ttnt&&found) )
+		  {
+			  NS_LOG_LOGIC ("Address Resolved.  Send.");
+			  m_tc->Send (m_device, Create<Ipv4QueueDiscItem> (p, hardwareDestination, Ipv4L3Protocol::PROT_NUMBER, hdr));
+		  }
+	  }
+	  else
+	  {
+		  NS_LOG_LOGIC ("Doesn't need ARP");
+		  m_tc->Send (m_device, Create<Ipv4QueueDiscItem> (p, m_device->GetBroadcast (), Ipv4L3Protocol::PROT_NUMBER, hdr));
+	  }
 }
 
 uint32_t
@@ -304,6 +334,11 @@ Ipv4Interface::GetNAddresses (void) const
   return m_ifaddrs.size ();
 }
 
+void
+Ipv4Interface::SetInitialXnpReqTime(Time t)
+{
+	m_initialXnpReqTime = t;
+}
 bool
 Ipv4Interface::AddAddress (Ipv4InterfaceAddress addr)
 {

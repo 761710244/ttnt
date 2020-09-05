@@ -95,6 +95,9 @@ UdpClientHelper::Install (NodeContainer c)
     {
       Ptr<Node> node = *i;
       Ptr<UdpClient> client = m_factory.Create<UdpClient> ();
+/*********************************************************************************/
+      client->SetNodeID(node->GetId());     //获得节点ID传递给UdpClient对象中的成员函数
+/*********************************************************************************/
       node->AddApplication (client);
       apps.Add (client);
     }

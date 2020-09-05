@@ -111,6 +111,7 @@ public:
   void SetBackoffParams (Time slotTime, uint32_t minSlots, uint32_t maxSlots, 
                          uint32_t maxRetries, uint32_t ceiling);
 
+
   /**
    * Attach the device to a channel.
    *

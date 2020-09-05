@@ -118,13 +118,60 @@ PacketTagIterator::Item::GetTag (Tag &tag) const
 }
 
 
+uint16_t Packet::m_packetCnt = 0;
+
+
 Ptr<Packet> 
 Packet::Copy (void) const
 {
   // we need to invoke the copy constructor directly
   // rather than calling Create because the copy constructor
   // is private.
-  return Ptr<Packet> (new Packet (*this), false);
+	Ptr<Packet> pp =  new Packet (*this);
+	if(this->GetTag()!=0)
+	{
+		pp->SetTag(this->GetTag());
+	}
+	if(this->GetMaliciousType()!=0)
+	{
+		pp->SetMaliciousType(this->GetMaliciousType());
+	}
+	if(this->maliciousTag != 0)
+	{
+		pp->maliciousTag = this->maliciousTag;
+	}
+  return pp;
+}
+
+
+void
+Packet::SetMaliciousType(uint16_t m)
+{
+	maliciousType = m;
+}
+
+uint16_t
+Packet::GetMaliciousType(void) const {
+	return maliciousType;
+}
+
+void
+Packet::SetPacketCount(uint16_t s)
+{
+	m_packetCnt = s;
+}
+
+uint16_t
+Packet::GetPacketCount(void)
+{
+	return m_packetCnt;
+}
+
+
+void
+Packet::UpdatePacketCount(void)
+{
+	++m_packetCnt;
 }
 
 Packet::Packet ()
@@ -827,6 +874,18 @@ Packet::AddPacketTag (const Tag &tag) const
   m_packetTagList.Add (tag);
 }
 
+
+void
+Packet::SetTag(uint32_t t)
+{
+	od_tag = t;
+}
+
+uint32_t
+Packet::GetTag(void) const
+{
+	return od_tag;
+}
 bool 
 Packet::RemovePacketTag (Tag &tag)
 {

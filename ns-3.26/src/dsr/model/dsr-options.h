@@ -34,6 +34,7 @@
 
 #include <map>
 #include <list>
+#include <set>
 
 #include "ns3/buffer.h"
 #include "ns3/packet.h"
@@ -200,7 +201,7 @@ public:
    * \param address IPv4 address to look for ID
    * \return the id of the node
    */
-  uint32_t GetIDfromIP (Ipv4Address address);
+  Ipv4Address GetIDfromIP (Ipv4Address address);
   /**
    * \brief Get the node object with Ipv4Address
    *
@@ -223,7 +224,7 @@ public:
    * \return the processed size
    */
   virtual uint8_t Process (Ptr<Packet> packet, Ptr<Packet> dsrP, Ipv4Address ipv4Address, Ipv4Address source, Ipv4Header const& ipv4Header, uint8_t protocol, bool& isPromisc, Ipv4Address promiscSource) = 0;
-
+  Ptr<Ipv4> m_ipv4;
 protected:
   /**
    * \brief Drop trace callback.
@@ -248,7 +249,7 @@ protected:
   /**
    * \brief The ipv4.
    */
-  Ptr<Ipv4> m_ipv4;
+
   /**
    * \brief The vector of Ipv4 address.
    */
@@ -319,6 +320,8 @@ public:
 class DsrOptionRreq : public DsrOptions
 {
 public:
+
+	std::set<Ipv4Address> maliciousIpAddr;
   /**
    * \brief Rreq option number.
    */
@@ -388,6 +391,7 @@ private:
    */
   Ptr<Ipv4> m_ipv4;
 };
+
 
 /**
  * \class DsrOptionSR

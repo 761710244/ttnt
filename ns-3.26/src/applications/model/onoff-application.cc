@@ -42,6 +42,10 @@
 #include "ns3/string.h"
 #include "ns3/pointer.h"
 
+#include "seq-ts-header.h"
+#include "application-header.h"
+#include "application-user-data.h"
+
 namespace ns3 {
 
 NS_LOG_COMPONENT_DEFINE ("OnOffApplication");
@@ -60,9 +64,9 @@ OnOffApplication::GetTypeId (void)
                    MakeDataRateAccessor (&OnOffApplication::m_cbrRate),
                    MakeDataRateChecker ())
     .AddAttribute ("PacketSize", "The size of packets sent in on state",
-                   UintegerValue (512),
+                   UintegerValue (1024),
                    MakeUintegerAccessor (&OnOffApplication::m_pktSize),
-                   MakeUintegerChecker<uint32_t> (1))
+                   MakeUintegerChecker<uint32_t> (1,5000))
     .AddAttribute ("Remote", "The address of the destination",
                    AddressValue (),
                    MakeAddressAccessor (&OnOffApplication::m_peer),
@@ -82,6 +86,13 @@ OnOffApplication::GetTypeId (void)
                    UintegerValue (0),
                    MakeUintegerAccessor (&OnOffApplication::m_maxBytes),
                    MakeUintegerChecker<uint64_t> ())
+
+				   .AddAttribute("Od_Interval",
+		                   "The time to wait between packets", TimeValue (Seconds (1.0)),
+		                   MakeTimeAccessor (&OnOffApplication::od_interval),
+		                   MakeTimeChecker ())
+
+
     .AddAttribute ("Protocol", "The type of protocol to use.",
                    TypeIdValue (UdpSocketFactory::GetTypeId ()),
                    MakeTypeIdAccessor (&OnOffApplication::m_tid),
@@ -89,6 +100,9 @@ OnOffApplication::GetTypeId (void)
     .AddTraceSource ("Tx", "A new packet is created and is sent",
                      MakeTraceSourceAccessor (&OnOffApplication::m_txTrace),
                      "ns3::Packet::TracedCallback")
+					 .AddTraceSource ("Rx", "A new packet is created and is sent",
+					                     MakeTraceSourceAccessor (&OnOffApplication::m_rxTrace),
+					                     "ns3::Packet::TracedCallback")
   ;
   return tid;
 }
@@ -102,12 +116,30 @@ OnOffApplication::OnOffApplication ()
     m_totBytes (0)
 {
   NS_LOG_FUNCTION (this);
+  m_sent = 0;
 }
 
 OnOffApplication::~OnOffApplication()
 {
   NS_LOG_FUNCTION (this);
 }
+
+
+/*******************************************************************************************/
+void
+OnOffApplication::SetNodeID (uint32_t NodeID)   //添加一对Set和Get方法使得udp-client-server-helper.cc中的
+{                                        //NodeID可以传递给UdpClient对象中的成员变量m_NodeID
+	m_NodeID = NodeID;                   //以便application-user-data.cc对定位字节读写时可以获得对应节点
+}
+uint32_t
+OnOffApplication::GetNodeID (void)
+{
+	return m_NodeID;
+}
+
+/*******************************************************************************************/
+
+
 
 void 
 OnOffApplication::SetMaxBytes (uint64_t maxBytes)
@@ -234,12 +266,13 @@ void OnOffApplication::ScheduleNextTx ()
   if (m_maxBytes == 0 || m_totBytes < m_maxBytes)
     {
       uint32_t bits = m_pktSize * 8 - m_residualBits;
+      std::cout<<"m_pktSize = "<<m_pktSize<<" m_residualBits = "<<m_residualBits<<std::endl;
       NS_LOG_LOGIC ("bits = " << bits);
       Time nextTime (Seconds (bits /
                               static_cast<double>(m_cbrRate.GetBitRate ()))); // Time till next packet
       NS_LOG_LOGIC ("nextTime = " << nextTime);
       m_sendEvent = Simulator::Schedule (nextTime,
-                                         &OnOffApplication::SendPacket, this);
+                                         &OnOffApplication::SendPacket, this); //od_interval
     }
   else
     { // All done, cancel any pending events
@@ -270,9 +303,101 @@ void OnOffApplication::SendPacket ()
 {
   NS_LOG_FUNCTION (this);
 
+  Address cpAddr = m_peer;
+  InetSocketAddress transport_Cp = InetSocketAddress::ConvertFrom (cpAddr);
+  std::cout << " OnOffApplication::SendPacket transport_Cp Ipv4 = " << transport_Cp.GetIpv4()
+		  << " Port = " << transport_Cp.GetPort() << std::endl;
+
   NS_ASSERT (m_sendEvent.IsExpired ());
-  Ptr<Packet> packet = Create<Packet> (m_pktSize);
-  m_txTrace (packet);
+  ++m_sent;
+  SeqTsHeader seqTs;
+  seqTs.SetSeq(m_sent);
+
+  uint32_t MessageNumber;
+ uint32_t size_temp =m_pktSize;
+
+     if (m_pktSize == 150)              // 512          //由于定位消息一般较短且需要定周期发送，因此对于小于512Byte的
+   	  {                                       //用户数据在应用头中对应的bit位设置为0
+     	MessageNumber = 0;
+     	size_temp = 0;
+   	  }
+     else if (m_pktSize == 300)       //    1024        //用于将来语音和图像应用的数据发送
+   	  {
+     	MessageNumber = 1;
+     	size_temp = 0;
+   	  }
+     else if ((m_pktSize == 10) || (m_pktSize == 100))       // 1500
+   	  {
+     	MessageNumber = 2;
+     	size_temp = 0;
+   	  }
+     else if(m_pktSize== 1000) // ***************
+     {
+     	MessageNumber = 2;
+     	size_temp = 0;
+     }
+     else if(m_pktSize==1) // This type is ready for building route
+     {
+     	MessageNumber = 2;
+     	size_temp = 0;
+     }
+
+     std::ofstream write_type;
+     write_type.open("AppType.txt");
+     if(write_type.good())
+     {
+   	  write_type<<MessageNumber;
+   	  write_type.close();
+     }
+     else
+     {
+   	  std::cout<<"Open AppType.txt Failed ! "<<std::endl;
+     }
+
+     Ptr<Packet> packet;
+     if(MessageNumber == 0)
+     {
+    	 packet = Create<Packet> (size_temp);
+     }
+     else
+     {
+    	 packet = Create<Packet> (m_pktSize);
+     }
+
+     time_t timeStamp = time(NULL);                                //将系统时间进行读取并写入应用头中
+     tm* Time1= localtime(&timeStamp);
+       uint8_t time_year_val = 128 | Time1->tm_year;
+       uint32_t time_month_val = 0;
+       time_month_val += (Time1->tm_mon + 1) << 28;
+       time_month_val += (Time1->tm_mday) << 23;
+       time_month_val += (Time1->tm_hour) << 18;
+       time_month_val += (Time1->tm_min) << 12;
+       time_month_val += (Time1->tm_sec) << 6;
+     ApplicationHeader AppHdr;
+     AppHdr.SetVMFmessageIdentificationGroup_MessageNumber (MessageNumber);//4
+     AppHdr.SetOriginatorDataTimeGroup_GPI_Year (time_year_val);//1
+     AppHdr.SetOriginatorDataTimeGroup_Complementation (time_month_val);//4
+
+     AppHdr.SetPacketId(od_PID[InetSocketAddress::ConvertFrom (m_peer).GetPort ()]);
+     od_PID[InetSocketAddress::ConvertFrom (m_peer).GetPort ()]++;
+
+     ApplicationUserData AppUD;
+     AppUD.SetNodeID(m_NodeID);    //将对应的NodeID传递给定位消息的发送端
+     if(MessageNumber==0)
+     {
+    	 packet->AddHeader(AppUD);          //将包含有定位信息的负载加入packet
+     }
+
+     packet->AddHeader (AppHdr);
+
+     packet->AddHeader (seqTs);
+     if(InetSocketAddress::ConvertFrom (m_peer).GetPort () == 10)
+     m_txTrace (packet);
+  //**********************************************ODD
+  od_TimestampTag timestamp;
+  timestamp.SetTimestamp (Simulator::Now ());
+  packet->AddByteTag (timestamp);
+
   m_socket->Send (packet);
   m_totBytes += m_pktSize;
   if (InetSocketAddress::IsMatchingType (m_peer))

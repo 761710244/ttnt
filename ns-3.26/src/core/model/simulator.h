@@ -308,6 +308,11 @@ public:
             typename T1, typename T2, typename T3, typename T4, typename T5>
   static EventId Schedule (Time const &delay, MEM mem_ptr, OBJ obj, 
                            T1 a1, T2 a2, T3 a3, T4 a4, T5 a5);
+
+  template <typename MEM, typename OBJ,
+            typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8>
+  static EventId Schedule (Time const &delay, MEM mem_ptr, OBJ obj,
+                           T1 a1, T2 a2, T3 a3, T4 a4, T5 a5, T6 a6, T7 a7, T8 a8);
   /**
    * Schedule an event to expire after @p delay.
    * This can be thought of as scheduling an event
@@ -1276,6 +1281,16 @@ EventId Simulator::Schedule (Time const &delay, MEM mem_ptr, OBJ obj,
 {
   return DoSchedule (delay, MakeEvent (mem_ptr, obj, a1, a2, a3, a4, a5));
 }
+
+template <typename MEM, typename OBJ,
+          typename T1, typename T2, typename T3, typename T4, typename T5, typename T6, typename T7, typename T8>
+EventId Simulator::Schedule (Time const &delay, MEM mem_ptr, OBJ obj,
+                             T1 a1, T2 a2, T3 a3, T4 a4, T5 a5, T6 a6, T7 a7, T8 a8)
+{
+  return DoSchedule (delay, MakeEvent (mem_ptr, obj, a1, a2, a3, a4, a5, a6, a7, a8));
+}
+
+
 
 template <typename U1,
           typename T1>

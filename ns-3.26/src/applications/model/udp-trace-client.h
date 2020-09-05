@@ -27,6 +27,10 @@
 #include "ns3/ptr.h"
 #include "ns3/ipv4-address.h"
 #include <vector>
+#include "ns3/stats-module.h"
+#include "ns3/core-module.h"
+#include "ns3/network-module.h"
+
 
 namespace ns3 {
 
@@ -157,7 +161,36 @@ private:
   uint32_t m_currentEntry; //!< Current entry index
   static struct TraceEntry g_defaultEntries[]; //!< Default trace to send
   uint16_t m_maxPacketSize; //!< Maximum packet size to send (including the SeqTsHeader)
+
+  Ptr<CounterCalculator<> > m_calc;
+   Ptr<TimeMinMaxAvgTotalCalculator> m_delay;
+
+   /// Callbacks for tracing the packet Tx events
+   TracedCallback<Ptr<const Packet> > m_txTrace;
+ //  TracedCallback<Ptr<Time> > m_txDelay;
 };
+
+class od_TimestampTag : public Tag {
+public:
+  static TypeId GetTypeId (void);
+  virtual TypeId GetInstanceTypeId (void) const;
+
+  virtual uint32_t GetSerializedSize (void) const;
+  virtual void Serialize (TagBuffer i) const;
+  virtual void Deserialize (TagBuffer i);
+
+  // these are our accessors to our tag structure
+  void SetTimestamp (Time time);
+  Time GetTimestamp (void) const;
+
+  void Print (std::ostream &os) const;
+
+private:
+  Time m_timestamp;
+
+  // end class TimestampTag
+};
+
 
 } // namespace ns3
 

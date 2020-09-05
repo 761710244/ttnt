@@ -32,6 +32,12 @@
 #include "arp-cache.h"
 #include "ipv4-interface.h"
 
+//*************************OD
+#include "xnp-req-header.h"
+#include "xnp-rep-header.h"
+#include "ipv4-header.h"
+#include "ns3/mac48-address.h"
+#include "ns3/address.h"
 namespace ns3 {
 
 NS_LOG_COMPONENT_DEFINE ("ArpL3Protocol");
@@ -349,6 +355,43 @@ ArpL3Protocol::Lookup (Ptr<Packet> packet, const Ipv4Header & ipHeader, Ipv4Addr
     }
   return false;
 }
+
+//******************************************************************ODD
+void
+ArpL3Protocol::SendXnpRequest(Ptr<const ArpCache> cache)
+{
+	XnpReqHeader xnp;
+	Ptr<Packet> packet = Create<Packet> ();
+	Ptr<NetDevice> device = cache->GetDevice ();
+	xnp.x_SetVersionNum(0x80);
+	xnp.x_SetId(0x28);
+
+	Ipv4Header iheader;
+	Ipv4Address ip_source;
+	ip_source = cache->GetInterface()->GetAddress(0).GetLocal();
+	iheader.SetSource(ip_source);
+	Ipv4Address ip_dest;
+	ip_dest.Set(0xa000002);
+	iheader.SetDestination(ip_dest);
+	iheader.Set_i_Field_1(0x61);
+	packet->AddHeader(xnp);
+	packet->AddHeader(iheader);
+	Mac48Address add="10:00:00:00:00:02";//---------------------------------FIX
+	device->Send(packet,add, 0x0888);
+}
+
+void
+ArpL3Protocol::SendXnpReply(Ptr<const ArpCache>cache)
+{
+	XnpRepHeader xnp;
+	Ptr<Packet> packet = Create<Packet> ();
+	Ptr<NetDevice> device = cache->GetDevice ();
+	xnp.x_SetVersionNum(0x01);
+	xnp.x_SetId(0xee);
+	packet->AddHeader(xnp);
+	cache->GetDevice()->Send(packet, device->GetBroadcast (), 0x886);
+}
+//******************************************************************ODD
 
 void
 ArpL3Protocol::SendArpRequest (Ptr<const ArpCache> cache, Ipv4Address to)

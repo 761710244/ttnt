@@ -61,8 +61,8 @@ DsrFsHeader::DsrFsHeader ()
   : m_nextHeader (0),
     m_messageType (0),
     m_payloadLen (0),
-    m_sourceId (0),
-    m_destId (0),
+    m_sourceId ("0.0.0.0"),
+    m_destId ("0.0.0.0"),
     m_data (0)
 {
 }
@@ -101,38 +101,39 @@ uint16_t DsrFsHeader::GetPayloadLength () const
   return m_payloadLen;
 }
 
-void DsrFsHeader::SetSourceId (uint16_t sourceId)
+void DsrFsHeader::SetSourceId (Ipv4Address sourceId)
 {
   m_sourceId = sourceId;
 }
 
-uint16_t DsrFsHeader::GetSourceId () const
+Ipv4Address DsrFsHeader::GetSourceId () const
 {
   return m_sourceId;
 }
 
-void DsrFsHeader::SetDestId (uint16_t destId)
+void DsrFsHeader::SetDestId (Ipv4Address destId)
 {
   m_destId = destId;
 }
 
-uint16_t DsrFsHeader::GetDestId () const
+Ipv4Address DsrFsHeader::GetDestId () const
 {
   return m_destId;
 }
 
 void DsrFsHeader::Print (std::ostream &os) const
 {
-  os
-  << "nextHeader: " << (uint32_t)GetNextHeader () << " messageType: " << (uint32_t)GetMessageType ()
-  << " sourceId: " << (uint32_t)GetSourceId () << " destinationId: " << (uint32_t)GetDestId ()
-  << " length: " << (uint32_t)GetPayloadLength ();
+//  os
+//  << "nextHeader: " << (uint32_t)GetNextHeader () << " messageType: " << (uint32_t)GetMessageType ()
+//  << " sourceId: " << (Ipv4Address)GetSourceId () << " destinationId: " << (Ipv4Address)GetDestId ()
+//  << " length: " << (uint32_t)GetPayloadLength ();
 }
 
 uint32_t DsrFsHeader::GetSerializedSize () const
 {
-  return 8;
-}
+  return 8+4;
+//odd
+  }
 
 void DsrFsHeader::Serialize (Buffer::Iterator start) const
 {
@@ -140,8 +141,8 @@ void DsrFsHeader::Serialize (Buffer::Iterator start) const
 
   i.WriteU8 (m_nextHeader);
   i.WriteU8 (m_messageType);
-  i.WriteU16 (m_sourceId);
-  i.WriteU16 (m_destId);
+  WriteTo (i, m_sourceId);
+  WriteTo (i, m_destId);
   i.WriteU16 (m_payloadLen);
 
   i.Write (m_data.PeekData (), m_data.GetSize ());
@@ -153,8 +154,13 @@ uint32_t DsrFsHeader::Deserialize (Buffer::Iterator start)
 
   m_nextHeader = i.ReadU8 ();
   m_messageType = i.ReadU8 ();
-  m_sourceId = i.ReadU16 ();
-  m_destId = i.ReadU16 ();
+  Ipv4Address src;
+    ReadFrom (i, src);
+    SetSourceId (src);
+
+    Ipv4Address dst;
+      ReadFrom (i, dst);
+      SetDestId (dst);
   m_payloadLen = i.ReadU16 ();
 
   uint32_t dataLength = GetPayloadLength ();
@@ -178,7 +184,7 @@ uint32_t DsrFsHeader::Deserialize (Buffer::Iterator start)
 
 DsrOptionField::DsrOptionField (uint32_t optionsOffset)
   : m_optionData (0),
-    m_optionsOffset (optionsOffset)
+    m_optionsOffset (optionsOffset+4)
 {
 }
 
@@ -214,6 +220,10 @@ void DsrOptionField::Serialize (Buffer::Iterator start) const
 uint32_t DsrOptionField::Deserialize (Buffer::Iterator start, uint32_t length)
 {
   uint8_t buf[length];
+//  Buffer::Iterator mk = start;
+  //std::cout<<"check dsr optionheader deserialize: ";
+  //for(uint16_t i =0; i<length; ++i)
+  //std::cout<<std::hex<<(uint16_t)mk.ReadU8()<<" ";
   start.Read (buf, length);
   m_optionData = Buffer ();
   m_optionData.AddAtEnd (length);
@@ -287,16 +297,16 @@ DsrRoutingHeader::~DsrRoutingHeader ()
 
 void DsrRoutingHeader::Print (std::ostream &os) const
 {
-  os
-  << " nextHeader: " << (uint32_t)GetNextHeader () << " messageType: " << (uint32_t)GetMessageType ()
-  << " sourceId: " << (uint32_t)GetSourceId () << " destinationId: " << (uint32_t)GetDestId ()
-  << " length: " << (uint32_t)GetPayloadLength ();
+//  os
+//  << " nextHeader: " << (uint32_t)GetNextHeader () << " messageType: " << (uint32_t)GetMessageType ()
+//  << " sourceId: " << (GetSourceId)GetSourceId () << " destinationId: " << (GetSourceId)GetDestId ()
+//  << " length: " << (uint32_t)GetPayloadLength ();
 }
 
 uint32_t DsrRoutingHeader::GetSerializedSize () const
 {
   // 8 bytes is the DsrFsHeader length
-  return 8 + DsrOptionField::GetSerializedSize ();
+  return 8 + DsrOptionField::GetSerializedSize ()+4;
 }
 
 void DsrRoutingHeader::Serialize (Buffer::Iterator start) const
@@ -305,8 +315,8 @@ void DsrRoutingHeader::Serialize (Buffer::Iterator start) const
 
   i.WriteU8 (GetNextHeader ());
   i.WriteU8 (GetMessageType ());
-  i.WriteU16 (GetSourceId ());
-  i.WriteU16 (GetDestId ());
+  WriteTo (i, GetSourceId ());
+  WriteTo (i ,GetDestId ());
   i.WriteU16 (GetPayloadLength ());
 
   DsrOptionField::Serialize (i);
@@ -318,8 +328,12 @@ uint32_t DsrRoutingHeader::Deserialize (Buffer::Iterator start)
 
   SetNextHeader (i.ReadU8 ());
   SetMessageType (i.ReadU8 ());
-  SetSourceId (i.ReadU16 ());
-  SetDestId (i.ReadU16 ());
+  Ipv4Address cmd;
+  ReadFrom (i, cmd);
+  SetSourceId (cmd);
+  Ipv4Address desmmd;
+  ReadFrom (i, desmmd);
+  SetDestId (desmmd);
   SetPayloadLength (i.ReadU16 ());
 
   DsrOptionField::Deserialize (i, GetPayloadLength ());
@@ -329,3 +343,4 @@ uint32_t DsrRoutingHeader::Deserialize (Buffer::Iterator start)
 
 }  /* namespace dsr */
 }  /* namespace ns3 */
+

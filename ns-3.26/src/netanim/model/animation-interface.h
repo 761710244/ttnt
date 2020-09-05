@@ -26,6 +26,8 @@
 #include <string>
 #include <cstdio>
 #include <map>
+#include "set"
+using namespace std;
 
 #include "ns3/ptr.h"
 #include "ns3/net-device.h"
@@ -44,6 +46,7 @@
 #include "ns3/ipv4.h"
 #include "ns3/ipv4-l3-protocol.h"
 
+
 namespace ns3 {
 
 #define MAX_PKTS_PER_TRACE_FILE 100000
@@ -54,6 +57,10 @@ namespace ns3 {
 
 
 struct NodeSize;
+
+
+
+
 
 /**
  * \defgroup netanim Network Animation
@@ -73,6 +80,9 @@ class AnimationInterface
 {
 public:
 
+	std::map<std::string, uint32_t> getIpv4AddressNodeIdTable(void);
+	std::multimap<uint32_t, std::string> GetIpv4AddressNodeIdTable(void);
+	std::map<uint32_t, Vector> getNodePosition(void);
   /**
    * \brief Constructor
    * \param filename The Filename for the trace file used by the Animator
@@ -593,6 +603,7 @@ private:
   std::map <uint32_t, Vector> m_nodeLocation;
   std::map <std::string, uint32_t> m_macToNodeIdMap;
   std::map <std::string, uint32_t> m_ipv4ToNodeIdMap;
+  std::multimap <uint32_t, std::string> m_Ipv4ToNodeIdMap;
   NodeColorsMap m_nodeColors;
   NodeDescriptionsMap m_nodeDescriptions;
   LinkPropertiesMap m_linkProperties;

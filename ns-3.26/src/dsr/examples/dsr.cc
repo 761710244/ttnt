@@ -50,7 +50,7 @@ main (int argc, char *argv[])
   // Users may find it convenient to turn on explicit debugging
   // for selected modules; the below lines suggest how to do this
   //
-#if 0
+#if 1
   LogComponentEnable ("Ipv4L3Protocol", LOG_LEVEL_ALL);
   LogComponentEnable ("UdpL4Protocol", LOG_LEVEL_ALL);
   LogComponentEnable ("UdpSocketImpl", LOG_LEVEL_ALL);
@@ -58,7 +58,7 @@ main (int argc, char *argv[])
   LogComponentEnable ("Ipv4EndPointDemux", LOG_LEVEL_ALL);
 #endif
 
-#if 0
+#if 1
   LogComponentEnable ("DsrOptions", LOG_LEVEL_ALL);
   LogComponentEnable ("DsrHelper", LOG_LEVEL_ALL);
   LogComponentEnable ("DsrRouting", LOG_LEVEL_ALL);

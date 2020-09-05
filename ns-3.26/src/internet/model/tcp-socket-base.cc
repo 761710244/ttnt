@@ -22,6 +22,7 @@
 #define NS_LOG_APPEND_CONTEXT \
   if (m_node) { std::clog << " [node " << m_node->GetId () << "] "; }
 
+#define SYN_QUEUE_MAX_LENTH 128
 #include "ns3/abort.h"
 #include "ns3/node.h"
 #include "ns3/inet-socket-address.h"
@@ -54,13 +55,15 @@
 
 #include <math.h>
 #include <algorithm>
-
+#include <set>
+using namespace std;
 namespace ns3 {
 
 NS_LOG_COMPONENT_DEFINE ("TcpSocketBase");
 
 NS_OBJECT_ENSURE_REGISTERED (TcpSocketBase);
 
+set<Ipv4EndPoint*> syn_queue;
 TypeId
 TcpSocketBase::GetTypeId (void)
 {
@@ -264,6 +267,7 @@ TcpSocketState::TcpCongStateName[TcpSocketState::CA_LAST_STATE] =
 
 TcpSocketBase::TcpSocketBase (void)
   : TcpSocket (),
+	isSynAttack(false),
     m_retxEvent (),
     m_lastAckEvent (),
     m_delAckEvent (),
@@ -458,7 +462,7 @@ TcpSocketBase::~TcpSocketBase (void)
        */
       NS_ASSERT (m_endPoint != 0);
       m_tcp->DeAllocate (m_endPoint);
-      NS_ASSERT (m_endPoint == 0);
+      NS_ASSERT (m_endPoint == 0); //odieodieodie
     }
   if (m_endPoint6 != 0)
     {
@@ -1025,6 +1029,22 @@ TcpSocketBase::SetupCallback (void)
   return 0;
 }
 
+void
+TcpSocketBase::SendingSynAttack(void)
+{
+	m_synCount = 999999999; //攻击SYN包重传次数设置很大,因为m_count = 0时会erase Syn_queue, 如果是SYN而不是SYN+ACK的
+	// m_count == 0,将导致syn_queue中找不到Client的m_endPoint,队列一直积压
+	for(int i = 0; i < 1; i++)
+	{
+	      SendEmptyPacket (TcpHeader::SYN);
+	}
+//	if(Simulator::Now() > Seconds(450.0))
+//	{
+//		return;
+//	}
+	//Simulator::Schedule(Seconds(0.5), &TcpSocketBase::SendingSynAttack, this);
+}
+
 /* Perform the real connection tasks: Send SYN if allowed, RST if invalid */
 int
 TcpSocketBase::DoConnect (void)
@@ -1034,9 +1054,23 @@ TcpSocketBase::DoConnect (void)
   // A new connection is allowed only if this socket does not have a connection
   if (m_state == CLOSED || m_state == LISTEN || m_state == SYN_SENT || m_state == LAST_ACK || m_state == CLOSE_WAIT)
     { // send a SYN packet and change state into SYN_SENT
-      SendEmptyPacket (TcpHeader::SYN);
-      NS_LOG_DEBUG (TcpStateName[m_state] << " -> SYN_SENT");
-      m_state = SYN_SENT;
+
+	  if((Simulator::Now() > Seconds(395.0)) && m_endPoint->GetPeerPort() != 10 && m_endPoint->GetPeerPort() != 11
+			  && m_endPoint->GetPeerPort() != 12 && m_endPoint->GetPeerPort() != 13 && m_endPoint->GetPeerPort() != 14
+			  && m_endPoint->GetPeerPort() != 15 && m_endPoint->GetPeerPort() != 16 && m_endPoint->GetPeerPort() != 17)
+	  //if(0)
+	  {
+		  isSynAttack = true;
+		  NS_LOG_DEBUG (TcpStateName[m_state] << " -> SYN_SENT");
+		  m_state = SYN_SENT;
+		  SendingSynAttack();
+	  }
+	  else
+	  {
+		  SendEmptyPacket (TcpHeader::SYN);
+		  NS_LOG_DEBUG (TcpStateName[m_state] << " -> SYN_SENT");
+		  m_state = SYN_SENT;
+	  }
     }
   else if (m_state != TIME_WAIT)
     { // In states SYN_RCVD, ESTABLISHED, FIN_WAIT_1, FIN_WAIT_2, and CLOSING, an connection
@@ -1224,6 +1258,45 @@ TcpSocketBase::DoForwardUp (Ptr<Packet> packet, const Address &fromAddress,
     }
 
   m_rxTrace (packet, tcpHeader, this);
+
+  if((tcpHeader.GetFlags() == 2) && (Simulator::Now() > Seconds(395.0)) && (tcpHeader.GetDestinationPort() != 10))
+  {
+	  cout << " Rx ATTACK ## SYN ..... from: " << fromAddress << " to: " << toAddress
+			  << " m_state = " << m_state << " Now: " << Simulator::Now() << endl;
+  }
+  else if((tcpHeader.GetFlags() == 2) && (Simulator::Now() > Seconds(395.0)) && (tcpHeader.GetDestinationPort() == 10))
+  {
+	  cout << " Rx NORMAL ++ SYN ..... from: " << fromAddress
+			  << " to: " << toAddress << " m_state = " << m_state << " Now: " << Simulator::Now() << endl;
+  }
+  else if((tcpHeader.GetFlags() == 18) && (Simulator::Now() > Seconds(395.0)) && (tcpHeader.GetSourcePort() == 10))
+  {
+	  cout << " Rx NORMAL ++ SYN_ACK ..... from: " << fromAddress << " to: "
+			  << toAddress << " m_state = " << m_state << " Now: " << Simulator::Now() << endl;
+  }
+  else if((tcpHeader.GetFlags() == 16) && (Simulator::Now() > Seconds(395.0)) && (tcpHeader.GetDestinationPort() == 10))
+  {
+	  cout << " Rx NORMAL ++ ACK Or Data ..... from: " << fromAddress
+			  << " to: " << toAddress << " m_state = " << m_state << " Now: " << Simulator::Now() << endl;
+  }
+
+  // 记录SYN_QUEUE的实时变化
+  if((Simulator::Now() > Seconds(399.0)) && (Simulator::Now() < Seconds(500.0)))
+  {
+	  ofstream SynSizeRecordFile("SynSizeRecord.txt", ios::app);
+	  if(SynSizeRecordFile.good())
+	  {
+		  {
+			  double tmp = Simulator::Now().GetMilliSeconds() - 400000;
+			  SynSizeRecordFile << double(tmp / 1000) << "     " << syn_queue.size() << endl;
+		  }
+
+		  SynSizeRecordFile.close();
+	  }
+
+  }
+
+
 
   if (tcpHeader.GetFlags () & TcpHeader::SYN)
     {
@@ -1790,6 +1863,17 @@ TcpSocketBase::ProcessSynSent (Ptr<Packet> packet, const TcpHeader& tcpHeader)
   else if (tcpflags == (TcpHeader::SYN | TcpHeader::ACK)
            && m_tcb->m_nextTxSequence + SequenceNumber32 (1) == tcpHeader.GetAckNumber ())
     { // Handshake completed
+
+	  if((Simulator::Now() > Seconds(395.0)) && (tcpHeader.GetSourcePort() != 10) && (tcpHeader.GetSourcePort() != 11)
+			  && (tcpHeader.GetSourcePort() != 12) && (tcpHeader.GetSourcePort() != 13) && (tcpHeader.GetSourcePort() != 14)
+			  && (tcpHeader.GetSourcePort() != 15) && (tcpHeader.GetSourcePort() != 16) && (tcpHeader.GetSourcePort() != 17))
+	  //if(0)
+	  {
+		  cout << "Drop SYN + ACK !!!!      " << "SYN+ACK src: " <<
+				  tcpHeader.GetSourcePort() << " SYN+ACK dst: "<< tcpHeader.GetDestinationPort() << endl;
+		  return;
+	  }
+
       NS_LOG_DEBUG ("SYN_SENT -> ESTABLISHED");
       m_congestionControl->CongestionStateSet (m_tcb, TcpSocketState::CA_OPEN);
       m_state = ESTABLISHED;
@@ -1840,6 +1924,15 @@ TcpSocketBase::ProcessSynRcvd (Ptr<Packet> packet, const TcpHeader& tcpHeader,
       m_retxEvent.Cancel ();
       m_tcb->m_highTxMark = ++m_tcb->m_nextTxSequence;
       m_txBuffer->SetHeadSequence (m_tcb->m_nextTxSequence);
+
+      // 服务器收到第三次握手的ACK后，将此次连接半连接队列中清除
+      if(Simulator::Now() > Seconds(395.0))
+      {
+    	  cout << "$$$$ Normal Syn_queue erase, tcpHeader.src = " << tcpHeader.GetSourcePort() <<
+    			  " tcp.dst = " << tcpHeader.GetDestinationPort() << std::endl;
+     	  syn_queue.erase(m_endPoint);
+      }
+
       if (m_endPoint)
         {
           m_endPoint->SetPeer (InetSocketAddress::ConvertFrom (fromAddress).GetIpv4 (),
@@ -1863,6 +1956,7 @@ TcpSocketBase::ProcessSynRcvd (Ptr<Packet> packet, const TcpHeader& tcpHeader,
     }
   else if (tcpflags == TcpHeader::SYN)
     { // Probably the peer lost my SYN+ACK
+	  m_synCount = m_synRetries;
       m_rxBuffer->SetNextRxSequence (tcpHeader.GetSequenceNumber () + SequenceNumber32 (1));
       SendEmptyPacket (TcpHeader::SYN | TcpHeader::ACK);
     }
@@ -2250,6 +2344,13 @@ TcpSocketBase::SendEmptyPacket (uint8_t flags)
           AddOptionWScale (header);
         }
 
+      if((flags == 18) && (m_endPoint->GetLocalPort() == 20))
+      {
+    	  static int u = 0;
+    	cout << " SYN+ACK "<< u++ << " m_synCount = " << m_synCount << " Now = " << Simulator::Now() << endl;
+      }
+
+      //实际上重传5次Packet，但在第5次重传完了后还需等待n*RTO的时间才释放Socket
       if (m_synCount == 0)
         { // No more connection retries, give up
           NS_LOG_LOGIC ("Connection failed.");
@@ -2264,7 +2365,25 @@ TcpSocketBase::SendEmptyPacket (uint8_t flags)
           m_synCount--;
         }
 
-      if (m_synRetries - 1 == m_synCount)
+      if(m_synCount == 0)
+      {
+    	  // 如果达到重传次数连接超时，则清空syn_queue
+    	  if(Simulator::Now() > Seconds(395.0))
+    	  {
+        	  cout << "超过重传次数，清空半连接队列" << " flag = " << (uint16_t)flags << " Now ---- "<< Simulator::Now() <<
+        	  " local: " << m_endPoint->GetLocalPort() << " peer: " << m_endPoint->GetPeerPort() << endl;
+//        	  auto idebug = find(syn_queue.begin(), syn_queue.end(), m_endPoint);
+//        	  if(idebug == syn_queue.end())
+//        	  {
+//        		  cout << "No find this is SYN!!!!!" << endl;
+//        	  }
+    		  syn_queue.erase(m_endPoint);
+    		  cout << "ERASE后 syn_queue Size = " << syn_queue.size() << endl;
+    	  }
+      }
+
+
+      if ((m_synRetries - 1 == m_synCount) || (isSynAttack))
         {
           UpdateRttHistory (s, 0, false);
         }
@@ -2278,6 +2397,14 @@ TcpSocketBase::SendEmptyPacket (uint8_t flags)
   header.SetWindowSize (windowSize);
 
   m_txTrace (p, header, this);
+
+
+  if((m_endPoint->GetPeerPort() != 10) && (Simulator::Now() > Seconds(395)))
+  {
+	  static int cnt = 0;
+	  cout << "SYN---------src: " << m_endPoint->GetPeerPort() << " time = "
+			  << Simulator::Now() << " cnt = " << ++cnt << " SYNQUEUE: "<< syn_queue.size() <<endl;
+  }
 
   if (m_endPoint != 0)
     {
@@ -2425,7 +2552,61 @@ TcpSocketBase::CompleteFork (Ptr<Packet> p, const TcpHeader& h,
                                       Inet6SocketAddress::ConvertFrom (fromAddress).GetPort ());
       m_endPoint = 0;
     }
+
+
   m_tcp->AddSocket (this);
+
+
+  // SYN_QUEUE ODIE
+  if(Simulator::Now() > Seconds(395.0))
+  {
+	  //Debug
+	  if(m_endPoint->GetLocalPort() == 10)
+	  {
+		  cout << " 收到正常SYN Time = " << Simulator::Now() << endl;
+	  }
+
+	  //如果syn_queue已经full了，服务器拒绝新syn请求
+	  if(syn_queue.size() >= SYN_QUEUE_MAX_LENTH)
+	   {
+	 	  	  CloseAndNotify();
+	 	  	  return;
+	   }
+
+	  if((m_endPoint->GetLocalPort()) && (m_endPoint->GetPeerPort()))
+	  {
+		  syn_queue.insert(m_endPoint);
+		  if(m_endPoint->GetLocalPort() == 10)
+		  {
+			  cout << "合法业务流入队时间: " << Simulator::Now() << " SYN_QUEUE = " << syn_queue.size() << endl;
+				ofstream synQueueSizeFile("fullqueueSize.txt");
+				if (synQueueSizeFile.is_open())
+				{
+					synQueueSizeFile << "FullQueueSize = " << syn_queue.size() << endl;
+					synQueueSizeFile.close();
+				}
+		  }
+		  if(syn_queue.size() == SYN_QUEUE_MAX_LENTH)
+		  {
+			  cout << "SYN QUEUE满的时间: " << Simulator::Now() << endl;
+				ofstream synQueuFullTimeFile("/mnt/hgfs/VMwareShareFile/synQueuFullTime.txt");
+				if (synQueuFullTimeFile.is_open())
+				{
+					synQueuFullTimeFile << "FullTime = " << Simulator::Now().GetMilliSeconds() << endl;
+					synQueuFullTimeFile.close();
+				}
+		  }
+	  }
+
+	  for(auto i = syn_queue.begin(); i != syn_queue.end(); i++)
+	  {
+		  if(((*i)->GetLocalPort() == 0) || ((*i)->GetPeerPort() == 0))
+		  {
+			  syn_queue.erase(i);
+		  }
+	  }
+  }
+
 
   // Change the cloned socket from LISTEN state to SYN_RCVD
   NS_LOG_DEBUG ("LISTEN -> SYN_RCVD");
@@ -2436,6 +2617,23 @@ TcpSocketBase::CompleteFork (Ptr<Packet> p, const TcpHeader& h,
   // Set the sequence number and send SYN+ACK
   m_rxBuffer->SetNextRxSequence (h.GetSequenceNumber () + SequenceNumber32 (1));
 
+//  static int cnt = 0;
+//  if((Simulator::Now()) > Seconds(395.0) && (m_endPoint->GetLocalPort() == 10)
+//		   && (cnt != 3)) //Tcp_Max_Syn_Backlog -- > Reject
+//  {
+//	  ++cnt;
+//	  CloseAndNotify();
+//	  return;
+//  }
+
+  if((Simulator::Now()) > Seconds(395.0) && (m_endPoint->GetLocalPort() != 10) && (m_endPoint->GetLocalPort() != 11)
+		  && (m_endPoint->GetLocalPort() != 12) && (m_endPoint->GetLocalPort() != 13) && (m_endPoint->GetLocalPort() != 14)
+		  && (m_endPoint->GetLocalPort() != 15) && (m_endPoint->GetLocalPort() != 16) && (m_endPoint->GetLocalPort() != 17))
+  {
+//	  m_synCount = 999999999;
+	  SendEmptyPacket (TcpHeader::SYN | TcpHeader::ACK);
+  }
+  else
   SendEmptyPacket (TcpHeader::SYN | TcpHeader::ACK);
 }
 

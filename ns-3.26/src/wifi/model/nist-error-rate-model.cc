@@ -347,6 +347,10 @@ NistErrorRateModel::GetChunkSuccessRate (WifiMode mode, WifiTxVector txVector, d
           return DsssErrorRateModel::GetDsssDbpskSuccessRate (snr, nbits);
         case 2000000:
           return DsssErrorRateModel::GetDsssDqpskSuccessRate (snr, nbits);
+          //*****************************************************************odd
+            case 5000000:
+            	return DsssErrorRateModel::GetDsssDqpskCck5SuccessRate(snr, nbits);
+          //*****************************************************************odd
         case 5500000:
           return DsssErrorRateModel::GetDsssDqpskCck5_5SuccessRate (snr, nbits);
         case 11000000:

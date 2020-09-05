@@ -26,6 +26,9 @@
 #include "ns3/ptr.h"
 #include "ns3/object.h"
 #include "ns3/traffic-control-layer.h"
+#include "ns3/nstime.h"
+#include "ns3/stats-module.h"
+
 
 namespace ns3 {
 
@@ -57,6 +60,8 @@ public:
    * \brief Get the type ID
    * \return type ID
    */
+
+  void SetInitialXnpReqTime (Time t);
   static TypeId GetTypeId (void);
 
   Ipv4Interface ();
@@ -220,9 +225,15 @@ private:
   Ipv4InterfaceAddressList m_ifaddrs; //!< Address list
   Ptr<Node> m_node; //!< The associated node
   Ptr<NetDevice> m_device; //!< The associated NetDevice
+
+  Time m_initialXnpReqTime;
   Ptr<TrafficControlLayer> m_tc; //!< The associated TrafficControlLayer
   Ptr<ArpCache> m_cache; //!< ARP cache
+
+  TracedCallback<uint64_t> m_delay;
 };
+
+
 
 } // namespace ns3
 

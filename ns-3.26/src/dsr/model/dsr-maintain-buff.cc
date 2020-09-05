@@ -53,13 +53,21 @@ bool
 DsrMaintainBuffer::Enqueue (DsrMaintainBuffEntry & entry)
 {
   Purge ();
+  if(!m_maintainBuffer.empty())
+  {
+	  for (std::vector<DsrMaintainBuffEntry>::iterator iterOd = m_maintainBuffer.begin (); iterOd != m_maintainBuffer.end ();)
+		  iterOd = m_maintainBuffer.erase (iterOd);
+//	  m_maintainBuffer.pop_back();
+  }
   for (std::vector<DsrMaintainBuffEntry>::const_iterator i = m_maintainBuffer.begin (); i
        != m_maintainBuffer.end (); ++i)
     {
-//      NS_LOG_INFO ("nexthop " << i->GetNextHop () << " " << entry.GetNextHop () << " our add " << i->GetOurAdd () << " " << entry.GetOurAdd ()
-//                              << " src " << i->GetSrc () << " " << entry.GetSrc () << " dst " << i->GetDst () << " " << entry.GetDst ()
-//                              << " ackId " << i->GetAckId () << " " << entry.GetAckId () << " SegsLeft " << (uint32_t)i->GetSegsLeft () << " " << (uint32_t)entry.GetSegsLeft ()
-//                   );
+	  static uint32_t sss=0;
+      std::cout<<"cnt: "<<++sss<<"  nexthop " << i->GetNextHop () << " " << entry.GetNextHop () << " our add " << i->GetOurAdd () << " " << entry.GetOurAdd ()
+                              << " src " << i->GetSrc () << " " << entry.GetSrc () << " dst " << i->GetDst () << " " << entry.GetDst ()
+                              << " ackId " << i->GetAckId () << " " << entry.GetAckId () << " SegsLeft " << (uint32_t)i->GetSegsLeft () << " " << (uint32_t)entry.GetSegsLeft ()
+                  <<std::endl;
+
 
       if ((i->GetNextHop () == entry.GetNextHop ()) && (i->GetOurAdd () == entry.GetOurAdd ()) && (i->GetSrc () == entry.GetSrc ())
           && (i->GetDst () == entry.GetDst ()) && (i->GetAckId () == entry.GetAckId ()) && (i->GetSegsLeft () == entry.GetSegsLeft ()))
@@ -70,7 +78,7 @@ DsrMaintainBuffer::Enqueue (DsrMaintainBuffEntry & entry)
     }
 
   entry.SetExpireTime (m_maintainBufferTimeout);
-  if (m_maintainBuffer.size () >= m_maxLen)
+  if (m_maintainBuffer.size () >= 50)
     {
       NS_LOG_DEBUG ("Drop the most aged packet");
       m_maintainBuffer.erase (m_maintainBuffer.begin ());        // Drop the most aged packet

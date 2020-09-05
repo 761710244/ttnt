@@ -26,7 +26,10 @@
 #include "ns3/ptr.h"
 #include "ns3/traced-callback.h"
 #include "ns3/address.h"
+#include "ns3/trace-source-accessor.h"
+#include "udp-trace-client.h"
 
+using namespace std;
 namespace ns3 {
 
 class Address;
@@ -91,6 +94,8 @@ public:
    * \return list of pointers to accepted sockets
    */
   std::list<Ptr<Socket> > GetAcceptedSockets (void) const;
+  std::set<uint32_t> PidSet;
+  static vector<uint32_t> packetSizeVec;
  
 protected:
   virtual void DoDispose (void);
@@ -129,9 +134,14 @@ private:
   Address         m_local;        //!< Local address to bind to
   uint64_t        m_totalRx;      //!< Total bytes received
   TypeId          m_tid;          //!< Protocol TypeId
+  TracedCallback<uint64_t> m_delay;
+
 
   /// Traced Callback: received packets, source address.
   TracedCallback<Ptr<const Packet>, const Address &> m_rxTrace;
+
+  TracedCallback<Ptr<const Packet> > m_rxxTrace;
+
 
 };
 

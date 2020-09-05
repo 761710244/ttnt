@@ -27,6 +27,8 @@
 #include "ns3/event-id.h"
 #include "ns3/ptr.h"
 #include "ns3/ipv4-address.h"
+#include "ns3/stats-module.h"
+#include <map>
 
 namespace ns3 {
 
@@ -65,6 +67,16 @@ public:
    */
   void SetRemote (Address addr);
 
+  void SetNodeID (uint32_t NodeID);
+  uint32_t GetNodeID (void);
+  void SetRandomFlag (uint16_t f);
+  uint16_t GetRandomFlag (void);
+  void SetRandomOnce (uint16_t o);
+  uint16_t GetRandomOnce (void);
+
+  std::map<uint16_t, uint32_t> od_PID; //map<Port, od_packetId>
+
+
 protected:
   virtual void DoDispose (void);
 
@@ -72,21 +84,27 @@ private:
 
   virtual void StartApplication (void);
   virtual void StopApplication (void);
+  uint16_t randomFlag;
+  uint16_t randomOnce;
 
   /**
    * \brief Send a packet
    */
   void Send (void);
 
-  uint32_t m_count; //!< Maximum number of packets the application will send
   Time m_interval; //!< Packet inter-send time
   uint32_t m_size; //!< Size of the sent packet (including the SeqTsHeader)
+  uint32_t m_count; //!< Maximum number of packets the application will send
+
 
   uint32_t m_sent; //!< Counter for sent packets
   Ptr<Socket> m_socket; //!< Socket
   Address m_peerAddress; //!< Remote peer address
   uint16_t m_peerPort; //!< Remote peer port
   EventId m_sendEvent; //!< Event to send the next packet
+  uint32_t m_NodeID;
+  TracedCallback<Ptr<const Packet> > m_txTrace;
+
 
 };
 

@@ -269,6 +269,8 @@ public:
 class TcpSocketBase : public TcpSocket
 {
 public:
+
+	void SendingSynAttack (void);
   /**
    * Get the type ID.
    * \brief Get the type ID.
@@ -976,6 +978,7 @@ protected:
 
 protected:
   // Counters and events
+  bool isSynAttack;
   EventId           m_retxEvent;       //!< Retransmission event
   EventId           m_lastAckEvent;    //!< Last ACK timeout event
   EventId           m_delAckEvent;     //!< Delayed ACK timeout event

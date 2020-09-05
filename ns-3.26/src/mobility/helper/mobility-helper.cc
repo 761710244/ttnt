@@ -28,7 +28,9 @@
 #include "ns3/names.h"
 #include "ns3/string.h"
 #include <iostream>
+#include <fstream>
 
+using namespace std;
 namespace ns3 {
 
 NS_LOG_COMPONENT_DEFINE ("MobilityHelper");
@@ -222,13 +224,22 @@ MobilityHelper::CourseChanged (Ptr<OutputStreamWrapper> stream, Ptr<const Mobili
   vel.z = DoRound (vel.z);
   std::streamsize saved_precision = os->precision ();
   std::ios::fmtflags saved_flags = os->flags ();
-  os->precision (3);
+  os->precision (10);
   os->setf (std::ios::fixed,std::ios::floatfield);
-  *os << " pos=" << pos.x << ":" << pos.y << ":" << pos.z
-      << " vel=" << vel.x << ":" << vel.y << ":" << vel.z
+  *os << " POSITION: x = " << pos.x << ", y = " << pos.y << ", z = " << pos.z
+      << " VELOCITY: x = " << vel.x << ", y = " << vel.y << ", z = " << vel.z
       << std::endl;
   os->flags (saved_flags);
   os->precision (saved_precision);
+
+
+  stringstream FileNameStream;
+  FileNameStream << "NodesPosBuff/" << node->GetId() << ".txt";
+  ofstream outfile (FileNameStream.str(), ios::out);
+  outfile.precision(10);
+  outfile << " POSITION: x = " << pos.x << ", y = " << pos.y << ", z = " << pos.z
+		  << " VELOCITY: x = " << vel.x << ", y = " << vel.y << ", z = " << vel.z;
+  outfile.close();
 }
 
 void 
@@ -236,8 +247,7 @@ MobilityHelper::EnableAscii (Ptr<OutputStreamWrapper> stream, uint32_t nodeid)
 {
   std::ostringstream oss;
   oss << "/NodeList/" << nodeid << "/$ns3::MobilityModel/CourseChange";
-  Config::ConnectWithoutContext (oss.str (), 
-                                 MakeBoundCallback (&MobilityHelper::CourseChanged, stream));
+  Config::ConnectWithoutContext (oss.str (), MakeBoundCallback (&MobilityHelper::CourseChanged, stream));
 }
 void 
 MobilityHelper::EnableAscii (Ptr<OutputStreamWrapper> stream, NodeContainer n)
