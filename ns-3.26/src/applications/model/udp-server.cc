@@ -189,19 +189,40 @@ namespace ns3 {
         }
     }
 
+    const double gate = 18000.0;
+    const int func_num = 4; //todo
 
-    /**
-     * packetNum
-     */
-//    uint16_t pktnum = 2 * 50;
+    vector<double> solve(vector<double> &res) {
+        double sum = accumulate(res.begin(), res.end(), 0.0);
+        if (sum < gate) {
+            return res;
+        }
+        int up_down = rand() % 50;
+        double need_to_fix = abs(gate + up_down - sum);
+        int change_business_total = rand() % func_num + 1;
+        double average = 0;
+        average = need_to_fix / (double) change_business_total;
 
-//    double temp1 = 106 / ((10 + 123) * 8 * 10 / 1024) * 2;
+//    srand((unsigned int) time(nullptr));
+        for (int i = 0; i < change_business_total; i++) {
+            int change_business_num = rand() % res.size();
+            res[change_business_num] -= average;
+        }
+        return res;
+    }
 
-    /**
-     * standard delay
-     */
-//    uint64_t standard = (123 + 10) * 8 * 1000000 / 1024 / 120;
+    vector<double> get_tps(vector<double> &vec, int node_num, int packet_size, int data_rate) {
+        int business = node_num / 2;
 
+        double standard_tps = (double) packet_size * 8 * (double) data_rate / 1024;
+        double random = 0.000;
+        for (int i = 0; i < business; i++) {
+            random = (double) (rand() % 1000 + 1000) / 1000;
+            vec[i] = standard_tps - random;
+        }
+        solve(vec);
+        return vec;
+    }
 
     void UdpServer::HandleRead(Ptr <Socket> socket) {
         NS_LOG_FUNCTION(this << socket);
@@ -228,8 +249,16 @@ namespace ns3 {
                 /**
                  * change!!!
                  */
-                uint16_t ttnt = 60;  // TTNT node
-
+                static int ttnt = 2;  // TTNT node
+                static int data_rate = 20;  // send rate (packets/s)
+                static int packet_size = 500;
+                static int isFunc = 0;
+                static vector<double> pre_tps(ttnt / 2, 0.0);
+                static vector<double> top_tps(ttnt / 2);
+                if (isFunc == 0) {
+                    top_tps = get_tps(top_tps, ttnt, packet_size, data_rate);
+                    isFunc++;
+                }
 
                 // simulation time   endtime = recordtime + workflow * 55
                 double record_start[31] = {0.0};
@@ -245,7 +274,7 @@ namespace ns3 {
                     NS_LOG_INFO("routing_end_time " << i << " is:" << record_end[i]);
                 }
 
-                srandom((int) time(nullptr));
+//                srandom((int) time(nullptr));
 
                 static uint16_t rxcnt0 = 1;
                 static uint16_t rxcnt21 = 1, rxcnt22 = 1, rxcnt23 = 1, rxcnt24 = 1, rxcnt25 = 1;  /****/
@@ -275,6 +304,10 @@ namespace ns3 {
                      * business 1
                      */
                     if (UdpServer::m_port == 21) {
+
+                        if (pre_tps[0] > top_tps[0]) {
+                            continue;
+                        }
 
                         static int a21 = 0;
                         static Time firstRx21;
@@ -313,6 +346,7 @@ namespace ns3 {
                                         sumPacketSize / (Seconds(record_end[1]).GetSeconds() -
                                                          firstRx21.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput21: " << packetThroughput * 1000 << " Kbps\n");
+                                pre_tps[0] = packetThroughput * 1000;
                                 ofstream udpThoughputFile21(dir + "udpThroughput21.txt");
                                 if (udpThoughputFile21.good()) {
                                     NS_LOG_INFO("udpThroughput is OK!\n" << endl);
@@ -370,6 +404,10 @@ namespace ns3 {
                      * business 2
                      */
                     if (UdpServer::m_port == 22) {
+
+                        if (pre_tps[1] > top_tps[1]) {
+                            continue;
+                        }
 
                         static int a22 = 0;
                         static Time firstRx22;
@@ -462,6 +500,10 @@ namespace ns3 {
                      */
                     if (UdpServer::m_port == 23) {
 
+                        if (pre_tps[2] > top_tps[2]) {
+                            continue;
+                        }
+
                         static int a23 = 0;
                         static Time firstRx23;
                         uint64_t aa23;
@@ -553,6 +595,9 @@ namespace ns3 {
                      */
                     if (UdpServer::m_port == 24) {
 
+                        if (pre_tps[3] > top_tps[3]) {
+                            continue;
+                        }
                         static int a24 = 0;
                         static Time firstRx24;
                         uint64_t aa24;
@@ -644,6 +689,9 @@ namespace ns3 {
                      */
                     if (UdpServer::m_port == 25) {
 
+                        if (pre_tps[4] > top_tps[4]) {
+                            continue;
+                        }
                         static int a25 = 0;
                         static Time firstRx25;
                         uint64_t aa25;
@@ -734,6 +782,10 @@ namespace ns3 {
                      * business 6
                      */
                     if (UdpServer::m_port == 26) {
+
+                        if (pre_tps[5] > top_tps[5]) {
+                            continue;
+                        }
 
                         static int a26 = 0;
                         static Time firstRx26;
@@ -826,6 +878,10 @@ namespace ns3 {
                      */
                     if (UdpServer::m_port == 27) {
 
+                        if (pre_tps[6] > top_tps[6]) {
+                            continue;
+                        }
+
                         static int a27 = 0;
                         static Time firstRx27;
                         uint64_t aa27;
@@ -916,6 +972,10 @@ namespace ns3 {
                     * business 8
                     */
                     if (UdpServer::m_port == 28) {
+
+                        if (pre_tps[7] > top_tps[7]) {
+                            continue;
+                        }
 
                         static int a28 = 0;
                         static Time firstRx28;
@@ -1008,6 +1068,10 @@ namespace ns3 {
                     */
                     if (UdpServer::m_port == 29) {
 
+                        if (pre_tps[8] > top_tps[8]) {
+                            continue;
+                        }
+
                         static int a29 = 0;
                         static Time firstRx29;
                         uint64_t aa29;
@@ -1098,6 +1162,10 @@ namespace ns3 {
                     * business 10
                     */
                     if (UdpServer::m_port == 30) {
+
+                        if (pre_tps[9] > top_tps[9]) {
+                            continue;
+                        }
 
                         static int a30 = 0;
                         static Time firstRx30;
@@ -1190,6 +1258,10 @@ namespace ns3 {
                     */
                     if (UdpServer::m_port == 31) {
 
+                        if (pre_tps[10] > top_tps[10]) {
+                            continue;
+                        }
+
                         static int a31 = 0;
                         static Time firstRx31;
                         uint64_t aa31;
@@ -1281,6 +1353,9 @@ namespace ns3 {
                     */
                     if (UdpServer::m_port == 32) {
 
+                        if (pre_tps[11] > top_tps[11]) {
+                            continue;
+                        }
                         static int a32 = 0;
                         static Time firstRx32;
                         uint64_t aa32;
@@ -1371,7 +1446,9 @@ namespace ns3 {
                     * business 13
                     */
                     if (UdpServer::m_port == 33) {
-
+                        if (pre_tps[12] > top_tps[12]) {
+                            continue;
+                        }
                         static int a33 = 0;
                         static Time firstRx33;
                         uint64_t aa33;
@@ -1462,6 +1539,10 @@ namespace ns3 {
                     * business 14
                     */
                     if (UdpServer::m_port == 34) {
+
+                        if (pre_tps[13] > top_tps[13]) {
+                            continue;
+                        }
 
                         static int a34 = 0;
                         static Time firstRx34;
@@ -1555,6 +1636,10 @@ namespace ns3 {
                     */
                     if (UdpServer::m_port == 35) {
 
+                        if (pre_tps[14] > top_tps[14]) {
+                            continue;
+                        }
+
                         static int a35 = 0;
                         static Time firstRx35;
                         uint64_t aa35;
@@ -1646,6 +1731,10 @@ namespace ns3 {
                     * business 16
                     */
                     if (UdpServer::m_port == 36) {
+
+                        if (pre_tps[15] > top_tps[15]) {
+                            continue;
+                        }
 
                         static int a36 = 0;
                         static Time firstRx36;
@@ -1739,6 +1828,10 @@ namespace ns3 {
                     */
                     if (UdpServer::m_port == 37) {
 
+                        if (pre_tps[16] > top_tps[16]) {
+                            continue;
+                        }
+
                         static int a37 = 0;
                         static Time firstRx37;
                         uint64_t aa37;
@@ -1830,6 +1923,10 @@ namespace ns3 {
                     * business 18
                     */
                     if (UdpServer::m_port == 38) {
+
+                        if (pre_tps[17] > top_tps[17]) {
+                            continue;
+                        }
 
                         static int a38 = 0;
                         static Time firstRx38;
@@ -1923,6 +2020,10 @@ namespace ns3 {
                     */
                     if (UdpServer::m_port == 39) {
 
+                        if (pre_tps[18] > top_tps[18]) {
+                            continue;
+                        }
+
                         static int a39 = 0;
                         static Time firstRx39;
                         uint64_t aa39;
@@ -2014,6 +2115,10 @@ namespace ns3 {
                     * business 20
                     */
                     if (UdpServer::m_port == 40) {
+
+                        if (pre_tps[19] > top_tps[19]) {
+                            continue;
+                        }
 
                         static int a40 = 0;
                         static Time firstRx40;
@@ -2107,6 +2212,10 @@ namespace ns3 {
                      */
                     if (UdpServer::m_port == 41) {
 
+                        if (pre_tps[20] > top_tps[20]) {
+                            continue;
+                        }
+
                         static int a41 = 0;
                         static Time firstRx41;
                         uint64_t aa41;
@@ -2198,6 +2307,10 @@ namespace ns3 {
                      * business 22
                      */
                     if (UdpServer::m_port == 42) {
+
+                        if (pre_tps[21] > top_tps[21]) {
+                            continue;
+                        }
 
                         static int a42 = 0;
                         static Time firstRx42;
@@ -2291,6 +2404,10 @@ namespace ns3 {
                      */
                     if (UdpServer::m_port == 43) {
 
+                        if (pre_tps[22] > top_tps[22]) {
+                            continue;
+                        }
+
                         static int a43 = 0;
                         static Time firstRx43;
                         uint64_t aa43;
@@ -2382,6 +2499,10 @@ namespace ns3 {
                      * business 24
                      */
                     if (UdpServer::m_port == 44) {
+
+                        if (pre_tps[23] > top_tps[23]) {
+                            continue;
+                        }
 
                         static int a44 = 0;
                         static Time firstRx44;
@@ -2475,6 +2596,10 @@ namespace ns3 {
                      */
                     if (UdpServer::m_port == 45) {
 
+                        if (pre_tps[24] > top_tps[24]) {
+                            continue;
+                        }
+
                         static int a45 = 0;
                         static Time firstRx45;
                         uint64_t aa45;
@@ -2566,6 +2691,10 @@ namespace ns3 {
                      * business 26
                      */
                     if (UdpServer::m_port == 46) {
+
+                        if (pre_tps[25] > top_tps[25]) {
+                            continue;
+                        }
 
                         static int a46 = 0;
                         static Time firstRx46;
@@ -2659,6 +2788,10 @@ namespace ns3 {
                      */
                     if (UdpServer::m_port == 47) {
 
+                        if (pre_tps[26] > top_tps[26]) {
+                            continue;
+                        }
+
                         static int a47 = 0;
                         static Time firstRx47;
                         uint64_t aa47;
@@ -2750,6 +2883,10 @@ namespace ns3 {
                      * business 28
                      */
                     if (UdpServer::m_port == 48) {
+
+                        if (pre_tps[27] > top_tps[27]) {
+                            continue;
+                        }
 
                         static int a48 = 0;
                         static Time firstRx48;
@@ -2843,6 +2980,10 @@ namespace ns3 {
                      */
                     if (UdpServer::m_port == 49) {
 
+                        if (pre_tps[28] > top_tps[28]) {
+                            continue;
+                        }
+
                         static int a49 = 0;
                         static Time firstRx49;
                         uint64_t aa49;
@@ -2934,6 +3075,10 @@ namespace ns3 {
                      * business 30
                      */
                     if (UdpServer::m_port == 50) {
+
+                        if (pre_tps[29] > top_tps[29]) {
+                            continue;
+                        }
 
                         static int a50 = 0;
                         static Time firstRx50;
