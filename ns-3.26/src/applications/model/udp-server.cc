@@ -189,7 +189,7 @@ namespace ns3 {
         }
     }
 
-    const double gate = 18000.0;
+    const double gate = 1750.0;
     const int func_num = 4; //todo
 
     vector<double> solve(vector<double> &res) {
@@ -257,6 +257,14 @@ namespace ns3 {
                 static vector<double> top_tps(ttnt / 2);
                 if (isFunc == 0) {
                     top_tps = get_tps(top_tps, ttnt, packet_size, data_rate);
+                    ofstream yuzhidile("top.txt");
+                    if (yuzhidile.good()) {
+                        for (uint8_t i = 0; i < top_tps.size(); i++) {
+                            yuzhidile << top_tps[i] << " Kbps\n";
+                        }
+                        yuzhidile << accumulate(top_tps.begin(), top_tps.end(), 0.0) << " Kbps\n";
+                        yuzhidile.close();
+                    }
                     isFunc++;
                 }
 

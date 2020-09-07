@@ -38,8 +38,7 @@ void TxCallback(Ptr <CounterCalculator<uint32_t>> datac, std::string path,
 
 int main(int argc, char *argv[]) {
 
-    uint32_t
-    ttnt = 2; // -------
+    uint32_t ttnt = 50; // -------
     bool verbose = true;
     uint32_t dir = 0;  // Output file path suffix
 
