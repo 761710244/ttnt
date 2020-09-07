@@ -82,9 +82,20 @@ namespace ns3 {
     vector <uint32_t> UdpServer::packetSizeVec50;
 
     uint32_t UdpServer::dirSuffix = 0;  // Static member variable initialization
+    const double gate = 1750.0;
+    const int func_num = 20; //todo
+    static int isFunc = 0;
+    static int ttnt = 50;  // TTNT node
+    static int data_rate = 20;  // send rate (packets/s)
+    static int packet_size = 500;
 
-    TypeId
-    UdpServer::GetTypeId(void) {
+    double record_start[31] = {0.0};
+    double record_end[31] = {0.0};
+
+    static vector<double> pre_tps(ttnt / 2, 0.0);
+    static vector<double> top_tps(ttnt / 2);
+
+    TypeId UdpServer::GetTypeId(void) {
         static TypeId tid = TypeId("ns3::UdpServer")
                 .SetParent<Application>()
                 .SetGroupName("Applications")
@@ -189,20 +200,20 @@ namespace ns3 {
         }
     }
 
-    const double gate = 1750.0;
-    const int func_num = 4; //todo
+
 
     vector<double> solve(vector<double> &res) {
         double sum = accumulate(res.begin(), res.end(), 0.0);
+        cout << "sum is ::::::::::::::::::" << sum << endl;
         if (sum < gate) {
             return res;
         }
         int up_down = rand() % 50;
         double need_to_fix = abs(gate + up_down - sum);
-        int change_business_total = rand() % func_num + 1;
+        int change_business_total = rand() % func_num + 10;
         double average = 0;
         average = need_to_fix / (double) change_business_total;
-
+        cout << "need_to_fix is ::::::::" << average << endl;
 //    srand((unsigned int) time(nullptr));
         for (int i = 0; i < change_business_total; i++) {
             int change_business_num = rand() % res.size();
@@ -220,7 +231,7 @@ namespace ns3 {
             random = (double) (rand() % 1000 + 1000) / 1000;
             vec[i] = standard_tps - random;
         }
-        solve(vec);
+        vec = solve(vec);
         return vec;
     }
 
@@ -228,8 +239,6 @@ namespace ns3 {
         NS_LOG_FUNCTION(this << socket);
         Ptr <Packet> packet;
         Address from;
-
-
         //************statistic**************
         while ((packet = socket->RecvFrom(from))) {
 
@@ -237,7 +246,6 @@ namespace ns3 {
             Ptr <Packet> packetOdcp;
             packetOdcp = packet->Copy();
             if (packet->GetSize() > 0) {
-
                 od_TimestampTag timestamp; //
                 SeqTsHeader seqTs;
                 packet->RemoveHeader(seqTs);
@@ -249,15 +257,11 @@ namespace ns3 {
                 /**
                  * change!!!
                  */
-                static int ttnt = 2;  // TTNT node
-                static int data_rate = 20;  // send rate (packets/s)
-                static int packet_size = 500;
-                static int isFunc = 0;
-                static vector<double> pre_tps(ttnt / 2, 0.0);
-                static vector<double> top_tps(ttnt / 2);
+
+
                 if (isFunc == 0) {
                     top_tps = get_tps(top_tps, ttnt, packet_size, data_rate);
-                    ofstream yuzhidile("top.txt");
+                    ofstream yuzhidile("yuzhi.txt");
                     if (yuzhidile.good()) {
                         for (uint8_t i = 0; i < top_tps.size(); i++) {
                             yuzhidile << top_tps[i] << " Kbps\n";
@@ -265,23 +269,16 @@ namespace ns3 {
                         yuzhidile << accumulate(top_tps.begin(), top_tps.end(), 0.0) << " Kbps\n";
                         yuzhidile.close();
                     }
+
+                    // simulation time   endtime = recordtime + workflow * 55
+                    for (uint16_t i = 1; i <= (ttnt / 2); i++) {
+                        record_start[i] = (i - 1) * 57 + 6.0;  // 57
+                        record_end[i] = record_start[i] + 50.0;  // 50
+                        NS_LOG_INFO("routing_start_time " << i << " is:" << record_start[i]);
+                        NS_LOG_INFO("routing_end_time " << i << " is:" << record_end[i]);
+                    }
                     isFunc++;
                 }
-
-                // simulation time   endtime = recordtime + workflow * 55
-                double record_start[31] = {0.0};
-                double record_end[31] = {0.0};
-
-                for (uint16_t i = 1; i <= (ttnt / 2); i++) {
-                    record_start[i] = (i - 1) * 57 + 6.0;  // 57
-                    record_end[i] = record_start[i] + 50.0;  // 50
-
-//                    cout << "routing_start_time " << i << " is:" << record_start[i] << endl;
-//                    cout << "routing_end_time " << i << " is:" << record_end[i] << endl;
-                    NS_LOG_INFO("routing_start_time " << i << " is:" << record_start[i]);
-                    NS_LOG_INFO("routing_end_time " << i << " is:" << record_end[i]);
-                }
-
 //                srandom((int) time(nullptr));
 
                 static uint16_t rxcnt0 = 1;
@@ -306,8 +303,6 @@ namespace ns3 {
 
                 if (1) //同时测量多条业务流niod
                 {
-
-
                     /**
                      * business 1
                      */
@@ -454,6 +449,7 @@ namespace ns3 {
                                         sumPacketSize / (Seconds(record_end[2]).GetSeconds() -
                                                          firstRx22.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
+                                pre_tps[1] = packetThroughput * 1000;
                                 ofstream udpThoughputFile22(dir + "udpThroughput22.txt");
                                 if (udpThoughputFile22.good()) {
                                     NS_LOG_INFO("udpThroughput22 is OK!\n" << endl);
@@ -549,6 +545,7 @@ namespace ns3 {
                                         sumPacketSize / (Seconds(record_end[3]).GetSeconds() -
                                                          firstRx23.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
+                                pre_tps[2] = packetThroughput * 1000;
                                 ofstream udpThoughputFile23(dir + "udpThroughput23.txt");
                                 if (udpThoughputFile23.good()) {
                                     NS_LOG_INFO("udpThroughput is OK!\n" << endl);
@@ -643,6 +640,7 @@ namespace ns3 {
                                         sumPacketSize / (Seconds(record_end[4]).GetSeconds() -
                                                          firstRx24.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
+                                pre_tps[3] = packetThroughput * 1000;
                                 ofstream udpThoughputFile24(dir + "udpThroughput24.txt");
                                 if (udpThoughputFile24.good()) {
                                     NS_LOG_INFO("udpThroughput is OK!\n" << endl);
@@ -737,6 +735,7 @@ namespace ns3 {
                                         sumPacketSize / (Seconds(record_end[5]).GetSeconds() -
                                                          firstRx25.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
+                                pre_tps[4] = packetThroughput * 1000;
                                 ofstream udpThoughputFile25(dir + "udpThroughput25.txt");
                                 if (udpThoughputFile25.good()) {
                                     NS_LOG_INFO("udpThroughput is OK!\n" << endl);
@@ -832,6 +831,7 @@ namespace ns3 {
                                         sumPacketSize / (Seconds(record_end[6]).GetSeconds() -
                                                          firstRx26.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
+                                pre_tps[5] = packetThroughput * 1000;
                                 ofstream udpThoughputFile26(dir + "udpThroughput26.txt");
                                 if (udpThoughputFile26.good()) {
                                     NS_LOG_INFO("udpThroughput is OK!\n" << endl);
@@ -927,6 +927,7 @@ namespace ns3 {
                                         sumPacketSize / (Seconds(record_end[7]).GetSeconds() -
                                                          firstRx27.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
+                                pre_tps[6] = packetThroughput * 1000;
                                 ofstream udpThoughputFile27(dir + "udpThroughput27.txt");
                                 if (udpThoughputFile27.good()) {
                                     NS_LOG_INFO("udpThroughput is OK!\n" << endl);
@@ -1022,6 +1023,7 @@ namespace ns3 {
                                         sumPacketSize / (Seconds(record_end[8]).GetSeconds() -
                                                          firstRx28.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
+                                pre_tps[7] = packetThroughput * 1000;
                                 ofstream udpThoughputFile28(dir + "udpThroughput28.txt");
                                 if (udpThoughputFile28.good()) {
                                     NS_LOG_INFO("udpThroughput is OK!\n" << endl);
@@ -1117,6 +1119,7 @@ namespace ns3 {
                                         sumPacketSize / (Seconds(record_end[9]).GetSeconds() -
                                                          firstRx29.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
+                                pre_tps[8] = packetThroughput * 1000;
                                 ofstream udpThoughputFile29(dir + "udpThroughput29.txt");
                                 if (udpThoughputFile29.good()) {
                                     NS_LOG_INFO("udpThroughput is OK!\n" << endl);
@@ -1212,6 +1215,7 @@ namespace ns3 {
                                         sumPacketSize / (Seconds(record_end[10]).GetSeconds() -
                                                          firstRx30.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
+                                pre_tps[9] = packetThroughput * 1000;
                                 ofstream udpThoughputFile30(dir + "udpThroughput30.txt");
                                 if (udpThoughputFile30.good()) {
                                     NS_LOG_INFO("udpThroughput is OK!\n" << endl);
@@ -1307,6 +1311,7 @@ namespace ns3 {
                                         sumPacketSize / (Seconds(record_end[11]).GetSeconds() -
                                                          firstRx31.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
+                                pre_tps[10] = packetThroughput * 1000;
                                 ofstream udpThoughputFile31(dir + "udpThroughput31.txt");
                                 if (udpThoughputFile31.good()) {
                                     NS_LOG_INFO("udpThroughput is OK!\n" << endl);
@@ -1401,6 +1406,7 @@ namespace ns3 {
                                         sumPacketSize / (Seconds(record_end[12]).GetSeconds() -
                                                          firstRx32.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
+                                pre_tps[11] = packetThroughput * 1000;
                                 ofstream udpThoughputFile32(dir + "udpThroughput32.txt");
                                 if (udpThoughputFile32.good()) {
                                     NS_LOG_INFO("udpThroughput is OK!\n" << endl);
@@ -1494,6 +1500,7 @@ namespace ns3 {
                                         sumPacketSize / (Seconds(record_end[13]).GetSeconds() -
                                                          firstRx33.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
+                                pre_tps[12] = packetThroughput * 1000;
                                 ofstream udpThoughputFile33(dir + "udpThroughput33.txt");
                                 if (udpThoughputFile33.good()) {
                                     NS_LOG_INFO("udpThroughput is OK!\n" << endl);
@@ -1590,6 +1597,7 @@ namespace ns3 {
                                         (Seconds(record_end[14]).GetSeconds() -
                                          firstRx34.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
+                                pre_tps[13] = packetThroughput * 1000;
                                 ofstream udpThoughputFile34(dir + "udpThroughput34.txt");
                                 if (udpThoughputFile34.good()) {
                                     NS_LOG_INFO("udpThroughput is OK!\n" << endl);
@@ -1686,6 +1694,7 @@ namespace ns3 {
                                         (Seconds(record_end[15]).GetSeconds() -
                                          firstRx35.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
+                                pre_tps[14] = packetThroughput * 1000;
                                 ofstream udpThoughputFile35(dir + "udpThroughput35.txt");
                                 if (udpThoughputFile35.good()) {
                                     NS_LOG_INFO("udpThroughput is OK!\n" << endl);
@@ -1782,6 +1791,7 @@ namespace ns3 {
                                         (Seconds(record_end[16]).GetSeconds() -
                                          firstRx36.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
+                                pre_tps[15] = packetThroughput * 1000;
                                 ofstream udpThoughputFile36(dir + "udpThroughput36.txt");
                                 if (udpThoughputFile36.good()) {
                                     NS_LOG_INFO("udpThroughput is OK!\n" << endl);
@@ -1878,6 +1888,7 @@ namespace ns3 {
                                         (Seconds(record_end[17]).GetSeconds() -
                                          firstRx37.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
+                                pre_tps[16] = packetThroughput * 1000;
                                 ofstream udpThoughputFile37(dir + "udpThroughput37.txt");
                                 if (udpThoughputFile37.good()) {
                                     NS_LOG_INFO("udpThroughput is OK!\n" << endl);
@@ -1974,6 +1985,7 @@ namespace ns3 {
                                         (Seconds(record_end[18]).GetSeconds() -
                                          firstRx38.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
+                                pre_tps[17] = packetThroughput * 1000;
                                 ofstream udpThoughputFile38(dir + "udpThroughput38.txt");
                                 if (udpThoughputFile38.good()) {
                                     NS_LOG_INFO("udpThroughput is OK!\n" << endl);
@@ -2070,6 +2082,7 @@ namespace ns3 {
                                         (Seconds(record_end[19]).GetSeconds() -
                                          firstRx39.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
+                                pre_tps[18] = packetThroughput * 1000;
                                 ofstream udpThoughputFile39(dir + "udpThroughput39.txt");
                                 if (udpThoughputFile39.good()) {
                                     NS_LOG_INFO("udpThroughput is OK!\n" << endl);
@@ -2166,6 +2179,7 @@ namespace ns3 {
                                         (Seconds(record_end[20]).GetSeconds() -
                                          firstRx40.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
+                                pre_tps[19] = packetThroughput * 1000;
                                 ofstream udpThoughputFile40(dir + "udpThroughput40.txt");
                                 if (udpThoughputFile40.good()) {
                                     NS_LOG_INFO("udpThroughput is OK!\n" << endl);
@@ -2262,6 +2276,7 @@ namespace ns3 {
                                         (Seconds(record_end[21]).GetSeconds() -
                                          firstRx41.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
+                                pre_tps[20] = packetThroughput * 1000;
                                 ofstream udpThoughputFile41(dir + "udpThroughput41.txt");
                                 if (udpThoughputFile41.good()) {
                                     NS_LOG_INFO("udpThroughput is OK!\n" << endl);
@@ -2358,6 +2373,7 @@ namespace ns3 {
                                         (Seconds(record_end[22]).GetSeconds() -
                                          firstRx42.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
+                                pre_tps[21] = packetThroughput * 1000;
                                 ofstream udpThoughputFile42(dir + "udpThroughput42.txt");
                                 if (udpThoughputFile42.good()) {
                                     NS_LOG_INFO("udpThroughput is OK!\n" << endl);
@@ -2454,6 +2470,7 @@ namespace ns3 {
                                         (Seconds(record_end[23]).GetSeconds() -
                                          firstRx43.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
+                                pre_tps[22] = packetThroughput * 1000;
                                 ofstream udpThoughputFile43(dir + "udpThroughput43.txt");
                                 if (udpThoughputFile43.good()) {
                                     NS_LOG_INFO("udpThroughput is OK!\n" << endl);
@@ -2550,6 +2567,7 @@ namespace ns3 {
                                         (Seconds(record_end[24]).GetSeconds() -
                                          firstRx44.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
+                                pre_tps[23] = packetThroughput * 1000;
                                 ofstream udpThoughputFile44(dir + "udpThroughput44.txt");
                                 if (udpThoughputFile44.good()) {
                                     NS_LOG_INFO("udpThroughput is OK!\n" << endl);
@@ -2646,6 +2664,7 @@ namespace ns3 {
                                         (Seconds(record_end[25]).GetSeconds() -
                                          firstRx45.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
+                                pre_tps[24] = packetThroughput * 1000;
                                 ofstream udpThoughputFile45(dir + "udpThroughput45.txt");
                                 if (udpThoughputFile45.good()) {
                                     NS_LOG_INFO("udpThroughput is OK!\n" << endl);
@@ -2742,6 +2761,7 @@ namespace ns3 {
                                         (Seconds(record_end[26]).GetSeconds() -
                                          firstRx46.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
+                                pre_tps[25] = packetThroughput * 1000;
                                 ofstream udpThoughputFile46(dir + "udpThroughput46.txt");
                                 if (udpThoughputFile46.good()) {
                                     NS_LOG_INFO("udpThroughput is OK!\n" << endl);
@@ -2838,6 +2858,7 @@ namespace ns3 {
                                         (Seconds(record_end[27]).GetSeconds() -
                                          firstRx47.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
+                                pre_tps[26] = packetThroughput * 1000;
                                 ofstream udpThoughputFile47(dir + "udpThroughput47.txt");
                                 if (udpThoughputFile47.good()) {
                                     NS_LOG_INFO("udpThroughput is OK!\n" << endl);
@@ -2934,6 +2955,7 @@ namespace ns3 {
                                         (Seconds(record_end[28]).GetSeconds() -
                                          firstRx48.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
+                                pre_tps[27] = packetThroughput * 1000;
                                 ofstream udpThoughputFile48(dir + "udpThroughput48.txt");
                                 if (udpThoughputFile48.good()) {
                                     NS_LOG_INFO("udpThroughput is OK!\n" << endl);
@@ -3030,6 +3052,7 @@ namespace ns3 {
                                         (Seconds(record_end[29]).GetSeconds() -
                                          firstRx49.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
+                                pre_tps[28] = packetThroughput * 1000;
                                 ofstream udpThoughputFile49(dir + "udpThroughput49.txt");
                                 if (udpThoughputFile49.good()) {
                                     NS_LOG_INFO("udpThroughput is OK!\n" << endl);
@@ -3126,6 +3149,7 @@ namespace ns3 {
                                         (Seconds(record_end[30]).GetSeconds() -
                                          firstRx50.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
+                                pre_tps[29] = packetThroughput * 1000;
                                 ofstream udpThoughputFile50(dir + "udpThroughput50.txt");
                                 if (udpThoughputFile50.good()) {
                                     NS_LOG_INFO("udpThroughput is OK!\n" << endl);
