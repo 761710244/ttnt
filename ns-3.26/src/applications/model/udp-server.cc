@@ -83,17 +83,21 @@ namespace ns3 {
 
     uint32_t UdpServer::dirSuffix = 0;  // Static member variable initialization
     const double gate = 1750.0;
-    const int func_num = 20; //todo
+//    const int func_num = 20;
     static int isFunc = 0;
-    static int ttnt = 50;  // TTNT node
+
     static int data_rate = 20;  // send rate (packets/s)
-    static int packet_size = 500;
+//    static int packet_size = 500;
+    static int kind = 2;
+    static int business = 2;
+    static int ttnt = kind * business * 2;  // todo
 
     double record_start[31] = {0.0};
     double record_end[31] = {0.0};
 
     static vector<double> pre_tps(ttnt / 2, 0.0);
     static vector<double> top_tps(ttnt / 2);
+    static vector<int> packet_size(ttnt / 2 + 1);
 
     TypeId UdpServer::GetTypeId(void) {
         static TypeId tid = TypeId("ns3::UdpServer")
@@ -201,7 +205,6 @@ namespace ns3 {
     }
 
 
-
     vector<double> solve(vector<double> &res) {
         double sum = accumulate(res.begin(), res.end(), 0.0);
         cout << "sum is ::::::::::::::::::" << sum << endl;
@@ -210,26 +213,62 @@ namespace ns3 {
         }
         int up_down = rand() % 50;
         double need_to_fix = abs(gate + up_down - sum);
-        int change_business_total = rand() % func_num + 10;
+        double tmp_sum = 0.000;
         double average = 0;
-        average = need_to_fix / (double) change_business_total;
-        cout << "need_to_fix is ::::::::" << average << endl;
-//    srand((unsigned int) time(nullptr));
-        for (int i = 0; i < change_business_total; i++) {
-            int change_business_num = rand() % res.size();
-            res[change_business_num] -= average;
+        int start = 0;
+        vector<int> flag(res.size(), 0);
+        while (need_to_fix > 0) {
+            tmp_sum = 0.000;
+            for (uint8_t i = start; i < start + business; i++) {
+                tmp_sum += res[i];
+            }
+            if (need_to_fix - tmp_sum < 0) {
+                int change_business_total = rand() % business + 4;
+                average = need_to_fix / (double) change_business_total;
+
+                for (uint8_t i = 0; i < change_business_total; i++) {
+                    int change_business_num = rand() % (start + business) + start;
+                    flag[change_business_num] = 2;
+                }
+
+                for (uint8_t i = 0; i < res.size(); i++) {
+                    if (flag[i] == 1) {
+                        res[i] = 0;
+                        continue;
+                    }
+                    if (flag[i] == 2) {
+                        res[i] -= average;
+                        continue;
+                    }
+                }
+                return res;
+            }
+            for (uint8_t i = start; i < start + business; i++) {
+                flag[i] = 1;
+            }
+            need_to_fix -= tmp_sum;
+            start += business;
         }
+
+//        int change_business_total = rand() % func_num + 10;
+//        double average = 0;
+//        average = need_to_fix / (double) change_business_total;
+//        cout << "need_to_fix is ::::::::" << average << endl;
+////    srand((unsigned int) time(nullptr));
+//        for (int i = 0; i < change_business_total; i++) {
+//            int change_business_num = rand() % res.size();
+//            res[change_business_num] -= average;
+//        }
         return res;
     }
 
-    vector<double> get_tps(vector<double> &vec, int node_num, int packet_size, int data_rate) {
-        int business = node_num / 2;
-
-        double standard_tps = (double) packet_size * 8 * (double) data_rate / 1024;
+    vector<double> get_tps(vector<double> &vec, int node_num, vector<int> packet_size, int data_rate) {
         double random = 0.000;
-        for (int i = 0; i < business; i++) {
+        double standard_tps = 0.000;
+        for (uint8_t i = 1; i < packet_size.size(); i++) {
+            standard_tps = (double) packet_size[i] * 8 * (double) data_rate / 1024;
             random = (double) (rand() % 1000 + 1000) / 1000;
-            vec[i] = standard_tps - random;
+            vec[i - 1] = standard_tps - random;
         }
         vec = solve(vec);
         return vec;
@@ -255,11 +294,16 @@ namespace ns3 {
                 packet->RemoveHeader(AppHdr);
 /********************************************************************************************/
                 /**
-                 * change!!!
+                 * prehandle
                  */
-
-
                 if (isFunc == 0) {
+                    uint16_t size = 500;
+                    for (uint8_t i = 1; i <= kind; i++) {
+                        for (uint8_t j = 1; j <= business; j++) {
+                            packet_size[(i - 1) * business + j] = size;
+                        }
+                        size -= 20;
+                    }
                     top_tps = get_tps(top_tps, ttnt, packet_size, data_rate);
                     ofstream yuzhidile("yuzhi.txt");
                     if (yuzhidile.good()) {
