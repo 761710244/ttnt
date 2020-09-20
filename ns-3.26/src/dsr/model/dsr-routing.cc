@@ -3764,9 +3764,9 @@ namespace ns3 {
                         malicious_RREQ_Once[m_TargetAddress] = true;
                     }
                 } else if (isMalicious == 0) {
-                    std::cout << "This is A Normal Node, do nothing\n";
+
                 }
-                //////////////////////////////Odie, If this is Malicious, adding the Tag
+                //Odie, If this is, adding the Tag
 
                 for (uint16_t i = 0; i < nodeList2.size(); i++)   //处理数据转发，使得SearchNextHop能够找到
                 {
