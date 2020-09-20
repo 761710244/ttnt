@@ -82,14 +82,15 @@ namespace ns3 {
     vector <uint32_t> UdpServer::packetSizeVec50;
 
     uint32_t UdpServer::dirSuffix = 0;  // Static member variable initialization
+
     const double gate = 1750.0;
 //    const int func_num = 20;
     static int isFunc = 0;
 
     static int data_rate = 20;  // send rate (packets/s)
 //    static int packet_size = 500;
-    static int kind = 2;
-    static int business = 2;
+    static int kind = 2;  // hack: Equal to the value of the variable [kind] in the script
+    static int business = 1;  // hack: Equal to the value of the variable [business] in the script
     static int ttnt = kind * business * 2;  // todo
 
     double record_start[31] = {0.0};
@@ -98,6 +99,15 @@ namespace ns3 {
     static vector<double> pre_tps(ttnt / 2, 0.0);
     static vector<double> top_tps(ttnt / 2);
     static vector<int> packet_size(ttnt / 2 + 1);
+
+    void UdpServer::reInit(int typeNum, int busiNum) {
+        kind = typeNum;
+        business = busiNum;
+        ttnt = kind * business * 2;
+        pre_tps.resize(ttnt/2, 0.0);
+        top_tps.resize(ttnt/2);
+        packet_size.resize(ttnt / 2 + 1);
+    }
 
     TypeId UdpServer::GetTypeId(void) {
         static TypeId tid = TypeId("ns3::UdpServer")
@@ -275,6 +285,12 @@ namespace ns3 {
     }
 
     void UdpServer::HandleRead(Ptr <Socket> socket) {
+        ofstream paraFile("paraFile1.txt");
+        paraFile << "udp:kind: " << to_string(kind) << endl;
+        paraFile << "udp:business: " << to_string(business) << endl;
+        paraFile << "udp:ttnt: " << to_string(ttnt) << endl;
+        paraFile.close();
+
         NS_LOG_FUNCTION(this << socket);
         Ptr <Packet> packet;
         Address from;

@@ -1,9 +1,9 @@
 //
-// Created by yf518 on 7/19/20.
+// Created by zy on 11/9/20.
 //
 
-/** 测试不同节点间距，业务类型数为2时的系统吞吐量
- *
+/**
+ * 测试五种业务类型的吞吐量和时延s
  */
 
 #include "ns3/core-module.h"
@@ -29,23 +29,38 @@ using namespace std;
 
 NS_LOG_COMPONENT_DEFINE("ThirdScriptExample");
 
-void TxCallback(Ptr<CounterCalculator<uint32_t>> datac, std::string path,
-                Ptr<const Packet> packet) {
+void TxCallback(Ptr <CounterCalculator<uint32_t>> datac, std::string path, Ptr<const Packet> packet) {
     NS_LOG_INFO("Sent frame counted in " << datac->GetKey());
     datac->Update();
 }
 
 int main(int argc, char *argv[]) {
 
-    uint32_t ttnt = 61; // -------
+    uint8_t kind = 5;
+    uint32_t business = 6;  // hack: Add 1 per test. Range: [1, 6]
+    uint32_t ttnt;
     bool verbose = true;
+    uint32_t dir = 0;  // Output file path suffix
 
     Time::SetResolution(Time::NS);  // 最小时间单元：ns
 
     CommandLine cmd;
     cmd.AddValue("ttnt", "Number of \"extra\" CSMA nodes/devices", ttnt);
     cmd.AddValue("verbose", "Tell echo applications to log if true", verbose);
+    cmd.AddValue("dir", "Specify the output file path suffix", dir);
+    cmd.AddValue("business", "Number of traffic flows of a single type", business);
     cmd.Parse(argc, argv);
+
+    ttnt = kind * business * 2;
+    ns3::UdpServer::dirSuffix = dir;
+    UdpServer::reInit(kind, business);
+
+    ofstream paraFile("paraFile.txt");
+    paraFile << "kind: " << to_string(kind) << endl;
+    paraFile << "business: " << to_string(business) << endl;
+    paraFile << "ttnt: " << to_string(ttnt) << endl;
+    paraFile.close();
+
 
     if (verbose) {
         LogComponentEnable("UdpEchoClientApplication", LOG_LEVEL_INFO); //LOG_LEVEL_ALL
@@ -56,104 +71,129 @@ int main(int argc, char *argv[]) {
     }
 
 
-    /** 创建节点 */
+    /**
+     * 创建节点
+     */
     NodeContainer TTNTNode;
     TTNTNode.Create(ttnt);
 
-    /** 创建物理层：Yans */
+    /**
+     * 创建物理层：Yans
+     */
     ttnt::WifiHelper wifiSinc;
-    ttnt::YansWifiChannelHelper channelSinc =
-            ttnt::YansWifiChannelHelper::Default(); //使用默认的信道模型
-    ttnt::YansWifiPhyHelper phySinc =
-            ttnt::YansWifiPhyHelper::Default();      //使用默认的PHY模型
+    ttnt::YansWifiChannelHelper channelSinc = ttnt::YansWifiChannelHelper::Default(); //使用默认的信道模型
+    ttnt::YansWifiPhyHelper phySinc = ttnt::YansWifiPhyHelper::Default();      //使用默认的PHY模型
+
     phySinc.SetChannel(channelSinc.Create()); //创建通道对象并把他关联到物理层对象管理器
     wifiSinc.SetStandard(ttnt::WIFI_PHY_STANDARD_80211b);  // 设置wifi标准
 
 
-    /** 创建MAC层 */
-    ttnt::NqosWifiMacHelper wifiMacSinc =
-            ttnt::NqosWifiMacHelper::Default();
+    /**
+     * 创建MAC层
+     */
+    ttnt::NqosWifiMacHelper wifiMacSinc = ttnt::NqosWifiMacHelper::Default();
     // 指定wifi运行模式：基础或ad hoc模式(P153)
     wifiMacSinc.SetType("ns3::sinc-AdhocWifiMac");
 
 
-    /** 创建网络设备 */
+    /**
+     * 创建网络设备
+     */
     NetDeviceContainer ttntDevice = wifiSinc.Install(phySinc, wifiMacSinc, TTNTNode);
 
 
-    /** 指定移动模型 ：
-     *    移动节点的移动模型分为两部分：
-     *      初始位置分布：SetPositionAllocator() :定义一个移动节点的初始坐标
-     *      后续移动轨迹模型：SetMobilityModel() ：节点的移动路径
+    /**
+     * 指定移动模型 ：
+     * 移动节点的移动模型分为两部分：
+     * 初始位置分布：SetPositionAllocator() :定义一个移动节点的初始坐标
+     * 后续移动轨迹模型：SetMobilityModel() ：节点的移动路径
      */
     MobilityHelper mobility;
     mobility.SetPositionAllocator("ns3::GridPositionAllocator",//按照设置好的行列参数把节点等间距放置在一个二维笛卡尔坐标系中
                                   "MinX", DoubleValue(0.0),   // 起始坐标 (0, 0)
                                   "MinY", DoubleValue(0.0),
-                                  "DeltaX", DoubleValue(50), // X轴节点间距：0.01m
-                                  "DeltaY", DoubleValue(50), // y轴节点间距：0.01m
+                                  "DeltaX", DoubleValue(2), // X轴节点间距：0.01m
+                                  "DeltaY", DoubleValue(2), // y轴节点间距：0.01m
                                   "GridWidth", UintegerValue(6),  // 每行最大节点数
                                   "LayoutType", StringValue("RowFirst"));  // 行优先放
     mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
     mobility.Install(TTNTNode);
 
 
-    /** 安装协议栈 */
+    /**
+     * 安装协议栈
+     */
     InternetStackHelper stack;
     stack.Install(TTNTNode);
 
 
-    /** 路由协议 */
+    /**
+     * 路由协议
+     */
     DsrHelper Dsr; // DSR：动态源路由协议
     DsrMainHelper DsrMain;
-    Dsr.Set("isMalicious", UintegerValue(0));
+    Dsr.Set("isMalicious", UintegerValue(0));   //  由于在client中设置了该参数，不添加会报错，设置为0,不影响结果
     DsrMain.Install(Dsr, TTNTNode);
 
 
-    /** 设置IP */
+    /**
+     * 设置IP
+     */
     Ipv4AddressHelper address;
     address.SetBase("198.3.1.0", "255.255.255.0");
     Ipv4InterfaceContainer ttntInterface;
     ttntInterface = address.Assign(ttntDevice);
 
 
-    uint32_t ttnting = 60;  // 有业务的节点数
-
     uint16_t workflow[31] = {0};
-
     uint16_t routing_start[31] = {0};
     uint16_t routing_end[31] = {0};
     uint16_t data_start[31] = {0};
     uint16_t data_end[31] = {0};
-    uint16_t record_time = 50;
-    for (uint32_t i = 1; i <= (ttnting / 2); i++) {
+
+    uint16_t record_time = 50;  // 50
+
+    for (uint8_t i = 1; i <= (ttnt / 2); i++) {
         workflow[i] = 1;
 
-        routing_start[i] = (i - 1) * 57;
+        routing_start[i] = (i - 1) * 57; // 57
         routing_end[i] = routing_start[i] + 5;
 
         data_start[i] = routing_start[i] + 6;
         data_end[i] = data_start[i] + record_time;
     }
-    double simulation_time = ((double)ttnting / 2) * 57;
 
-    /** workflow: 1: 0->3 */
+    double simulation_time = ((double) ttnt / 2) * 57; // 57
+    uint16_t packet_size[31] = {0};
+
+    uint16_t size = 500;
+    for (uint8_t i = 1; i <= kind; i++) {
+        for (uint8_t j = 1; j <= business; j++) {
+            packet_size[(i - 1) * business + j] = size;
+        }
+        size -= 20;
+    }
+
+    /**
+     * workflow: 1
+     */
+
     if (workflow[1]) {
         /**
          * route
          */
         {
             uint32_t packetSizev = 1;
-            uint32_t maxPacketCountv = 10000000;
+            uint32_t maxPacketCountv = 10000000; //10000000
             uint32_t packetFrequencyv = 1;
             Time interPacketIntervalv = Seconds((1 / (double) packetFrequencyv));
 
             UdpServerHelper echoServerv(111);
-            ApplicationContainer serv1erAppsv = echoServerv.Install(TTNTNode.Get(3));
+            ApplicationContainer serv1erAppsv = echoServerv.Install(TTNTNode.Get(1));
             serv1erAppsv.Start(Seconds(routing_start[1]));
             serv1erAppsv.Stop(Seconds(routing_end[1]));
 
-            UdpClientHelper echoClient(ttntInterface.GetAddress(3), 111);
+            UdpClientHelper echoClient(ttntInterface.GetAddress(1), 111);
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv));
             echoClient.SetAttribute("Interval", TimeValue(interPacketIntervalv));
             echoClient.SetAttribute("PacketSize", UintegerValue(packetSizev));
@@ -168,20 +208,20 @@ int main(int argc, char *argv[]) {
          * data
          */
         {
-            uint32_t packetSize = 1000;
+//            uint32_t packetSize = 500;
             uint32_t maxPacketCount = 10000000;
-            uint32_t packetFrequency = 10;
-            Time interPacketInterval = Seconds((1 / (double) packetFrequency) /* 1/((double)20) */);
+            uint32_t packetFrequency = 20;
+            Time interPacketInterval = Seconds((1 / (double) packetFrequency) /*1/((double)20)*/);
 
             UdpServerHelper echoServerv(21);
-            ApplicationContainer serverAppsv = echoServerv.Install(TTNTNode.Get(3));
+            ApplicationContainer serverAppsv = echoServerv.Install(TTNTNode.Get(1));
             serverAppsv.Start(Seconds(data_start[1]));
             serverAppsv.Stop(Seconds(data_end[1]));
 
-            UdpClientHelper echoClient(ttntInterface.GetAddress(3), 21);
+            UdpClientHelper echoClient(ttntInterface.GetAddress(1), 21);
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCount));
             echoClient.SetAttribute("Interval", TimeValue(interPacketInterval));
-            echoClient.SetAttribute("PacketSize", UintegerValue(packetSize));
+            echoClient.SetAttribute("PacketSize", UintegerValue(packet_size[1]));
 
             ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(0));
             clientApps.Start(Seconds(data_start[1]));
@@ -189,7 +229,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    /** workflow: 2: 1->4  */
+    /** workflow: 2 */
     if (workflow[2]) {
 
         /**
@@ -202,17 +242,17 @@ int main(int argc, char *argv[]) {
             Time interPacketIntervalv = Seconds((1 / (double) packetFrequencyv));
 
             UdpServerHelper echoServerv(112);                                          // port (+1)
-            ApplicationContainer serv1erAppsv = echoServerv.Install(TTNTNode.Get(4)); // node (+2)
+            ApplicationContainer serv1erAppsv = echoServerv.Install(TTNTNode.Get(3)); // node (+2)
             serv1erAppsv.Start(Seconds(routing_start[2]));                              // (+1)
             serv1erAppsv.Stop(Seconds(routing_end[2]));                                  // (+1)
 
-            UdpClientHelper echoClient(ttntInterface.GetAddress(4), 112); // node + port (+2. +1)
+            UdpClientHelper echoClient(ttntInterface.GetAddress(3), 112); // node + port (+2. +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv));
             echoClient.SetAttribute("Interval", TimeValue(interPacketIntervalv));
             echoClient.SetAttribute("PacketSize", UintegerValue(packetSizev));
 
             ApplicationContainer clientAppsv = echoClient.Install(
-                    TTNTNode.Get(1));                          // node (+2)
+                    TTNTNode.Get(2));                          // node (+2)
             clientAppsv.Start(Seconds(routing_start[2])); // +1
             clientAppsv.Stop(Seconds(routing_end[2]));      // +1
         }
@@ -221,28 +261,28 @@ int main(int argc, char *argv[]) {
          * data
          */
         {
-            uint32_t packetSize = 1000; // ------
+//            uint32_t packetSize = 500; // ------
             uint32_t maxPacketCount = 10000000;
-            uint32_t packetFrequency = 10;
+            uint32_t packetFrequency = 20;
             Time interPacketInterval = Seconds((1 / (double) packetFrequency) /*1/((double)20)*/);
 
             UdpServerHelper echoServerv(22);                                         // (+1)
-            ApplicationContainer serverAppsv = echoServerv.Install(TTNTNode.Get(4)); // (+2)
+            ApplicationContainer serverAppsv = echoServerv.Install(TTNTNode.Get(3)); // (+2)
             serverAppsv.Start(Seconds(data_start[2]));                                 // +1
             serverAppsv.Stop(Seconds(data_end[2]));                                     // +1
 
-            UdpClientHelper echoClient(ttntInterface.GetAddress(4), 22); // (+2, +1)
+            UdpClientHelper echoClient(ttntInterface.GetAddress(3), 22); // (+2, +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCount));
             echoClient.SetAttribute("Interval", TimeValue(interPacketInterval));
-            echoClient.SetAttribute("PacketSize", UintegerValue(packetSize));
+            echoClient.SetAttribute("PacketSize", UintegerValue(packet_size[2]));
 
-            ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(1)); // +2
+            ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(2)); // +2
             clientApps.Start(Seconds(data_start[2]));                               // +1
             clientApps.Stop(Seconds(data_end[2]));                                   // +1
         }
     }
 
-    /** workflow: 3: 2->5 */
+    /** workflow: 3 */
     if (workflow[3]) {
 
         /**
@@ -265,7 +305,7 @@ int main(int argc, char *argv[]) {
             echoClient.SetAttribute("PacketSize", UintegerValue(packetSizev));
 
             ApplicationContainer clientAppsv = echoClient.Install(
-                    TTNTNode.Get(2));                          // node (+2)
+                    TTNTNode.Get(4));                          // node (+2)
             clientAppsv.Start(Seconds(routing_start[3])); // +1
             clientAppsv.Stop(Seconds(routing_end[3]));      // +1
         }
@@ -274,9 +314,9 @@ int main(int argc, char *argv[]) {
          * data
          */
         {
-            uint32_t packetSize = 1000; // ------
+//            uint32_t packetSize = 500; // ------
             uint32_t maxPacketCount = 10000000;
-            uint32_t packetFrequency = 10;
+            uint32_t packetFrequency = 20;
             Time interPacketInterval = Seconds((1 / (double) packetFrequency) /*1/((double)20)*/);
 
             UdpServerHelper echoServerv(23);                                         // (+1)
@@ -287,15 +327,15 @@ int main(int argc, char *argv[]) {
             UdpClientHelper echoClient(ttntInterface.GetAddress(5), 23); // (+2, +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCount));
             echoClient.SetAttribute("Interval", TimeValue(interPacketInterval));
-            echoClient.SetAttribute("PacketSize", UintegerValue(packetSize));
+            echoClient.SetAttribute("PacketSize", UintegerValue(packet_size[3]));
 
-            ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(2)); // +2
+            ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(4)); // +2
             clientApps.Start(Seconds(data_start[3]));                               // +1
             clientApps.Stop(Seconds(data_end[3]));                                   // +1
         }
     }
 
-    /** workflow: 4: 6->9 */
+    /** workflow: 4 */
     if (workflow[4]) {
 
         /**
@@ -308,11 +348,11 @@ int main(int argc, char *argv[]) {
             Time interPacketIntervalv = Seconds((1 / (double) packetFrequencyv));
 
             UdpServerHelper echoServerv(114);                                          // port (+1)
-            ApplicationContainer serv1erAppsv = echoServerv.Install(TTNTNode.Get(9)); // node (+2)
+            ApplicationContainer serv1erAppsv = echoServerv.Install(TTNTNode.Get(7)); // node (+2)
             serv1erAppsv.Start(Seconds(routing_start[4]));                              // (+1)
             serv1erAppsv.Stop(Seconds(routing_end[4]));                                  // (+1)
 
-            UdpClientHelper echoClient(ttntInterface.GetAddress(9), 114); // node + port (+2. +1)
+            UdpClientHelper echoClient(ttntInterface.GetAddress(7), 114); // node + port (+2. +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv));
             echoClient.SetAttribute("Interval", TimeValue(interPacketIntervalv));
             echoClient.SetAttribute("PacketSize", UintegerValue(packetSizev));
@@ -327,20 +367,20 @@ int main(int argc, char *argv[]) {
          * data
          */
         {
-            uint32_t packetSize = 1000; // ------
+//            uint32_t packetSize = 500; // ------
             uint32_t maxPacketCount = 10000000;
-            uint32_t packetFrequency = 10;
+            uint32_t packetFrequency = 20;
             Time interPacketInterval = Seconds((1 / (double) packetFrequency) /*1/((double)20)*/);
 
             UdpServerHelper echoServerv(24);                                         // (+1)
-            ApplicationContainer serverAppsv = echoServerv.Install(TTNTNode.Get(9)); // (+2)
+            ApplicationContainer serverAppsv = echoServerv.Install(TTNTNode.Get(7)); // (+2)
             serverAppsv.Start(Seconds(data_start[4]));                                 // +1
             serverAppsv.Stop(Seconds(data_end[4]));                                     // +1
 
-            UdpClientHelper echoClient(ttntInterface.GetAddress(9), 24); // (+2, +1)
+            UdpClientHelper echoClient(ttntInterface.GetAddress(7), 24); // (+2, +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCount));
             echoClient.SetAttribute("Interval", TimeValue(interPacketInterval));
-            echoClient.SetAttribute("PacketSize", UintegerValue(packetSize));
+            echoClient.SetAttribute("PacketSize", UintegerValue(packet_size[4]));
 
             ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(6)); // +2
             clientApps.Start(Seconds(data_start[4]));                               // +1
@@ -348,7 +388,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    /** workflow: 5: 7->10 */
+    /** workflow: 5 */
     if (workflow[5]) {
 
         /**
@@ -361,17 +401,17 @@ int main(int argc, char *argv[]) {
             Time interPacketIntervalv = Seconds((1 / (double) packetFrequencyv));
 
             UdpServerHelper echoServerv(115);                                          // port (+1)
-            ApplicationContainer serv1erAppsv = echoServerv.Install(TTNTNode.Get(10)); // node (+2)
+            ApplicationContainer serv1erAppsv = echoServerv.Install(TTNTNode.Get(9)); // node (+2)
             serv1erAppsv.Start(Seconds(routing_start[5]));                              // (+1)
             serv1erAppsv.Stop(Seconds(routing_end[5]));                                  // (+1)
 
-            UdpClientHelper echoClient(ttntInterface.GetAddress(10), 115); // node + port (+2. +1)
+            UdpClientHelper echoClient(ttntInterface.GetAddress(9), 115); // node + port (+2. +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv));
             echoClient.SetAttribute("Interval", TimeValue(interPacketIntervalv));
             echoClient.SetAttribute("PacketSize", UintegerValue(packetSizev));
 
             ApplicationContainer clientAppsv = echoClient.Install(
-                    TTNTNode.Get(7));                          // node (+2)
+                    TTNTNode.Get(8));                          // node (+2)
             clientAppsv.Start(Seconds(routing_start[5])); // +1
             clientAppsv.Stop(Seconds(routing_end[5]));      // +1
         }
@@ -380,28 +420,28 @@ int main(int argc, char *argv[]) {
          * data
          */
         {
-            uint32_t packetSize = 1000; // ------
+//            uint32_t packetSize = 500; // ------
             uint32_t maxPacketCount = 10000000;
-            uint32_t packetFrequency = 10;
+            uint32_t packetFrequency = 20;
             Time interPacketInterval = Seconds((1 / (double) packetFrequency) /*1/((double)20)*/);
 
             UdpServerHelper echoServerv(25);                                         // (+1)
-            ApplicationContainer serverAppsv = echoServerv.Install(TTNTNode.Get(10)); // (+2)
+            ApplicationContainer serverAppsv = echoServerv.Install(TTNTNode.Get(9)); // (+2)
             serverAppsv.Start(Seconds(data_start[5]));                                 // +1
             serverAppsv.Stop(Seconds(data_end[5]));                                     // +1
 
-            UdpClientHelper echoClient(ttntInterface.GetAddress(10), 25); // (+2, +1)
+            UdpClientHelper echoClient(ttntInterface.GetAddress(9), 25); // (+2, +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCount));
             echoClient.SetAttribute("Interval", TimeValue(interPacketInterval));
-            echoClient.SetAttribute("PacketSize", UintegerValue(packetSize));
+            echoClient.SetAttribute("PacketSize", UintegerValue(packet_size[5]));
 
-            ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(7)); // +2
+            ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(8)); // +2
             clientApps.Start(Seconds(data_start[5]));                               // +1
             clientApps.Stop(Seconds(data_end[5]));                                   // +1
         }
     }
 
-    /** workflow: 6: 8->11 */
+    /** workflow: 6 */
     if (workflow[6]) {
 
         /**
@@ -424,7 +464,7 @@ int main(int argc, char *argv[]) {
             echoClient.SetAttribute("PacketSize", UintegerValue(packetSizev));
 
             ApplicationContainer clientAppsv = echoClient.Install(
-                    TTNTNode.Get(8));                          // node (+2)
+                    TTNTNode.Get(10));                          // node (+2)
             clientAppsv.Start(Seconds(routing_start[6])); // +1
             clientAppsv.Stop(Seconds(routing_end[6]));      // +1
         }
@@ -433,9 +473,9 @@ int main(int argc, char *argv[]) {
          * data
          */
         {
-            uint32_t packetSize = 1000; // ------
+//            uint32_t packetSize = 500; // ------
             uint32_t maxPacketCount = 10000000;
-            uint32_t packetFrequency = 10;
+            uint32_t packetFrequency = 20;
             Time interPacketInterval = Seconds((1 / (double) packetFrequency) /*1/((double)20)*/);
 
             UdpServerHelper echoServerv(26);                                          // (+1)
@@ -446,15 +486,15 @@ int main(int argc, char *argv[]) {
             UdpClientHelper echoClient(ttntInterface.GetAddress(11), 26); // (+2, +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCount));
             echoClient.SetAttribute("Interval", TimeValue(interPacketInterval));
-            echoClient.SetAttribute("PacketSize", UintegerValue(packetSize));
+            echoClient.SetAttribute("PacketSize", UintegerValue(packet_size[6]));
 
-            ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(8)); // +2
+            ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(10)); // +2
             clientApps.Start(Seconds(data_start[6]));                                // +1
             clientApps.Stop(Seconds(data_end[6]));                                    // +1
         }
     }
 
-    /** workflow: 7: 12->15 */
+    /** workflow: 7 */
     if (workflow[7]) {
 
         /**
@@ -467,11 +507,11 @@ int main(int argc, char *argv[]) {
             Time interPacketIntervalv = Seconds((1 / (double) packetFrequencyv));
 
             UdpServerHelper echoServerv(117);                                           // port (+1)
-            ApplicationContainer serv1erAppsv = echoServerv.Install(TTNTNode.Get(15)); // node (+2)
+            ApplicationContainer serv1erAppsv = echoServerv.Install(TTNTNode.Get(13)); // node (+2)
             serv1erAppsv.Start(Seconds(routing_start[7]));                               // (+1)
             serv1erAppsv.Stop(Seconds(routing_end[7]));                                   // (+1)
 
-            UdpClientHelper echoClient(ttntInterface.GetAddress(15), 117); // node + port (+2. +1)
+            UdpClientHelper echoClient(ttntInterface.GetAddress(13), 117); // node + port (+2. +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv));
             echoClient.SetAttribute("Interval", TimeValue(interPacketIntervalv));
             echoClient.SetAttribute("PacketSize", UintegerValue(packetSizev));
@@ -486,20 +526,20 @@ int main(int argc, char *argv[]) {
          * data
          */
         {
-            uint32_t packetSize = 1000; // ------
+//            uint32_t packetSize = 500; // ------
             uint32_t maxPacketCount = 10000000;
-            uint32_t packetFrequency = 10;
+            uint32_t packetFrequency = 20;
             Time interPacketInterval = Seconds((1 / (double) packetFrequency) /*1/((double)20)*/);
 
             UdpServerHelper echoServerv(27);                                          // (+1)
-            ApplicationContainer serverAppsv = echoServerv.Install(TTNTNode.Get(15)); // (+2)
+            ApplicationContainer serverAppsv = echoServerv.Install(TTNTNode.Get(13)); // (+2)
             serverAppsv.Start(Seconds(data_start[7]));                                  // +1
             serverAppsv.Stop(Seconds(data_end[7]));                                      // +1
 
-            UdpClientHelper echoClient(ttntInterface.GetAddress(15), 27); // (+2, +1)
+            UdpClientHelper echoClient(ttntInterface.GetAddress(13), 27); // (+2, +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCount));
             echoClient.SetAttribute("Interval", TimeValue(interPacketInterval));
-            echoClient.SetAttribute("PacketSize", UintegerValue(packetSize));
+            echoClient.SetAttribute("PacketSize", UintegerValue(packet_size[7]));
 
             ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(12)); // +2
             clientApps.Start(Seconds(data_start[7]));                                // +1
@@ -507,7 +547,7 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    /** workflow: 8: 13->16 */
+    /** workflow: 8 */
     if (workflow[8]) {
 
         /**
@@ -520,17 +560,17 @@ int main(int argc, char *argv[]) {
             Time interPacketIntervalv = Seconds((1 / (double) packetFrequencyv));
 
             UdpServerHelper echoServerv(118);                                           // port (+1)
-            ApplicationContainer serv1erAppsv = echoServerv.Install(TTNTNode.Get(16)); // node (+2)
+            ApplicationContainer serv1erAppsv = echoServerv.Install(TTNTNode.Get(15)); // node (+2)
             serv1erAppsv.Start(Seconds(routing_start[8]));                               // (+1)
             serv1erAppsv.Stop(Seconds(routing_end[8]));                                   // (+1)
 
-            UdpClientHelper echoClient(ttntInterface.GetAddress(16), 118); // node + port (+2. +1)
+            UdpClientHelper echoClient(ttntInterface.GetAddress(15), 118); // node + port (+2. +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv));
             echoClient.SetAttribute("Interval", TimeValue(interPacketIntervalv));
             echoClient.SetAttribute("PacketSize", UintegerValue(packetSizev));
 
             ApplicationContainer clientAppsv = echoClient.Install(
-                    TTNTNode.Get(13));                          // node (+2)
+                    TTNTNode.Get(14));                          // node (+2)
             clientAppsv.Start(Seconds(routing_start[8])); // +1
             clientAppsv.Stop(Seconds(routing_end[8]));      // +1
         }
@@ -539,29 +579,29 @@ int main(int argc, char *argv[]) {
          * data
          */
         {
-            uint32_t packetSize = 1000; // odd number:1000, even number:500
+//            uint32_t packetSize = 500; // odd number:1000, even number:500
             uint32_t maxPacketCount = 10000000;
-            uint32_t packetFrequency = 10;
+            uint32_t packetFrequency = 20;
             Time interPacketInterval = Seconds((1 / (double) packetFrequency) /*1/((double)20)*/);
 
             UdpServerHelper echoServerv(28);                                          // (+1)
-            ApplicationContainer serverAppsv = echoServerv.Install(TTNTNode.Get(16)); // (+2)
+            ApplicationContainer serverAppsv = echoServerv.Install(TTNTNode.Get(15)); // (+2)
             serverAppsv.Start(Seconds(data_start[8]));                                  // +1
             serverAppsv.Stop(Seconds(data_end[8]));                                      // +1
 
-            UdpClientHelper echoClient(ttntInterface.GetAddress(16), 28); // (+2, +1)
+            UdpClientHelper echoClient(ttntInterface.GetAddress(15), 28); // (+2, +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCount));
             echoClient.SetAttribute("Interval", TimeValue(interPacketInterval));
-            echoClient.SetAttribute("PacketSize", UintegerValue(packetSize));
+            echoClient.SetAttribute("PacketSize", UintegerValue(packet_size[8]));
 
-            ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(13)); // +2
+            ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(14)); // +2
             clientApps.Start(Seconds(data_start[8]));                                // +1
             clientApps.Stop(Seconds(data_end[8]));                                    // +1
         }
     }
 
 
-    /** workflow: 9: 14->17 */
+    /** workflow: 9 */
     if (workflow[9]) {
 
         /**
@@ -584,7 +624,7 @@ int main(int argc, char *argv[]) {
             echoClient.SetAttribute("PacketSize", UintegerValue(packetSizev));
 
             ApplicationContainer clientAppsv = echoClient.Install(
-                    TTNTNode.Get(14));                          // node (+2)
+                    TTNTNode.Get(16));                          // node (+2)
             clientAppsv.Start(Seconds(routing_start[9])); // +1
             clientAppsv.Stop(Seconds(routing_end[9]));      // +1
         }
@@ -593,9 +633,9 @@ int main(int argc, char *argv[]) {
          * data
          */
         {
-            uint32_t packetSize = 1000; // odd number:1000, even number:500
+//            uint32_t packetSize = 500; // odd number:1000, even number:500
             uint32_t maxPacketCount = 10000000;
-            uint32_t packetFrequency = 10;
+            uint32_t packetFrequency = 20;
             Time interPacketInterval = Seconds((1 / (double) packetFrequency) /*1/((double)20)*/);
 
             UdpServerHelper echoServerv(29);                                          // (+1)
@@ -606,16 +646,16 @@ int main(int argc, char *argv[]) {
             UdpClientHelper echoClient(ttntInterface.GetAddress(17), 29); // (+2, +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCount));
             echoClient.SetAttribute("Interval", TimeValue(interPacketInterval));
-            echoClient.SetAttribute("PacketSize", UintegerValue(packetSize));
+            echoClient.SetAttribute("PacketSize", UintegerValue(packet_size[9]));
 
-            ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(14)); // +2
+            ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(16)); // +2
             clientApps.Start(Seconds(data_start[9]));                                // +1
             clientApps.Stop(Seconds(data_end[9]));                                    // +1
         }
     }
 
 
-    /** workflow: 10: 18->21 */
+    /** workflow: 10 */
     if (workflow[10]) {
 
         /**
@@ -628,11 +668,11 @@ int main(int argc, char *argv[]) {
             Time interPacketIntervalv = Seconds((1 / (double) packetFrequencyv));
 
             UdpServerHelper echoServerv(120);                                           // port (+1)
-            ApplicationContainer serv1erAppsv = echoServerv.Install(TTNTNode.Get(21)); // node (+2)
+            ApplicationContainer serv1erAppsv = echoServerv.Install(TTNTNode.Get(19)); // node (+2)
             serv1erAppsv.Start(Seconds(routing_start[10]));                               // (+1)
             serv1erAppsv.Stop(Seconds(routing_end[10]));                                   // (+1)
 
-            UdpClientHelper echoClient(ttntInterface.GetAddress(21), 120); // node + port (+2. +1)
+            UdpClientHelper echoClient(ttntInterface.GetAddress(19), 120); // node + port (+2. +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv));
             echoClient.SetAttribute("Interval", TimeValue(interPacketIntervalv));
             echoClient.SetAttribute("PacketSize", UintegerValue(packetSizev));
@@ -647,20 +687,20 @@ int main(int argc, char *argv[]) {
          * data
          */
         {
-            uint32_t packetSize = 1000; // odd number:1000, even number:500
+//            uint32_t packetSize = 500; // odd number:1000, even number:500
             uint32_t maxPacketCount = 10000000;
-            uint32_t packetFrequency = 10;
+            uint32_t packetFrequency = 20;
             Time interPacketInterval = Seconds((1 / (double) packetFrequency) /*1/((double)20)*/);
 
             UdpServerHelper echoServerv(30);                                          // (+1)
-            ApplicationContainer serverAppsv = echoServerv.Install(TTNTNode.Get(21)); // (+2)
+            ApplicationContainer serverAppsv = echoServerv.Install(TTNTNode.Get(19)); // (+2)
             serverAppsv.Start(Seconds(data_start[10]));                                  // +1
             serverAppsv.Stop(Seconds(data_end[10]));                                      // +1
 
-            UdpClientHelper echoClient(ttntInterface.GetAddress(21), 30); // (+2, +1)
+            UdpClientHelper echoClient(ttntInterface.GetAddress(19), 30); // (+2, +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCount));
             echoClient.SetAttribute("Interval", TimeValue(interPacketInterval));
-            echoClient.SetAttribute("PacketSize", UintegerValue(packetSize));
+            echoClient.SetAttribute("PacketSize", UintegerValue(packet_size[10]));
 
             ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(18)); // +2
             clientApps.Start(Seconds(data_start[10]));                                // +1
@@ -669,7 +709,7 @@ int main(int argc, char *argv[]) {
     }
 
 
-    /** workflow: 11: 19->22 */
+    /** workflow: 11 */
     if (workflow[11]) {
 
         /**
@@ -682,17 +722,17 @@ int main(int argc, char *argv[]) {
             Time interPacketIntervalv = Seconds((1 / (double) packetFrequencyv));
 
             UdpServerHelper echoServerv(121);                                           // port (+1)
-            ApplicationContainer serv1erAppsv = echoServerv.Install(TTNTNode.Get(22)); // node (+2)
+            ApplicationContainer serv1erAppsv = echoServerv.Install(TTNTNode.Get(21)); // node (+2)
             serv1erAppsv.Start(Seconds(routing_start[11]));                               // (+1)
             serv1erAppsv.Stop(Seconds(routing_end[11]));                                   // (+1)
 
-            UdpClientHelper echoClient(ttntInterface.GetAddress(22), 121); // node + port (+2. +1)
+            UdpClientHelper echoClient(ttntInterface.GetAddress(21), 121); // node + port (+2. +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv));
             echoClient.SetAttribute("Interval", TimeValue(interPacketIntervalv));
             echoClient.SetAttribute("PacketSize", UintegerValue(packetSizev));
 
             ApplicationContainer clientAppsv = echoClient.Install(
-                    TTNTNode.Get(19));                          // node (+2)
+                    TTNTNode.Get(20));                          // node (+2)
             clientAppsv.Start(Seconds(routing_start[11])); // +1
             clientAppsv.Stop(Seconds(routing_end[11]));      // +1
         }
@@ -701,29 +741,29 @@ int main(int argc, char *argv[]) {
          * data
          */
         {
-            uint32_t packetSize = 1000; // odd number:1000, even number:500
+//            uint32_t packetSize = 500; // odd number:1000, even number:500
             uint32_t maxPacketCount = 10000000;
-            uint32_t packetFrequency = 10;
+            uint32_t packetFrequency = 20;
             Time interPacketInterval = Seconds((1 / (double) packetFrequency) /*1/((double)20)*/);
 
             UdpServerHelper echoServerv(31);                                          // (+1)
-            ApplicationContainer serverAppsv = echoServerv.Install(TTNTNode.Get(22)); // (+2)
+            ApplicationContainer serverAppsv = echoServerv.Install(TTNTNode.Get(21)); // (+2)
             serverAppsv.Start(Seconds(data_start[11]));                                  // +1
             serverAppsv.Stop(Seconds(data_end[11]));                                      // +1
 
-            UdpClientHelper echoClient(ttntInterface.GetAddress(22), 31); // (+2, +1)
+            UdpClientHelper echoClient(ttntInterface.GetAddress(21), 31); // (+2, +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCount));
             echoClient.SetAttribute("Interval", TimeValue(interPacketInterval));
-            echoClient.SetAttribute("PacketSize", UintegerValue(packetSize));
+            echoClient.SetAttribute("PacketSize", UintegerValue(packet_size[11]));
 
-            ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(19)); // +2
+            ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(20)); // +2
             clientApps.Start(Seconds(data_start[11]));                                // +1
             clientApps.Stop(Seconds(data_end[11]));                                    // +1
         }
     }
 
 
-    /** workflow: 12: 20->23 */
+    /** workflow: 12 */
     if (workflow[12]) {
 
         /**
@@ -746,7 +786,7 @@ int main(int argc, char *argv[]) {
             echoClient.SetAttribute("PacketSize", UintegerValue(packetSizev));
 
             ApplicationContainer clientAppsv = echoClient.Install(
-                    TTNTNode.Get(20));                          // node (+2)
+                    TTNTNode.Get(22));                          // node (+2)
             clientAppsv.Start(Seconds(routing_start[12])); // +1
             clientAppsv.Stop(Seconds(routing_end[12]));      // +1
         }
@@ -755,9 +795,9 @@ int main(int argc, char *argv[]) {
          * data
          */
         {
-            uint32_t packetSize = 1000; // odd number:1000, even number:500
+//            uint32_t packetSize = 500; // odd number:1000, even number:500
             uint32_t maxPacketCount = 10000000;
-            uint32_t packetFrequency = 10;
+            uint32_t packetFrequency = 20;
             Time interPacketInterval = Seconds((1 / (double) packetFrequency) /*1/((double)20)*/);
 
             UdpServerHelper echoServerv(32);                                          // (+1)
@@ -768,16 +808,16 @@ int main(int argc, char *argv[]) {
             UdpClientHelper echoClient(ttntInterface.GetAddress(23), 32); // (+2, +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCount));
             echoClient.SetAttribute("Interval", TimeValue(interPacketInterval));
-            echoClient.SetAttribute("PacketSize", UintegerValue(packetSize));
+            echoClient.SetAttribute("PacketSize", UintegerValue(packet_size[12]));
 
-            ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(20)); // +2
+            ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(22)); // +2
             clientApps.Start(Seconds(data_start[12]));                                // +1
             clientApps.Stop(Seconds(data_end[12]));                                    // +1
         }
     }
 
 
-    /** workflow: 13: 24->27 */
+    /** workflow: 13 */
     if (workflow[13]) {
 
         /**
@@ -790,11 +830,11 @@ int main(int argc, char *argv[]) {
             Time interPacketIntervalv = Seconds((1 / (double) packetFrequencyv));
 
             UdpServerHelper echoServerv(123);                                           // port (+1)
-            ApplicationContainer serv1erAppsv = echoServerv.Install(TTNTNode.Get(27)); // node (+2)
+            ApplicationContainer serv1erAppsv = echoServerv.Install(TTNTNode.Get(25)); // node (+2)
             serv1erAppsv.Start(Seconds(routing_start[13]));                               // (+1)
             serv1erAppsv.Stop(Seconds(routing_end[13]));                                   // (+1)
 
-            UdpClientHelper echoClient(ttntInterface.GetAddress(27), 123); // node + port (+2. +1)
+            UdpClientHelper echoClient(ttntInterface.GetAddress(25), 123); // node + port (+2. +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv));
             echoClient.SetAttribute("Interval", TimeValue(interPacketIntervalv));
             echoClient.SetAttribute("PacketSize", UintegerValue(packetSizev));
@@ -809,20 +849,20 @@ int main(int argc, char *argv[]) {
          * data
          */
         {
-            uint32_t packetSize = 1000; // odd number:1000, even number:500
+//            uint32_t packetSize = 500; // odd number:1000, even number:500
             uint32_t maxPacketCount = 10000000;
-            uint32_t packetFrequency = 10;
+            uint32_t packetFrequency = 20;
             Time interPacketInterval = Seconds((1 / (double) packetFrequency) /*1/((double)20)*/);
 
             UdpServerHelper echoServerv(33);                                          // (+1)
-            ApplicationContainer serverAppsv = echoServerv.Install(TTNTNode.Get(27)); // (+2)
+            ApplicationContainer serverAppsv = echoServerv.Install(TTNTNode.Get(25)); // (+2)
             serverAppsv.Start(Seconds(data_start[13]));                                  // +1
             serverAppsv.Stop(Seconds(data_end[13]));                                      // +1
 
-            UdpClientHelper echoClient(ttntInterface.GetAddress(27), 33); // (+2, +1)
+            UdpClientHelper echoClient(ttntInterface.GetAddress(25), 33); // (+2, +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCount));
             echoClient.SetAttribute("Interval", TimeValue(interPacketInterval));
-            echoClient.SetAttribute("PacketSize", UintegerValue(packetSize));
+            echoClient.SetAttribute("PacketSize", UintegerValue(packet_size[13]));
 
             ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(24)); // +2
             clientApps.Start(Seconds(data_start[13]));                                // +1
@@ -831,7 +871,7 @@ int main(int argc, char *argv[]) {
     }
 
 
-    /** workflow: 14: 25->28 */
+    /** workflow: 14 */
     if (workflow[14]) {
 
         /**
@@ -844,17 +884,17 @@ int main(int argc, char *argv[]) {
             Time interPacketIntervalv = Seconds((1 / (double) packetFrequencyv));
 
             UdpServerHelper echoServerv(124);                                           // port (+1)
-            ApplicationContainer serv1erAppsv = echoServerv.Install(TTNTNode.Get(28)); // node (+2)
+            ApplicationContainer serv1erAppsv = echoServerv.Install(TTNTNode.Get(27)); // node (+2)
             serv1erAppsv.Start(Seconds(routing_start[14]));                               // (+1)
             serv1erAppsv.Stop(Seconds(routing_end[14]));                                   // (+1)
 
-            UdpClientHelper echoClient(ttntInterface.GetAddress(28), 124); // node + port (+2. +1)
+            UdpClientHelper echoClient(ttntInterface.GetAddress(27), 124); // node + port (+2. +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv));
             echoClient.SetAttribute("Interval", TimeValue(interPacketIntervalv));
             echoClient.SetAttribute("PacketSize", UintegerValue(packetSizev));
 
             ApplicationContainer clientAppsv = echoClient.Install(
-                    TTNTNode.Get(25));                          // node (+2)
+                    TTNTNode.Get(26));                          // node (+2)
             clientAppsv.Start(Seconds(routing_start[14])); // +1
             clientAppsv.Stop(Seconds(routing_end[14]));      // +1
         }
@@ -863,29 +903,29 @@ int main(int argc, char *argv[]) {
          * data
          */
         {
-            uint32_t packetSize = 1000; // odd number:1000, even number:500
+//            uint32_t packetSize = 500; // odd number:1000, even number:500
             uint32_t maxPacketCount = 10000000;
-            uint32_t packetFrequency = 10;
+            uint32_t packetFrequency = 20;
             Time interPacketInterval = Seconds((1 / (double) packetFrequency) /*1/((double)20)*/);
 
             UdpServerHelper echoServerv(34);                                          // (+1)
-            ApplicationContainer serverAppsv = echoServerv.Install(TTNTNode.Get(28)); // (+2)
+            ApplicationContainer serverAppsv = echoServerv.Install(TTNTNode.Get(27)); // (+2)
             serverAppsv.Start(Seconds(data_start[14]));                                  // +1
             serverAppsv.Stop(Seconds(data_end[14]));                                      // +1
 
-            UdpClientHelper echoClient(ttntInterface.GetAddress(28), 34); // (+2, +1)
+            UdpClientHelper echoClient(ttntInterface.GetAddress(27), 34); // (+2, +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCount));
             echoClient.SetAttribute("Interval", TimeValue(interPacketInterval));
-            echoClient.SetAttribute("PacketSize", UintegerValue(packetSize));
+            echoClient.SetAttribute("PacketSize", UintegerValue(packet_size[14]));
 
-            ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(25)); // +2
+            ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(26)); // +2
             clientApps.Start(Seconds(data_start[14]));                                // +1
             clientApps.Stop(Seconds(data_end[14]));                                    // +1
         }
     }
 
 
-    /** workflow: 15: 26->29 */
+    /** workflow: 15 */
     if (workflow[15]) {
 
         /**
@@ -908,7 +948,7 @@ int main(int argc, char *argv[]) {
             echoClient.SetAttribute("PacketSize", UintegerValue(packetSizev));
 
             ApplicationContainer clientAppsv = echoClient.Install(
-                    TTNTNode.Get(25));                          // node (+2)
+                    TTNTNode.Get(28));                          // node (+2)
             clientAppsv.Start(Seconds(routing_start[15])); // +1
             clientAppsv.Stop(Seconds(routing_end[15]));      // +1
         }
@@ -917,9 +957,9 @@ int main(int argc, char *argv[]) {
          * data
          */
         {
-            uint32_t packetSize = 1000; // odd number:1000, even number:500
+//            uint32_t packetSize = 500; // odd number:1000, even number:500
             uint32_t maxPacketCount = 10000000;
-            uint32_t packetFrequency = 10;
+            uint32_t packetFrequency = 20;
             Time interPacketInterval = Seconds((1 / (double) packetFrequency) /*1/((double)20)*/);
 
             UdpServerHelper echoServerv(35);                                          // (+1)
@@ -930,16 +970,16 @@ int main(int argc, char *argv[]) {
             UdpClientHelper echoClient(ttntInterface.GetAddress(29), 35); // (+2, +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCount));
             echoClient.SetAttribute("Interval", TimeValue(interPacketInterval));
-            echoClient.SetAttribute("PacketSize", UintegerValue(packetSize));
+            echoClient.SetAttribute("PacketSize", UintegerValue(packet_size[15]));
 
-            ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(25)); // +2
+            ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(28)); // +2
             clientApps.Start(Seconds(data_start[15]));                                // +1
             clientApps.Stop(Seconds(data_end[15]));                                    // +1
         }
     }
 
 
-    /** workflow: 16: 30->33 */
+    /** workflow: 16 */
     if (workflow[16]) {
 
         /**
@@ -952,11 +992,11 @@ int main(int argc, char *argv[]) {
             Time interPacketIntervalv = Seconds((1 / (double) packetFrequencyv));
 
             UdpServerHelper echoServerv(126);                                           // port (+1)
-            ApplicationContainer serv1erAppsv = echoServerv.Install(TTNTNode.Get(33)); // node (+2)
+            ApplicationContainer serv1erAppsv = echoServerv.Install(TTNTNode.Get(31)); // node (+2)
             serv1erAppsv.Start(Seconds(routing_start[16]));                               // (+1)
             serv1erAppsv.Stop(Seconds(routing_end[16]));                                   // (+1)
 
-            UdpClientHelper echoClient(ttntInterface.GetAddress(33), 126); // node + port (+2. +1)
+            UdpClientHelper echoClient(ttntInterface.GetAddress(31), 126); // node + port (+2. +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv));
             echoClient.SetAttribute("Interval", TimeValue(interPacketIntervalv));
             echoClient.SetAttribute("PacketSize", UintegerValue(packetSizev));
@@ -971,20 +1011,20 @@ int main(int argc, char *argv[]) {
          * data
          */
         {
-            uint32_t packetSize = 1000; // odd number:1000, even number:500
+//            uint32_t packetSize = 500; // odd number:1000, even number:500
             uint32_t maxPacketCount = 10000000;
-            uint32_t packetFrequency = 10;
+            uint32_t packetFrequency = 20;
             Time interPacketInterval = Seconds((1 / (double) packetFrequency) /*1/((double)20)*/);
 
             UdpServerHelper echoServerv(36);                                          // (+1)
-            ApplicationContainer serverAppsv = echoServerv.Install(TTNTNode.Get(33)); // (+2)
+            ApplicationContainer serverAppsv = echoServerv.Install(TTNTNode.Get(31)); // (+2)
             serverAppsv.Start(Seconds(data_start[16]));                                  // +1
             serverAppsv.Stop(Seconds(data_end[16]));                                      // +1
 
-            UdpClientHelper echoClient(ttntInterface.GetAddress(33), 36); // (+2, +1)
+            UdpClientHelper echoClient(ttntInterface.GetAddress(31), 36); // (+2, +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCount));
             echoClient.SetAttribute("Interval", TimeValue(interPacketInterval));
-            echoClient.SetAttribute("PacketSize", UintegerValue(packetSize));
+            echoClient.SetAttribute("PacketSize", UintegerValue(packet_size[16]));
 
             ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(30)); // +2
             clientApps.Start(Seconds(data_start[16]));                                // +1
@@ -993,7 +1033,7 @@ int main(int argc, char *argv[]) {
     }
 
 
-    /** workflow: 17: 31->34 */
+    /** workflow: 17 */
     if (workflow[17]) {
         /**
          * route
@@ -1005,17 +1045,17 @@ int main(int argc, char *argv[]) {
             Time interPacketIntervalv = Seconds((1 / (double) packetFrequencyv));
 
             UdpServerHelper echoServerv(127);                                           // port (+1)
-            ApplicationContainer serv1erAppsv = echoServerv.Install(TTNTNode.Get(34)); // node (+2)
+            ApplicationContainer serv1erAppsv = echoServerv.Install(TTNTNode.Get(33)); // node (+2)
             serv1erAppsv.Start(Seconds(routing_start[17]));                               // (+1)
             serv1erAppsv.Stop(Seconds(routing_end[17]));                                   // (+1)
 
-            UdpClientHelper echoClient(ttntInterface.GetAddress(34), 127); // node + port (+2. +1)
+            UdpClientHelper echoClient(ttntInterface.GetAddress(33), 127); // node + port (+2. +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv));
             echoClient.SetAttribute("Interval", TimeValue(interPacketIntervalv));
             echoClient.SetAttribute("PacketSize", UintegerValue(packetSizev));
 
             ApplicationContainer clientAppsv = echoClient.Install(
-                    TTNTNode.Get(31));                          // node (+2)
+                    TTNTNode.Get(32));                          // node (+2)
             clientAppsv.Start(Seconds(routing_start[17])); // +1
             clientAppsv.Stop(Seconds(routing_end[17]));      // +1
         }
@@ -1024,29 +1064,29 @@ int main(int argc, char *argv[]) {
          * data
          */
         {
-            uint32_t packetSize = 1000; // odd number:1000, even number:500
+//            uint32_t packetSize = 500; // odd number:1000, even number:500
             uint32_t maxPacketCount = 10000000;
-            uint32_t packetFrequency = 10;
+            uint32_t packetFrequency = 20;
             Time interPacketInterval = Seconds((1 / (double) packetFrequency) /*1/((double)20)*/);
 
             UdpServerHelper echoServerv(37);                                          // (+1)
-            ApplicationContainer serverAppsv = echoServerv.Install(TTNTNode.Get(34)); // (+2)
+            ApplicationContainer serverAppsv = echoServerv.Install(TTNTNode.Get(33)); // (+2)
             serverAppsv.Start(Seconds(data_start[17]));                                  // +1
             serverAppsv.Stop(Seconds(data_end[17]));                                      // +1
 
-            UdpClientHelper echoClient(ttntInterface.GetAddress(34), 37); // (+2, +1)
+            UdpClientHelper echoClient(ttntInterface.GetAddress(33), 37); // (+2, +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCount));
             echoClient.SetAttribute("Interval", TimeValue(interPacketInterval));
-            echoClient.SetAttribute("PacketSize", UintegerValue(packetSize));
+            echoClient.SetAttribute("PacketSize", UintegerValue(packet_size[17]));
 
-            ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(31)); // +2
+            ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(32)); // +2
             clientApps.Start(Seconds(data_start[17]));                                // +1
             clientApps.Stop(Seconds(data_end[17]));                                    // +1
         }
     }
 
 
-    /** workflow: 18: 32->35 */
+    /** workflow: 18 */
     if (workflow[18]) {
         /**
          * route
@@ -1068,7 +1108,7 @@ int main(int argc, char *argv[]) {
             echoClient.SetAttribute("PacketSize", UintegerValue(packetSizev));
 
             ApplicationContainer clientAppsv = echoClient.Install(
-                    TTNTNode.Get(32));                          // node (+2)
+                    TTNTNode.Get(34));                          // node (+2)
             clientAppsv.Start(Seconds(routing_start[18])); // +1
             clientAppsv.Stop(Seconds(routing_end[18]));      // +1
         }
@@ -1077,9 +1117,9 @@ int main(int argc, char *argv[]) {
          * data
          */
         {
-            uint32_t packetSize = 1000; // odd number:1000, even number:500
+//            uint32_t packetSize = 500; // odd number:1000, even number:500
             uint32_t maxPacketCount = 10000000;
-            uint32_t packetFrequency = 10;
+            uint32_t packetFrequency = 20;
             Time interPacketInterval = Seconds((1 / (double) packetFrequency) /*1/((double)20)*/);
 
             UdpServerHelper echoServerv(38);                                          // (+1)
@@ -1090,16 +1130,16 @@ int main(int argc, char *argv[]) {
             UdpClientHelper echoClient(ttntInterface.GetAddress(35), 38); // (+2, +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCount));
             echoClient.SetAttribute("Interval", TimeValue(interPacketInterval));
-            echoClient.SetAttribute("PacketSize", UintegerValue(packetSize));
+            echoClient.SetAttribute("PacketSize", UintegerValue(packet_size[18]));
 
-            ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(32)); // +2
+            ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(34)); // +2
             clientApps.Start(Seconds(data_start[18]));                                // +1
             clientApps.Stop(Seconds(data_end[18]));                                    // +1
         }
     }
 
 
-    /** workflow: 19: 36->39 */
+    /** workflow: 19 */
     if (workflow[19]) {
         /**
          * route
@@ -1111,11 +1151,11 @@ int main(int argc, char *argv[]) {
             Time interPacketIntervalv = Seconds((1 / (double) packetFrequencyv));
 
             UdpServerHelper echoServerv(129);                                           // port (+1)
-            ApplicationContainer serv1erAppsv = echoServerv.Install(TTNTNode.Get(39)); // node (+2)
+            ApplicationContainer serv1erAppsv = echoServerv.Install(TTNTNode.Get(37)); // node (+2)
             serv1erAppsv.Start(Seconds(routing_start[19]));                               // (+1)
             serv1erAppsv.Stop(Seconds(routing_end[19]));                                   // (+1)
 
-            UdpClientHelper echoClient(ttntInterface.GetAddress(39), 129); // node + port (+2. +1)
+            UdpClientHelper echoClient(ttntInterface.GetAddress(37), 129); // node + port (+2. +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv));
             echoClient.SetAttribute("Interval", TimeValue(interPacketIntervalv));
             echoClient.SetAttribute("PacketSize", UintegerValue(packetSizev));
@@ -1130,20 +1170,20 @@ int main(int argc, char *argv[]) {
          * data
          */
         {
-            uint32_t packetSize = 1000; // odd number:1000, even number:500
+//            uint32_t packetSize = 500; // odd number:1000, even number:500
             uint32_t maxPacketCount = 10000000;
-            uint32_t packetFrequency = 10;
+            uint32_t packetFrequency = 20;
             Time interPacketInterval = Seconds((1 / (double) packetFrequency) /*1/((double)20)*/);
 
             UdpServerHelper echoServerv(39);                                          // (+1)
-            ApplicationContainer serverAppsv = echoServerv.Install(TTNTNode.Get(39)); // (+2)
+            ApplicationContainer serverAppsv = echoServerv.Install(TTNTNode.Get(37)); // (+2)
             serverAppsv.Start(Seconds(data_start[19]));                                  // +1
             serverAppsv.Stop(Seconds(data_end[19]));                                      // +1
 
-            UdpClientHelper echoClient(ttntInterface.GetAddress(39), 39); // (+2, +1)
+            UdpClientHelper echoClient(ttntInterface.GetAddress(37), 39); // (+2, +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCount));
             echoClient.SetAttribute("Interval", TimeValue(interPacketInterval));
-            echoClient.SetAttribute("PacketSize", UintegerValue(packetSize));
+            echoClient.SetAttribute("PacketSize", UintegerValue(packet_size[19]));
 
             ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(36)); // +2
             clientApps.Start(Seconds(data_start[19]));                                // +1
@@ -1152,7 +1192,7 @@ int main(int argc, char *argv[]) {
     }
 
 
-    /** workflow: 20: 37->40 */
+    /** workflow: 20 */
     if (workflow[20]) {
         /**
          * route
@@ -1164,17 +1204,17 @@ int main(int argc, char *argv[]) {
             Time interPacketIntervalv = Seconds((1 / (double) packetFrequencyv));
 
             UdpServerHelper echoServerv(130);                                           // port (+1)
-            ApplicationContainer serv1erAppsv = echoServerv.Install(TTNTNode.Get(40)); // node (+2)
+            ApplicationContainer serv1erAppsv = echoServerv.Install(TTNTNode.Get(39)); // node (+2)
             serv1erAppsv.Start(Seconds(routing_start[20]));                               // (+1)
             serv1erAppsv.Stop(Seconds(routing_end[20]));                                   // (+1)
 
-            UdpClientHelper echoClient(ttntInterface.GetAddress(40), 130); // node + port (+2. +1)
+            UdpClientHelper echoClient(ttntInterface.GetAddress(39), 130); // node + port (+2. +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv));
             echoClient.SetAttribute("Interval", TimeValue(interPacketIntervalv));
             echoClient.SetAttribute("PacketSize", UintegerValue(packetSizev));
 
             ApplicationContainer clientAppsv = echoClient.Install(
-                    TTNTNode.Get(37));                          // node (+2)
+                    TTNTNode.Get(38));                          // node (+2)
             clientAppsv.Start(Seconds(routing_start[20])); // +1
             clientAppsv.Stop(Seconds(routing_end[20]));      // +1
         }
@@ -1183,29 +1223,29 @@ int main(int argc, char *argv[]) {
          * data
          */
         {
-            uint32_t packetSize = 1000; // odd number:1000, even number:500
+//            uint32_t packetSize = 500; // odd number:1000, even number:500
             uint32_t maxPacketCount = 10000000;
-            uint32_t packetFrequency = 10;
+            uint32_t packetFrequency = 20;
             Time interPacketInterval = Seconds((1 / (double) packetFrequency) /*1/((double)20)*/);
 
             UdpServerHelper echoServerv(40);                                          // (+1)
-            ApplicationContainer serverAppsv = echoServerv.Install(TTNTNode.Get(40)); // (+2)
+            ApplicationContainer serverAppsv = echoServerv.Install(TTNTNode.Get(39)); // (+2)
             serverAppsv.Start(Seconds(data_start[20]));                                  // +1
             serverAppsv.Stop(Seconds(data_end[20]));                                      // +1
 
-            UdpClientHelper echoClient(ttntInterface.GetAddress(40), 40); // (+2, +1)
+            UdpClientHelper echoClient(ttntInterface.GetAddress(39), 40); // (+2, +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCount));
             echoClient.SetAttribute("Interval", TimeValue(interPacketInterval));
-            echoClient.SetAttribute("PacketSize", UintegerValue(packetSize));
+            echoClient.SetAttribute("PacketSize", UintegerValue(packet_size[20]));
 
-            ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(37)); // +2
+            ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(38)); // +2
             clientApps.Start(Seconds(data_start[20]));                                // +1
             clientApps.Stop(Seconds(data_end[20]));                                    // +1
         }
     }
 
 
-    /** workflow: 21: 38->41 */
+    /** workflow: 21 */
     if (workflow[21]) {
         /**
          * route
@@ -1227,7 +1267,7 @@ int main(int argc, char *argv[]) {
             echoClient.SetAttribute("PacketSize", UintegerValue(packetSizev));
 
             ApplicationContainer clientAppsv = echoClient.Install(
-                    TTNTNode.Get(38));                          // node (+2)
+                    TTNTNode.Get(40));                          // node (+2)
             clientAppsv.Start(Seconds(routing_start[21])); // +1
             clientAppsv.Stop(Seconds(routing_end[21]));      // +1
         }
@@ -1236,9 +1276,9 @@ int main(int argc, char *argv[]) {
          * data
          */
         {
-            uint32_t packetSize = 1000; // odd number:1000, even number:500
+//            uint32_t packetSize = 500; // odd number:1000, even number:500
             uint32_t maxPacketCount = 10000000;
-            uint32_t packetFrequency = 10;
+            uint32_t packetFrequency = 20;
             Time interPacketInterval = Seconds((1 / (double) packetFrequency) /*1/((double)20)*/);
 
             UdpServerHelper echoServerv(41);                                          // (+1)
@@ -1249,16 +1289,16 @@ int main(int argc, char *argv[]) {
             UdpClientHelper echoClient(ttntInterface.GetAddress(41), 41); // (+2, +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCount));
             echoClient.SetAttribute("Interval", TimeValue(interPacketInterval));
-            echoClient.SetAttribute("PacketSize", UintegerValue(packetSize));
+            echoClient.SetAttribute("PacketSize", UintegerValue(packet_size[21]));
 
-            ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(38)); // +2
+            ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(40)); // +2
             clientApps.Start(Seconds(data_start[21]));                                // +1
             clientApps.Stop(Seconds(data_end[21]));                                    // +1
         }
     }
 
 
-    /** workflow: 22: 42->45 */
+    /** workflow: 22 */
     if (workflow[22]) {
         /**
          * route
@@ -1270,11 +1310,11 @@ int main(int argc, char *argv[]) {
             Time interPacketIntervalv = Seconds((1 / (double) packetFrequencyv));
 
             UdpServerHelper echoServerv(132);  // port (+1)
-            ApplicationContainer serv1erAppsv = echoServerv.Install(TTNTNode.Get(45)); // node (+2)
+            ApplicationContainer serv1erAppsv = echoServerv.Install(TTNTNode.Get(43)); // node (+2)
             serv1erAppsv.Start(Seconds(routing_start[22]));                               // (+1)
             serv1erAppsv.Stop(Seconds(routing_end[22]));                            // (+1)
 
-            UdpClientHelper echoClient(ttntInterface.GetAddress(45), 132); // node + port (+2. +1)
+            UdpClientHelper echoClient(ttntInterface.GetAddress(43), 132); // node + port (+2. +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv));
             echoClient.SetAttribute("Interval", TimeValue(interPacketIntervalv));
             echoClient.SetAttribute("PacketSize", UintegerValue(packetSizev));
@@ -1289,20 +1329,20 @@ int main(int argc, char *argv[]) {
          * data
          */
         {
-            uint32_t packetSize = 1000; // odd number:1000, even number:500
+//            uint32_t packetSize = 500; // odd number:1000, even number:500
             uint32_t maxPacketCount = 10000000;
-            uint32_t packetFrequency = 10;
+            uint32_t packetFrequency = 20;
             Time interPacketInterval = Seconds((1 / (double) packetFrequency) /*1/((double)20)*/);
 
             UdpServerHelper echoServerv(42);  // (+1)
-            ApplicationContainer serverAppsv = echoServerv.Install(TTNTNode.Get(45)); // (+2)
+            ApplicationContainer serverAppsv = echoServerv.Install(TTNTNode.Get(43)); // (+2)
             serverAppsv.Start(Seconds(data_start[22]));                                  // +1
             serverAppsv.Stop(Seconds(data_end[22]));                                // +1
 
-            UdpClientHelper echoClient(ttntInterface.GetAddress(45), 42); // (+2, +1)
+            UdpClientHelper echoClient(ttntInterface.GetAddress(43), 42); // (+2, +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCount));
             echoClient.SetAttribute("Interval", TimeValue(interPacketInterval));
-            echoClient.SetAttribute("PacketSize", UintegerValue(packetSize));
+            echoClient.SetAttribute("PacketSize", UintegerValue(packet_size[22]));
 
             ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(42)); // +2
             clientApps.Start(Seconds(data_start[22]));                                // +1
@@ -1311,7 +1351,7 @@ int main(int argc, char *argv[]) {
     }
 
 
-    /** workflow: 23: 43->46 */
+    /** workflow: 23 */
     if (workflow[23]) {
         /**
          * route
@@ -1323,17 +1363,17 @@ int main(int argc, char *argv[]) {
             Time interPacketIntervalv = Seconds((1 / (double) packetFrequencyv));
 
             UdpServerHelper echoServerv(133);  // port (+1)
-            ApplicationContainer serv1erAppsv = echoServerv.Install(TTNTNode.Get(46)); // node (+2)
+            ApplicationContainer serv1erAppsv = echoServerv.Install(TTNTNode.Get(45)); // node (+2)
             serv1erAppsv.Start(Seconds(routing_start[23]));                               // (+1)
             serv1erAppsv.Stop(Seconds(routing_end[23]));                            // (+1)
 
-            UdpClientHelper echoClient(ttntInterface.GetAddress(46), 133); // node + port (+2. +1)
+            UdpClientHelper echoClient(ttntInterface.GetAddress(45), 133); // node + port (+2. +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv));
             echoClient.SetAttribute("Interval", TimeValue(interPacketIntervalv));
             echoClient.SetAttribute("PacketSize", UintegerValue(packetSizev));
 
             ApplicationContainer clientAppsv = echoClient.Install(
-                    TTNTNode.Get(43));                          // node (+2)
+                    TTNTNode.Get(44));                          // node (+2)
             clientAppsv.Start(Seconds(routing_start[23])); // +1
             clientAppsv.Stop(Seconds(routing_end[23]));      // +1
         }
@@ -1342,29 +1382,29 @@ int main(int argc, char *argv[]) {
          * data
          */
         {
-            uint32_t packetSize = 1000; // odd number:1000, even number:500
+//            uint32_t packetSize = 500; // odd number:1000, even number:500
             uint32_t maxPacketCount = 10000000;
-            uint32_t packetFrequency = 10;
+            uint32_t packetFrequency = 20;
             Time interPacketInterval = Seconds((1 / (double) packetFrequency) /*1/((double)20)*/);
 
             UdpServerHelper echoServerv(43);  // (+1)
-            ApplicationContainer serverAppsv = echoServerv.Install(TTNTNode.Get(46)); // (+2)
+            ApplicationContainer serverAppsv = echoServerv.Install(TTNTNode.Get(45)); // (+2)
             serverAppsv.Start(Seconds(data_start[23]));                                  // +1
             serverAppsv.Stop(Seconds(data_end[23]));                                // +1
 
-            UdpClientHelper echoClient(ttntInterface.GetAddress(46), 43); // (+2, +1)
+            UdpClientHelper echoClient(ttntInterface.GetAddress(45), 43); // (+2, +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCount));
             echoClient.SetAttribute("Interval", TimeValue(interPacketInterval));
-            echoClient.SetAttribute("PacketSize", UintegerValue(packetSize));
+            echoClient.SetAttribute("PacketSize", UintegerValue(packet_size[23]));
 
-            ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(43)); // +2
+            ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(44)); // +2
             clientApps.Start(Seconds(data_start[23]));                                // +1
             clientApps.Stop(Seconds(data_end[23]));                                    // +1
         }
     }
 
 
-    /** workflow: 24: 44->47 */
+    /** workflow: 24 */
     if (workflow[24]) {
         /**
          * route
@@ -1386,7 +1426,7 @@ int main(int argc, char *argv[]) {
             echoClient.SetAttribute("PacketSize", UintegerValue(packetSizev));
 
             ApplicationContainer clientAppsv = echoClient.Install(
-                    TTNTNode.Get(44));                          // node (+2)
+                    TTNTNode.Get(46));                          // node (+2)
             clientAppsv.Start(Seconds(routing_start[24])); // +1
             clientAppsv.Stop(Seconds(routing_end[24]));      // +1
         }
@@ -1395,9 +1435,9 @@ int main(int argc, char *argv[]) {
          * data
          */
         {
-            uint32_t packetSize = 1000; // odd number:1000, even number:500
+//            uint32_t packetSize = 500; // odd number:1000, even number:500
             uint32_t maxPacketCount = 10000000;
-            uint32_t packetFrequency = 10;
+            uint32_t packetFrequency = 20;
             Time interPacketInterval = Seconds((1 / (double) packetFrequency) /*1/((double)20)*/);
 
             UdpServerHelper echoServerv(44);  // (+1)
@@ -1408,16 +1448,16 @@ int main(int argc, char *argv[]) {
             UdpClientHelper echoClient(ttntInterface.GetAddress(47), 44); // (+2, +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCount));
             echoClient.SetAttribute("Interval", TimeValue(interPacketInterval));
-            echoClient.SetAttribute("PacketSize", UintegerValue(packetSize));
+            echoClient.SetAttribute("PacketSize", UintegerValue(packet_size[24]));
 
-            ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(44)); // +2
+            ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(46)); // +2
             clientApps.Start(Seconds(data_start[24]));                                // +1
             clientApps.Stop(Seconds(data_end[24]));                                    // +1
         }
     }
 
 
-    /** workflow: 25: 48->51 */
+    /** workflow: 25 */
     if (workflow[25]) {
         /**
          * route
@@ -1429,11 +1469,11 @@ int main(int argc, char *argv[]) {
             Time interPacketIntervalv = Seconds((1 / (double) packetFrequencyv));
 
             UdpServerHelper echoServerv(135);  // port (+1)
-            ApplicationContainer serv1erAppsv = echoServerv.Install(TTNTNode.Get(51)); // node (+2)
+            ApplicationContainer serv1erAppsv = echoServerv.Install(TTNTNode.Get(49)); // node (+2)
             serv1erAppsv.Start(Seconds(routing_start[25]));                               // (+1)
             serv1erAppsv.Stop(Seconds(routing_end[25]));                            // (+1)
 
-            UdpClientHelper echoClient(ttntInterface.GetAddress(51), 135); // node + port (+2. +1)
+            UdpClientHelper echoClient(ttntInterface.GetAddress(49), 135); // node + port (+2. +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv));
             echoClient.SetAttribute("Interval", TimeValue(interPacketIntervalv));
             echoClient.SetAttribute("PacketSize", UintegerValue(packetSizev));
@@ -1448,20 +1488,20 @@ int main(int argc, char *argv[]) {
          * data
          */
         {
-            uint32_t packetSize = 1000; // odd number:1000, even number:500
+//            uint32_t packetSize = 500; // odd number:1000, even number:500
             uint32_t maxPacketCount = 10000000;
-            uint32_t packetFrequency = 10;
+            uint32_t packetFrequency = 20;
             Time interPacketInterval = Seconds((1 / (double) packetFrequency) /*1/((double)20)*/);
 
             UdpServerHelper echoServerv(45);  // (+1)
-            ApplicationContainer serverAppsv = echoServerv.Install(TTNTNode.Get(51)); // (+2)
+            ApplicationContainer serverAppsv = echoServerv.Install(TTNTNode.Get(49)); // (+2)
             serverAppsv.Start(Seconds(data_start[25]));                                  // +1
             serverAppsv.Stop(Seconds(data_end[25]));                                // +1
 
-            UdpClientHelper echoClient(ttntInterface.GetAddress(51), 45); // (+2, +1)
+            UdpClientHelper echoClient(ttntInterface.GetAddress(49), 45); // (+2, +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCount));
             echoClient.SetAttribute("Interval", TimeValue(interPacketInterval));
-            echoClient.SetAttribute("PacketSize", UintegerValue(packetSize));
+            echoClient.SetAttribute("PacketSize", UintegerValue(packet_size[25]));
 
             ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(48)); // +2
             clientApps.Start(Seconds(data_start[25]));                                // +1
@@ -1470,7 +1510,7 @@ int main(int argc, char *argv[]) {
     }
 
 
-    /** workflow: 26: 49->52 */
+    /** workflow: 26 */
     if (workflow[26]) {
         /**
          * route
@@ -1482,17 +1522,17 @@ int main(int argc, char *argv[]) {
             Time interPacketIntervalv = Seconds((1 / (double) packetFrequencyv));
 
             UdpServerHelper echoServerv(136);  // port (+1)
-            ApplicationContainer serv1erAppsv = echoServerv.Install(TTNTNode.Get(52)); // node (+2)
+            ApplicationContainer serv1erAppsv = echoServerv.Install(TTNTNode.Get(51)); // node (+2)
             serv1erAppsv.Start(Seconds(routing_start[26]));                               // (+1)
             serv1erAppsv.Stop(Seconds(routing_end[26]));                            // (+1)
 
-            UdpClientHelper echoClient(ttntInterface.GetAddress(52), 136); // node + port (+2. +1)
+            UdpClientHelper echoClient(ttntInterface.GetAddress(51), 136); // node + port (+2. +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv));
             echoClient.SetAttribute("Interval", TimeValue(interPacketIntervalv));
             echoClient.SetAttribute("PacketSize", UintegerValue(packetSizev));
 
             ApplicationContainer clientAppsv = echoClient.Install(
-                    TTNTNode.Get(49));                          // node (+2)
+                    TTNTNode.Get(50));                          // node (+2)
             clientAppsv.Start(Seconds(routing_start[26])); // +1
             clientAppsv.Stop(Seconds(routing_end[26]));      // +1
         }
@@ -1501,29 +1541,29 @@ int main(int argc, char *argv[]) {
          * data
          */
         {
-            uint32_t packetSize = 1000; // odd number:1000, even number:500
+//            uint32_t packetSize = 500; // odd number:1000, even number:500
             uint32_t maxPacketCount = 10000000;
-            uint32_t packetFrequency = 10;
+            uint32_t packetFrequency = 20;
             Time interPacketInterval = Seconds((1 / (double) packetFrequency) /*1/((double)20)*/);
 
             UdpServerHelper echoServerv(46);  // (+1)
-            ApplicationContainer serverAppsv = echoServerv.Install(TTNTNode.Get(52)); // (+2)
+            ApplicationContainer serverAppsv = echoServerv.Install(TTNTNode.Get(51)); // (+2)
             serverAppsv.Start(Seconds(data_start[26]));                                  // +1
             serverAppsv.Stop(Seconds(data_end[26]));                                // +1
 
-            UdpClientHelper echoClient(ttntInterface.GetAddress(52), 46); // (+2, +1)
+            UdpClientHelper echoClient(ttntInterface.GetAddress(51), 46); // (+2, +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCount));
             echoClient.SetAttribute("Interval", TimeValue(interPacketInterval));
-            echoClient.SetAttribute("PacketSize", UintegerValue(packetSize));
+            echoClient.SetAttribute("PacketSize", UintegerValue(packet_size[26]));
 
-            ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(49)); // +2
+            ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(50)); // +2
             clientApps.Start(Seconds(data_start[26]));                                // +1
             clientApps.Stop(Seconds(data_end[26]));                                    // +1
         }
     }
 
 
-    /** workflow: 27: 50->53 */
+    /** workflow: 27 */
     if (workflow[27]) {
         /**
          * route
@@ -1545,7 +1585,7 @@ int main(int argc, char *argv[]) {
             echoClient.SetAttribute("PacketSize", UintegerValue(packetSizev));
 
             ApplicationContainer clientAppsv = echoClient.Install(
-                    TTNTNode.Get(50));                          // node (+2)
+                    TTNTNode.Get(52));                          // node (+2)
             clientAppsv.Start(Seconds(routing_start[27])); // +1
             clientAppsv.Stop(Seconds(routing_end[27]));      // +1
         }
@@ -1554,9 +1594,9 @@ int main(int argc, char *argv[]) {
          * data
          */
         {
-            uint32_t packetSize = 1000; // odd number:1000, even number:500
+//            uint32_t packetSize = 500; // odd number:1000, even number:500
             uint32_t maxPacketCount = 10000000;
-            uint32_t packetFrequency = 10;
+            uint32_t packetFrequency = 20;
             Time interPacketInterval = Seconds((1 / (double) packetFrequency) /*1/((double)20)*/);
 
             UdpServerHelper echoServerv(47);  // (+1)
@@ -1567,16 +1607,16 @@ int main(int argc, char *argv[]) {
             UdpClientHelper echoClient(ttntInterface.GetAddress(53), 47); // (+2, +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCount));
             echoClient.SetAttribute("Interval", TimeValue(interPacketInterval));
-            echoClient.SetAttribute("PacketSize", UintegerValue(packetSize));
+            echoClient.SetAttribute("PacketSize", UintegerValue(packet_size[27]));
 
-            ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(50)); // +2
+            ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(52)); // +2
             clientApps.Start(Seconds(data_start[27]));                                // +1
             clientApps.Stop(Seconds(data_end[27]));                                    // +1
         }
     }
 
 
-    /** workflow: 28: 54->57 */
+    /** workflow: 28 */
     if (workflow[28]) {
         /**
          * route
@@ -1588,11 +1628,11 @@ int main(int argc, char *argv[]) {
             Time interPacketIntervalv = Seconds((1 / (double) packetFrequencyv));
 
             UdpServerHelper echoServerv(138);  // port (+1)
-            ApplicationContainer serv1erAppsv = echoServerv.Install(TTNTNode.Get(57)); // node (+2)
+            ApplicationContainer serv1erAppsv = echoServerv.Install(TTNTNode.Get(55)); // node (+2)
             serv1erAppsv.Start(Seconds(routing_start[28]));                               // (+1)
             serv1erAppsv.Stop(Seconds(routing_end[28]));                            // (+1)
 
-            UdpClientHelper echoClient(ttntInterface.GetAddress(57), 138); // node + port (+2. +1)
+            UdpClientHelper echoClient(ttntInterface.GetAddress(55), 138); // node + port (+2. +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv));
             echoClient.SetAttribute("Interval", TimeValue(interPacketIntervalv));
             echoClient.SetAttribute("PacketSize", UintegerValue(packetSizev));
@@ -1607,9 +1647,9 @@ int main(int argc, char *argv[]) {
          * data
          */
         {
-            uint32_t packetSize = 1000; // odd number:1000, even number:500
+//            uint32_t packetSize = 500; // odd number:1000, even number:500
             uint32_t maxPacketCount = 10000000;
-            uint32_t packetFrequency = 10;
+            uint32_t packetFrequency = 20;
             Time interPacketInterval = Seconds((1 / (double) packetFrequency) /*1/((double)20)*/);
 
             UdpServerHelper echoServerv(48);  // (+1)
@@ -1620,16 +1660,16 @@ int main(int argc, char *argv[]) {
             UdpClientHelper echoClient(ttntInterface.GetAddress(55), 48); // (+2, +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCount));
             echoClient.SetAttribute("Interval", TimeValue(interPacketInterval));
-            echoClient.SetAttribute("PacketSize", UintegerValue(packetSize));
+            echoClient.SetAttribute("PacketSize", UintegerValue(packet_size[28]));
 
-            ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(52)); // +2
+            ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(54)); // +2
             clientApps.Start(Seconds(data_start[28]));                                // +1
             clientApps.Stop(Seconds(data_end[28]));                                    // +1
         }
     }
 
 
-    /** workflow: 29: 55->58 */
+    /** workflow: 29 */
     if (workflow[29]) {
         /**
          * route
@@ -1641,17 +1681,17 @@ int main(int argc, char *argv[]) {
             Time interPacketIntervalv = Seconds((1 / (double) packetFrequencyv));
 
             UdpServerHelper echoServerv(139);  // port (+1)
-            ApplicationContainer serv1erAppsv = echoServerv.Install(TTNTNode.Get(58)); // node (+2)
+            ApplicationContainer serv1erAppsv = echoServerv.Install(TTNTNode.Get(57)); // node (+2)
             serv1erAppsv.Start(Seconds(routing_start[29]));                               // (+1)
             serv1erAppsv.Stop(Seconds(routing_end[29]));                            // (+1)
 
-            UdpClientHelper echoClient(ttntInterface.GetAddress(58), 139); // node + port (+2. +1)
+            UdpClientHelper echoClient(ttntInterface.GetAddress(57), 139); // node + port (+2. +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCountv));
             echoClient.SetAttribute("Interval", TimeValue(interPacketIntervalv));
             echoClient.SetAttribute("PacketSize", UintegerValue(packetSizev));
 
             ApplicationContainer clientAppsv = echoClient.Install(
-                    TTNTNode.Get(55));                          // node (+2)
+                    TTNTNode.Get(56));                          // node (+2)
             clientAppsv.Start(Seconds(routing_start[29])); // +1
             clientAppsv.Stop(Seconds(routing_end[29]));      // +1
         }
@@ -1660,29 +1700,29 @@ int main(int argc, char *argv[]) {
          * data
          */
         {
-            uint32_t packetSize = 1000; // odd number:1000, even number:500
+//            uint32_t packetSize = 500; // odd number:1000, even number:500
             uint32_t maxPacketCount = 10000000;
-            uint32_t packetFrequency = 10;
+            uint32_t packetFrequency = 20;
             Time interPacketInterval = Seconds((1 / (double) packetFrequency) /*1/((double)20)*/);
 
             UdpServerHelper echoServerv(49);  // (+1)
-            ApplicationContainer serverAppsv = echoServerv.Install(TTNTNode.Get(58)); // (+2)
+            ApplicationContainer serverAppsv = echoServerv.Install(TTNTNode.Get(57)); // (+2)
             serverAppsv.Start(Seconds(data_start[29]));                                  // +1
             serverAppsv.Stop(Seconds(data_end[29]));                                // +1
 
-            UdpClientHelper echoClient(ttntInterface.GetAddress(58), 49); // (+2, +1)
+            UdpClientHelper echoClient(ttntInterface.GetAddress(57), 49); // (+2, +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCount));
             echoClient.SetAttribute("Interval", TimeValue(interPacketInterval));
-            echoClient.SetAttribute("PacketSize", UintegerValue(packetSize));
+            echoClient.SetAttribute("PacketSize", UintegerValue(packet_size[29]));
 
-            ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(55)); // +2
+            ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(56)); // +2
             clientApps.Start(Seconds(data_start[29]));                                // +1
             clientApps.Stop(Seconds(data_end[29]));                                    // +1
         }
     }
 
 
-    /** workflow: 30: 56->59 */
+    /** workflow: 30 */
     if (workflow[30]) {
         /**
          * route
@@ -1704,7 +1744,7 @@ int main(int argc, char *argv[]) {
             echoClient.SetAttribute("PacketSize", UintegerValue(packetSizev));
 
             ApplicationContainer clientAppsv = echoClient.Install(
-                    TTNTNode.Get(56));                          // node (+2)
+                    TTNTNode.Get(58));                          // node (+2)
             clientAppsv.Start(Seconds(routing_start[30])); // +1
             clientAppsv.Stop(Seconds(routing_end[30]));      // +1
         }
@@ -1713,9 +1753,9 @@ int main(int argc, char *argv[]) {
          * data
          */
         {
-            uint32_t packetSize = 1000; // odd number:1000, even number:500
+//            uint32_t packetSize = 500; // odd number:1000, even number:500
             uint32_t maxPacketCount = 10000000;
-            uint32_t packetFrequency = 10;
+            uint32_t packetFrequency = 20;
             Time interPacketInterval = Seconds((1 / (double) packetFrequency) /*1/((double)20)*/);
 
             UdpServerHelper echoServerv(50);  // (+1)
@@ -1726,9 +1766,9 @@ int main(int argc, char *argv[]) {
             UdpClientHelper echoClient(ttntInterface.GetAddress(59), 50); // (+2, +1)
             echoClient.SetAttribute("MaxPackets", UintegerValue(maxPacketCount));
             echoClient.SetAttribute("Interval", TimeValue(interPacketInterval));
-            echoClient.SetAttribute("PacketSize", UintegerValue(packetSize));
+            echoClient.SetAttribute("PacketSize", UintegerValue(packet_size[30]));
 
-            ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(56)); // +2
+            ApplicationContainer clientApps = echoClient.Install(TTNTNode.Get(58)); // +2
             clientApps.Start(Seconds(data_start[30]));                                // +1
             clientApps.Stop(Seconds(data_end[30]));                                    // +1
         }
@@ -1745,12 +1785,12 @@ int main(int argc, char *argv[]) {
 
     if (0) //得出每个节点的真实位置与IP地址
     {
-        map<std::string, uint32_t> mapIpv4 = anim.getIpv4AddressNodeIdTable();
-        multimap<uint32_t, std::string> mapipv4 = anim.GetIpv4AddressNodeIdTable();
-        map<uint32_t, Vector> mapPositon = anim.getNodePosition();
+        map <std::string, uint32_t> mapIpv4 = anim.getIpv4AddressNodeIdTable();
+        multimap <uint32_t, std::string> mapipv4 = anim.GetIpv4AddressNodeIdTable();
+        map <uint32_t, Vector> mapPositon = anim.getNodePosition();
 
-        map<std::string, Vector> NodeIPandPosition;
-        map<uint32_t, map<std::string, Vector>> NodeIDandIPandPosition;
+        map <std::string, Vector> NodeIPandPosition;
+        map <uint32_t, map<std::string, Vector>> NodeIDandIPandPosition;
 
         if (mapPositon.size() == mapIpv4.size()) //判断两个map大小是否相等
         {

@@ -1,9 +1,9 @@
 //
-// Created by yf518 on 9/9/20.
+// Created by zy on 11/9/20.
 //
 
 /**
- * 测试两种业务类型的吞吐量和时延s
+ * 测试四种业务类型的吞吐量和时延s
  */
 
 #include "ns3/core-module.h"
@@ -36,8 +36,8 @@ void TxCallback(Ptr <CounterCalculator<uint32_t>> datac, std::string path, Ptr<c
 
 int main(int argc, char *argv[]) {
 
-    uint8_t kind = 2;
-    uint32_t business = 6;  // hack: Add 1 per test. Range: [1, 15]
+    uint8_t kind = 4;
+    uint32_t business = 6;  // hack: Add 1 per test. Range: [1, 7]
     uint32_t ttnt;
     bool verbose = true;
     uint32_t dir = 0;  // Output file path suffix
@@ -55,11 +55,11 @@ int main(int argc, char *argv[]) {
     ns3::UdpServer::dirSuffix = dir;
     UdpServer::reInit(kind, business);
 
-//    ofstream paraFile("paraFile.txt");
-//    paraFile << "kind: " << to_string(kind) << endl;
-//    paraFile << "business: " << to_string(business) << endl;
-//    paraFile << "ttnt: " << to_string(ttnt) << endl;
-//    paraFile.close();
+    ofstream paraFile("paraFile.txt");
+    paraFile << "kind: " << to_string(kind) << endl;
+    paraFile << "business: " << to_string(business) << endl;
+    paraFile << "ttnt: " << to_string(ttnt) << endl;
+    paraFile.close();
 
 
     if (verbose) {
