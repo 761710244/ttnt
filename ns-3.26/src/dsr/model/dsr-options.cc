@@ -543,7 +543,7 @@ uint8_t DsrOptionRreq::Process (Ptr<Packet> packet, Ptr<Packet> dsrP, Ipv4Addres
   NS_LOG_DEBUG ("The number of Ip addresses " << (uint32_t)numberAddress);
 
 //todo 8跳限制了距离
-if(numberAddress >= 8)
+if(numberAddress >= 16)
   {
       NS_LOG_DEBUG ("Discard the packet, malformed header since two many ip addresses in route");
       m_dropTrace (packet); // call the drop trace to show in the tracing
@@ -583,7 +583,7 @@ if(numberAddress >= 8)
   set<Ipv4Address> s1 = {"198.3.1.26", "198.3.1.27", "198.3.1.28", "198.2.1.1"};
   set<Ipv4Address> s2 = {"198.3.1.26", "198.3.1.27", "198.3.1.28", "198.3.1.29", "198.3.1.30", "198.3.1.31", "198.2.1.1"};
  //黑洞节点收到RREQ时.如果SRC是黑洞节点并且路径中也有黑洞节点那么DROP(防止多个黑洞节点联合影响)
-if(1)
+if(0)
   {
 maliciousIpAddr = s2;
 	  if(/*sourceAddress == Ipv4Address("198.2.1.1") && */nodeList.size() > 3)

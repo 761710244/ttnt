@@ -89,8 +89,8 @@ namespace ns3 {
 
     static int data_rate = 20;  // send rate (packets/s)
 //    static int packet_size = 500;
-    static int kind = 2;  // hack: Equal to the value of the variable [kind] in the script
-    static int business = 1;  // hack: Equal to the value of the variable [business] in the script
+    static int kind = 1;  // hack: Equal to the value of the variable [kind] in the script
+    static int business = 12;  // hack: Equal to the value of the variable [business] in the script
     static int ttnt = kind * business * 2;  // todo
 
     double record_start[31] = {0.0};

@@ -175,6 +175,13 @@ public:
 
   static uint32_t dirSuffix;  // Output file path suffix
 
+  /**
+   * \brief Reinitialize related parameters: number of business per type, number of business nodes, etc.
+   * \param typeNum Number of business type
+   * \param busiNum Number of business per type
+   */
+  static void reInit(int typeNum,int busiNum);
+
 
 
 protected:

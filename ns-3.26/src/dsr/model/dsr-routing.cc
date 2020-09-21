@@ -373,7 +373,7 @@ namespace ns3 {
 
 
         DsrRouting::DsrRouting() {
-            NS_LOG_FUNCTION_NOARGS ();
+            NS_LOG_FUNCTION_NOARGS();
 
             m_uniformRandomVariable = CreateObject<UniformRandomVariable>();
 
@@ -383,14 +383,14 @@ namespace ns3 {
    * the following options based on the option number, and pass the packet to the appropriate option to
    * process it. After the option processing, it will pass the packet back to DSR Routing to send down layer.
    */
-            Ptr<dsr::DsrOptionPad1> pad1Option = CreateObject<dsr::DsrOptionPad1>();
-            Ptr<dsr::DsrOptionPadn> padnOption = CreateObject<dsr::DsrOptionPadn>();
-            Ptr<dsr::DsrOptionRreq> rreqOption = CreateObject<dsr::DsrOptionRreq>();
-            Ptr<dsr::DsrOptionRrep> rrepOption = CreateObject<dsr::DsrOptionRrep>();
-            Ptr<dsr::DsrOptionSR> srOption = CreateObject<dsr::DsrOptionSR>();
-            Ptr<dsr::DsrOptionRerr> rerrOption = CreateObject<dsr::DsrOptionRerr>();
-            Ptr<dsr::DsrOptionAckReq> ackReq = CreateObject<dsr::DsrOptionAckReq>();
-            Ptr<dsr::DsrOptionAck> ack = CreateObject<dsr::DsrOptionAck>();
+            Ptr <dsr::DsrOptionPad1> pad1Option = CreateObject<dsr::DsrOptionPad1>();
+            Ptr <dsr::DsrOptionPadn> padnOption = CreateObject<dsr::DsrOptionPadn>();
+            Ptr <dsr::DsrOptionRreq> rreqOption = CreateObject<dsr::DsrOptionRreq>();
+            Ptr <dsr::DsrOptionRrep> rrepOption = CreateObject<dsr::DsrOptionRrep>();
+            Ptr <dsr::DsrOptionSR> srOption = CreateObject<dsr::DsrOptionSR>();
+            Ptr <dsr::DsrOptionRerr> rerrOption = CreateObject<dsr::DsrOptionRerr>();
+            Ptr <dsr::DsrOptionAckReq> ackReq = CreateObject<dsr::DsrOptionAckReq>();
+            Ptr <dsr::DsrOptionAck> ack = CreateObject<dsr::DsrOptionAck>();
 
             Insert(pad1Option);
             Insert(padnOption);
@@ -407,15 +407,15 @@ namespace ns3 {
         }
 
         DsrRouting::~DsrRouting() {
-            NS_LOG_FUNCTION_NOARGS ();
+            NS_LOG_FUNCTION_NOARGS();
         }
 
 
         void
         DsrRouting::NotifyNewAggregate() {
-            NS_LOG_FUNCTION (this << "NotifyNewAggregate");
+            NS_LOG_FUNCTION(this << "NotifyNewAggregate");
             if (m_node == 0) {
-                Ptr<Node> node = this->GetObject<Node>();
+                Ptr <Node> node = this->GetObject<Node>();
                 if (node != 0) {
                     m_ipv4 = this->GetObject<Ipv4L3Protocol>();
                     if (m_ipv4 != 0) {
@@ -426,7 +426,7 @@ namespace ns3 {
 
                     m_ip = node->GetObject<Ipv4>();
                     if (m_ip != 0) {
-                        NS_LOG_DEBUG ("Ipv4 started");
+                        NS_LOG_DEBUG("Ipv4 started");
                     }
                 }
             }
@@ -438,20 +438,21 @@ namespace ns3 {
             static uint16_t a = 0;
             std::cout << "----------------------------------------------------------------" << "\n";
             std::cout << "DsrRouting::Start () = " << ++a << "\n";
-            NS_LOG_FUNCTION (this << "Start DSR Routing protocol");
+            NS_LOG_FUNCTION(this << "Start DSR Routing protocol");
 
-            NS_LOG_INFO ("The number of network queues " << m_numPriorityQueues);
+            NS_LOG_INFO("The number of network queues " << m_numPriorityQueues);
             for (uint32_t i = 0; i < m_numPriorityQueues; i++) {
                 // Set the network queue max size and the delay
-                NS_LOG_INFO ("The network queue size " << m_maxNetworkSize << " and the queue delay "
-                                                       << m_maxNetworkDelay.GetSeconds());
-                Ptr<dsr::DsrNetworkQueue> queue_i = CreateObject<dsr::DsrNetworkQueue>(m_maxNetworkSize,
-                                                                                       m_maxNetworkDelay);
-                std::pair<std::map<uint32_t, Ptr<dsr::DsrNetworkQueue> >::iterator, bool> result_i = m_priorityQueue.insert(
-                        std::make_pair(i, queue_i));
-                NS_ASSERT_MSG (result_i.second, "Error in creating queues");
+                NS_LOG_INFO("The network queue size " << m_maxNetworkSize << " and the queue delay "
+                                                      << m_maxNetworkDelay.GetSeconds());
+                Ptr <dsr::DsrNetworkQueue> queue_i = CreateObject<dsr::DsrNetworkQueue>(m_maxNetworkSize,
+                                                                                        m_maxNetworkDelay);
+                std::pair < std::map < uint32_t, Ptr < dsr::DsrNetworkQueue > > ::iterator,
+                        bool > result_i = m_priorityQueue.insert(
+                                std::make_pair(i, queue_i));
+                NS_ASSERT_MSG(result_i.second, "Error in creating queues");
             }
-            Ptr<dsr::DsrRreqTable> rreqTable = CreateObject<dsr::DsrRreqTable>();
+            Ptr <dsr::DsrRreqTable> rreqTable = CreateObject<dsr::DsrRreqTable>();
             // Set the initial hop limit
             rreqTable->SetInitHopLimit(m_discoveryHopLimit);
             // Configure the request table parameters
@@ -460,7 +461,7 @@ namespace ns3 {
             rreqTable->SetUniqueRreqIdSize(m_maxRreqId);
             SetRequestTable(rreqTable);
             // Set the passive buffer parameters using just the send buffer parameters
-            Ptr<dsr::DsrPassiveBuffer> passiveBuffer = CreateObject<dsr::DsrPassiveBuffer>();
+            Ptr <dsr::DsrPassiveBuffer> passiveBuffer = CreateObject<dsr::DsrPassiveBuffer>();
             passiveBuffer->SetMaxQueueLen(m_maxSendBuffLen);
             passiveBuffer->SetPassiveBufferTimeout(m_sendBufferTimeout);
             SetPassiveBuffer(passiveBuffer);
@@ -510,7 +511,7 @@ namespace ns3 {
                         /*
                * Set dsr route cache
                */
-                        Ptr<dsr::DsrRouteCache> routeCache = CreateObject<dsr::DsrRouteCache>();
+                        Ptr <dsr::DsrRouteCache> routeCache = CreateObject<dsr::DsrRouteCache>();
                         // Configure the path cache parameters
                         routeCache->SetCacheType(m_cacheType);
                         routeCache->SetSubRoute(m_subRoute);
@@ -534,18 +535,18 @@ namespace ns3 {
                         m_ipv4->GetNetDevice(i)->SetPromiscReceiveCallback(
                                 MakeCallback(&DsrRouting::PromiscReceive, this));
                         // Allow neighbor manager use this interface for layer 2 feedback if possible
-                        Ptr<NetDevice> dev = m_ipv4->GetNetDevice(m_ipv4->GetInterfaceForAddress(addr));
-                        Ptr<WifiNetDevice> wifi = dev->GetObject<WifiNetDevice>();
+                        Ptr <NetDevice> dev = m_ipv4->GetNetDevice(m_ipv4->GetInterfaceForAddress(addr));
+                        Ptr <WifiNetDevice> wifi = dev->GetObject<WifiNetDevice>();
                         if (wifi == 0) {
                             break;
                         }
-                        Ptr<WifiMac> mac = wifi->GetMac();
+                        Ptr <WifiMac> mac = wifi->GetMac();
                         if (mac == 0) {
                             break;
                         }
 
                         routeCache->AddArpCache(m_ipv4->GetInterface(i)->GetArpCache());
-                        NS_LOG_LOGIC ("Starting DSR on node " << m_mainAddress);
+                        NS_LOG_LOGIC("Starting DSR on node " << m_mainAddress);
 //              break;//oddd schdule diedai 每个interface进行一次starts
 //              if(isFound) //odd
                         //  break;   //todo
@@ -556,7 +557,7 @@ namespace ns3 {
 //    	  std::cout<<"Interface is larger than 2\n";
 ////    	  Simulator::ScheduleNow (&DsrRouting::Start, this);
 //      }
-                NS_ASSERT (m_mainAddress != Ipv4Address() && m_broadcast != Ipv4Address());
+                NS_ASSERT(m_mainAddress != Ipv4Address() && m_broadcast != Ipv4Address());
             }
 
             for (int i = 0; i < 50; i++) {
@@ -610,20 +611,20 @@ namespace ns3 {
             }
         }
 
-        Ptr<NetDevice>
+        Ptr <NetDevice>
         DsrRouting::GetNetDeviceFromContext(std::string context) {
             // Use "NodeList/*/DeviceList/*/ as reference
             // where element [1] is the Node Id
             // element [2] is the NetDevice Id
-            std::vector<std::string> elements = GetElementsFromContext(context);
-            Ptr<Node> n = NodeList::GetNode(atoi(elements[1].c_str()));
-            NS_ASSERT (n);
+            std::vector <std::string> elements = GetElementsFromContext(context);
+            Ptr <Node> n = NodeList::GetNode(atoi(elements[1].c_str()));
+            NS_ASSERT(n);
             return n->GetDevice(atoi(elements[3].c_str()));
         }
 
-        std::vector<std::string>
+        std::vector <std::string>
         DsrRouting::GetElementsFromContext(std::string context) {
-            std::vector<std::string> elements;
+            std::vector <std::string> elements;
             size_t pos1 = 0, pos2;
             while (pos1 != context.npos) {
                 pos1 = context.find("/", pos1);
@@ -637,14 +638,14 @@ namespace ns3 {
 
         void
         DsrRouting::DoDispose(void) {
-            NS_LOG_FUNCTION_NOARGS ();
+            NS_LOG_FUNCTION_NOARGS();
             m_node = 0;
             for (uint32_t i = 0; i < m_ipv4->GetNInterfaces(); i++) {
                 // Disable layer 2 link state monitoring (if possible)
-                Ptr<NetDevice> dev = m_ipv4->GetNetDevice(i);
-                Ptr<WifiNetDevice> wifi = dev->GetObject<WifiNetDevice>();
+                Ptr <NetDevice> dev = m_ipv4->GetNetDevice(i);
+                Ptr <WifiNetDevice> wifi = dev->GetObject<WifiNetDevice>();
                 if (wifi != 0) {
-                    Ptr<WifiMac> mac = wifi->GetMac()->GetObject<AdhocWifiMac>();
+                    Ptr <WifiMac> mac = wifi->GetMac()->GetObject<AdhocWifiMac>();
                     if (mac != 0) {
                         mac->TraceDisconnectWithoutContext("TxErrHeader",
                                                            m_routeCache->GetTxErrorCallback());
@@ -656,56 +657,56 @@ namespace ns3 {
         }
 
         void
-        DsrRouting::SetNode(Ptr<Node> node) {
+        DsrRouting::SetNode(Ptr <Node> node) {
             m_node = node;
         }
 
-        Ptr<Node>
+        Ptr <Node>
         DsrRouting::GetNode() const {
-            NS_LOG_FUNCTION_NOARGS ();
+            NS_LOG_FUNCTION_NOARGS();
             return m_node;
         }
 
-        void DsrRouting::SetRouteCache(Ptr<dsr::DsrRouteCache> r) {
+        void DsrRouting::SetRouteCache(Ptr <dsr::DsrRouteCache> r) {
             // / Set the route cache to use
             m_routeCache = r;
         }
 
-        Ptr<dsr::DsrRouteCache>
+        Ptr <dsr::DsrRouteCache>
         DsrRouting::GetRouteCache() const {
             // / Get the route cache to use
             return m_routeCache;
         }
 
-        void DsrRouting::SetRequestTable(Ptr<dsr::DsrRreqTable> q) {
+        void DsrRouting::SetRequestTable(Ptr <dsr::DsrRreqTable> q) {
             // / Set the request table to use
             m_rreqTable = q;
         }
 
-        Ptr<dsr::DsrRreqTable>
+        Ptr <dsr::DsrRreqTable>
         DsrRouting::GetRequestTable() const {
             // / Get the request table to use
             return m_rreqTable;
         }
 
-        void DsrRouting::SetPassiveBuffer(Ptr<dsr::DsrPassiveBuffer> p) {
+        void DsrRouting::SetPassiveBuffer(Ptr <dsr::DsrPassiveBuffer> p) {
             // / Set the request table to use
             m_passiveBuffer = p;
         }
 
-        Ptr<dsr::DsrPassiveBuffer>
+        Ptr <dsr::DsrPassiveBuffer>
         DsrRouting::GetPassiveBuffer() const {
             // / Get the request table to use
             return m_passiveBuffer;
         }
 
-        Ptr<Node>
+        Ptr <Node>
         DsrRouting::GetNodeWithAddress(Ipv4Address ipv4Address) {
-            NS_LOG_FUNCTION (this << ipv4Address);
+            NS_LOG_FUNCTION(this << ipv4Address);
             int32_t nNodes = NodeList::GetNNodes();
             for (int32_t i = 0; i < nNodes; ++i) {
-                Ptr<Node> node = NodeList::GetNode(i);
-                Ptr<Ipv4> ipv4 = node->GetObject<Ipv4>();
+                Ptr <Node> node = NodeList::GetNode(i);
+                Ptr <Ipv4> ipv4 = node->GetObject<Ipv4>();
                 int32_t ifIndex = ipv4->GetInterfaceForAddress(ipv4Address);
                 if (ifIndex != -1) {
                     return node;
@@ -733,7 +734,7 @@ namespace ns3 {
         }
 
         bool DsrRouting::AddRoute(DsrRouteCacheEntry &rt) {
-            std::vector<Ipv4Address> nodelist = rt.GetVector();
+            std::vector <Ipv4Address> nodelist = rt.GetVector();
             Ipv4Address nextHop = SearchNextHop(m_mainAddress, nodelist);
             m_errorBuffer.DropPacketForErrLink(m_mainAddress, nextHop);
             return m_routeCache->AddRoute(rt);
@@ -753,14 +754,14 @@ namespace ns3 {
 
         Ipv4Address
         DsrRouting::GetIPfromMAC(Mac48Address address) {
-            NS_LOG_FUNCTION (this << address);
+            NS_LOG_FUNCTION(this << address);
             int32_t nNodes = NodeList::GetNNodes();
             for (int32_t i = 0; i < nNodes; ++i) {
-                Ptr<Node> node = NodeList::GetNode(i);
-                Ptr<Ipv4> ipv4 = node->GetObject<Ipv4>();
+                Ptr <Node> node = NodeList::GetNode(i);
+                Ptr <Ipv4> ipv4 = node->GetObject<Ipv4>();
                 uint16_t in_num = ipv4->GetNInterfaces();
                 for (uint16_t i = 1; i < in_num; i++) {
-                    Ptr<NetDevice> netDevice = ipv4->GetNetDevice(i);
+                    Ptr <NetDevice> netDevice = ipv4->GetNetDevice(i);
                     if (netDevice->GetAddress() == address) {
                         return ipv4->GetAddress(i, 0).GetLocal();
                     }
@@ -770,32 +771,32 @@ namespace ns3 {
             return 0;
         }
 
-        void DsrRouting::PrintVector(std::vector<Ipv4Address> &vec) {
-            NS_LOG_FUNCTION (this);
+        void DsrRouting::PrintVector(std::vector <Ipv4Address> &vec) {
+            NS_LOG_FUNCTION(this);
             /*
    * Check elements in a route vector
    */
             if (!vec.size()) {
-                NS_LOG_DEBUG ("The vector is empty");
+                NS_LOG_DEBUG("The vector is empty");
             } else {
-                NS_LOG_DEBUG ("Print all the elements in a vector");
+                NS_LOG_DEBUG("Print all the elements in a vector");
                 for (std::vector<Ipv4Address>::const_iterator i = vec.begin(); i != vec.end(); ++i) {
-                    NS_LOG_DEBUG ("The ip address " << *i);
+                    NS_LOG_DEBUG("The ip address " << *i);
                 }
             }
         }
 
-        Ipv4Address DsrRouting::SearchNextHop(Ipv4Address ipv4Address, std::vector<Ipv4Address> &vec) {
-            NS_LOG_FUNCTION (this << ipv4Address);
+        Ipv4Address DsrRouting::SearchNextHop(Ipv4Address ipv4Address, std::vector <Ipv4Address> &vec) {
+            NS_LOG_FUNCTION(this << ipv4Address);
             Ipv4Address nextHop;
-            NS_LOG_DEBUG ("the vector size " << vec.size());
+            NS_LOG_DEBUG("the vector size " << vec.size());
             if (vec.size() == 2) {
-                NS_LOG_DEBUG ("The two nodes are neighbors");
+                NS_LOG_DEBUG("The two nodes are neighbors");
                 nextHop = vec[1];
                 return nextHop;
             } else {
                 if (ipv4Address == vec.back()) {
-                    NS_LOG_DEBUG ("We have reached to the final destination " << ipv4Address << " " << vec.back());
+                    NS_LOG_DEBUG("We have reached to the final destination " << ipv4Address << " " << vec.back());
                     return ipv4Address;
                 }
                 for (std::vector<Ipv4Address>::const_iterator i = vec.begin(); i != vec.end(); ++i) {
@@ -805,14 +806,14 @@ namespace ns3 {
                     }
                 }
             }
-            NS_LOG_DEBUG ("Next hop address not found");
+            NS_LOG_DEBUG("Next hop address not found");
             Ipv4Address none = "0.0.0.0";
             return none;
         }
 
-        Ptr<Ipv4Route>
+        Ptr <Ipv4Route>
         DsrRouting::SetRoute(Ipv4Address nextHop, Ipv4Address srcAddress) {
-            NS_LOG_FUNCTION (this << nextHop << srcAddress);
+            NS_LOG_FUNCTION(this << nextHop << srcAddress);
             m_ipv4Route = Create<Ipv4Route>();
             m_ipv4Route->SetDestination(nextHop);
             m_ipv4Route->SetGateway(nextHop);
@@ -854,33 +855,33 @@ namespace ns3 {
         }
 
         void DsrRouting::CheckSendBuffer() {
-            NS_LOG_INFO (Simulator::Now().GetSeconds()
-                                 << " Checking send buffer at " << m_mainAddress << " with size "
-                                 << m_sendBuffer.GetSize());
+            NS_LOG_INFO(Simulator::Now().GetSeconds()
+                                << " Checking send buffer at " << m_mainAddress << " with size "
+                                << m_sendBuffer.GetSize());
 
             for (std::vector<DsrSendBuffEntry>::iterator i = m_sendBuffer.GetBuffer().begin();
                  i != m_sendBuffer.GetBuffer().end();) {
-                NS_LOG_DEBUG ("Here we try to find the data packet in the send buffer");
+                NS_LOG_DEBUG("Here we try to find the data packet in the send buffer");
                 Ipv4Address destination = i->GetDestination();
                 DsrRouteCacheEntry toDst;
                 bool findRoute = m_routeCache->LookupRoute(destination, toDst);
                 if (findRoute) {
-                    NS_LOG_INFO ("We have found a route for the packet");
+                    NS_LOG_INFO("We have found a route for the packet");
                     Ptr<const Packet> packet = i->GetPacket();
-                    Ptr<Packet> cleanP = packet->Copy();
+                    Ptr <Packet> cleanP = packet->Copy();
                     uint8_t protocol = i->GetProtocol();
 
                     i = m_sendBuffer.GetBuffer().erase(i);
 
                     DsrRoutingHeader dsrRoutingHeader;
-                    Ptr<Packet> copyP = packet->Copy();
-                    Ptr<Packet> dsrPacket = packet->Copy();
+                    Ptr <Packet> copyP = packet->Copy();
+                    Ptr <Packet> dsrPacket = packet->Copy();
                     dsrPacket->RemoveHeader(dsrRoutingHeader);
                     uint32_t offset = dsrRoutingHeader.GetDsrOptionsOffset();
                     copyP->RemoveAtStart(
                             offset); // Here the processed size is 8 bytes, which is the fixed sized extension header
                     // The packet to get ipv4 header
-                    Ptr<Packet> ipv4P = copyP->Copy();
+                    Ptr <Packet> ipv4P = copyP->Copy();
                     /*
            * Peek data to get the option type as well as length and segmentsLeft field
            */
@@ -892,7 +893,7 @@ namespace ns3 {
                     optionType = *(data);
 
                     if (optionType == 3) {
-                        Ptr<dsr::DsrOptions> dsrOption;
+                        Ptr <dsr::DsrOptions> dsrOption;
                         DsrOptionHeader dsrOptionHeader;
                         uint8_t errorType = *(data + 2);
 
@@ -900,7 +901,7 @@ namespace ns3 {
                         {
                             DsrOptionRerrUnreachHeader rerr;
                             copyP->RemoveHeader(rerr);
-                            NS_ASSERT (copyP->GetSize() == 0);
+                            NS_ASSERT(copyP->GetSize() == 0);
 
                             DsrOptionRerrUnreachHeader newUnreach;
                             newUnreach.SetErrorType(1);
@@ -911,7 +912,7 @@ namespace ns3 {
                                     rerr.GetSalvage()); // Set the value about whether to salvage a packet or not
 
                             DsrOptionSRHeader sourceRoute;
-                            std::vector<Ipv4Address> errorRoute = toDst.GetVector();
+                            std::vector <Ipv4Address> errorRoute = toDst.GetVector();
                             sourceRoute.SetNodesAddress(errorRoute);
                             /// When found a route and use it, UseExtends to the link cache
                             if (m_routeCache->IsLinkCache()) {
@@ -938,16 +939,17 @@ namespace ns3 {
                             dsrRoutingHeader.AddDsrOption(newUnreach);
                             dsrRoutingHeader.AddDsrOption(sourceRoute);
 
-                            Ptr<Packet> newPacket = Create<Packet>();
+                            Ptr <Packet> newPacket = Create<Packet>();
                             newPacket->AddHeader(
                                     dsrRoutingHeader); // Add the routing header with rerr and sourceRoute attached to it
-                            Ptr<NetDevice> dev = m_ip->GetNetDevice(m_ip->GetInterfaceForAddress(m_mainAddress));
+                            Ptr <NetDevice> dev = m_ip->GetNetDevice(m_ip->GetInterfaceForAddress(m_mainAddress));
                             m_ipv4Route->SetOutputDevice(dev);
 
                             uint32_t priority = GetPriority(DSR_CONTROL_PACKET); /// This will be priority 0
-                            std::map<uint32_t, Ptr<dsr::DsrNetworkQueue> >::iterator i = m_priorityQueue.find(priority);
-                            Ptr<dsr::DsrNetworkQueue> dsrNetworkQueue = i->second;
-                            NS_LOG_LOGIC ("Will be inserting into priority queue number: " << priority);
+                            std::map < uint32_t, Ptr < dsr::DsrNetworkQueue > > ::iterator
+                            i = m_priorityQueue.find(priority);
+                            Ptr <dsr::DsrNetworkQueue> dsrNetworkQueue = i->second;
+                            NS_LOG_LOGIC("Will be inserting into priority queue number: " << priority);
 
                             //m_downTarget (newPacket, m_mainAddress, nextHop, GetProtocolNumber (), m_ipv4Route);
 
@@ -958,7 +960,7 @@ namespace ns3 {
                             if (dsrNetworkQueue->Enqueue(newEntry)) {
                                 Scheduler(priority);
                             } else {
-                                NS_LOG_INFO ("Packet dropped as dsr network queue is full");
+                                NS_LOG_INFO("Packet dropped as dsr network queue is full");
                             }
                         }
                     } else {
@@ -968,7 +970,7 @@ namespace ns3 {
                         dsrRoutingHeader.SetDestId(GetIDfromIP(destination));
 
                         DsrOptionSRHeader sourceRoute;
-                        std::vector<Ipv4Address> nodeList = toDst.GetVector(); // Get the route from the route entry we found
+                        std::vector <Ipv4Address> nodeList = toDst.GetVector(); // Get the route from the route entry we found
                         Ipv4Address nextHop = SearchNextHop(m_mainAddress,
                                                             nodeList);  // Get the next hop address for the route
                         if (nextHop == "0.0.0.0") {
@@ -1024,7 +1026,7 @@ namespace ns3 {
                             if (m_linkAck) {
                                 ScheduleLinkPacketRetry(newEntry, protocol);
                             } else {
-                                NS_LOG_LOGIC ("Not using link acknowledgment");
+                                NS_LOG_LOGIC("Not using link acknowledgment");
                                 if (nextHop != destination) {
                                     SchedulePassivePacketRetry(newEntry, protocol);
                                 } else {
@@ -1048,19 +1050,19 @@ namespace ns3 {
             //after going through the entire send buffer and send all packets found route,
             //we need to resume the timer if it has been suspended
             if (m_sendBuffTimer.IsSuspended()) {
-                NS_LOG_DEBUG ("Resume the send buffer timer");
+                NS_LOG_DEBUG("Resume the send buffer timer");
                 m_sendBuffTimer.Resume();
             }
         }
 
-        bool DsrRouting::PromiscReceive(Ptr<NetDevice> device, Ptr<const Packet> packet, uint16_t protocol,
+        bool DsrRouting::PromiscReceive(Ptr <NetDevice> device, Ptr<const Packet> packet, uint16_t protocol,
                                         const Address &from,
                                         const Address &to, NetDevice::PacketType packetType) {
             if (protocol != Ipv4L3Protocol::PROT_NUMBER) {
                 return false;
             }
             // Remove the ipv4 header here
-            Ptr<Packet> pktMinusIpHdr = packet->Copy();
+            Ptr <Packet> pktMinusIpHdr = packet->Copy();
             Ipv4Header ipv4Header;
             pktMinusIpHdr->RemoveHeader(ipv4Header);
 
@@ -1068,7 +1070,7 @@ namespace ns3 {
                 return false;
             }
             // Remove the dsr routing header here
-            Ptr<Packet> pktMinusDsrHdr = pktMinusIpHdr->Copy();
+            Ptr <Packet> pktMinusDsrHdr = pktMinusIpHdr->Copy();
             DsrRoutingHeader dsrRouting;
             pktMinusDsrHdr->RemoveHeader(dsrRouting);
 
@@ -1091,13 +1093,13 @@ namespace ns3 {
 //  Ipv4Address ourAddress = m_ipv4->GetAddress (1, 0).GetLocal ();			//odd   TODO check
             // check if the message type is 2 and if the ipv4 address matches
             if (dsrRouting.GetMessageType() == 2 && ourAddress == m_mainAddress) {
-                NS_LOG_DEBUG ("data packet receives " << packet->GetUid());
+                NS_LOG_DEBUG("data packet receives " << packet->GetUid());
                 Ipv4Address sourceIp = GetIPfromID(dsrRouting.GetSourceId());
                 Ipv4Address destinationIp = GetIPfromID(dsrRouting.GetDestId());
                 /// This is the ip address we just received data packet from
                 Ipv4Address previousHop = GetIPfromMAC(Mac48Address::ConvertFrom(from));
 
-                Ptr<Packet> p = Create<Packet>();
+                Ptr <Packet> p = Create<Packet>();
                 // Here the segments left value need to plus one to check the earlier hop maintain buffer entry
                 DsrMaintainBuffEntry newEntry;
                 newEntry.SetPacket(p);
@@ -1107,17 +1109,17 @@ namespace ns3 {
                 newEntry.SetOurAdd(previousHop);
                 newEntry.SetNextHop(ourAddress);
                 /// Get the previous node's maintenance buffer and passive ack
-                Ptr<Node> node = GetNodeWithAddress(previousHop);
-                NS_LOG_DEBUG ("The previous node " << previousHop);
+                Ptr <Node> node = GetNodeWithAddress(previousHop);
+                NS_LOG_DEBUG("The previous node " << previousHop);
 
-                Ptr<dsr::DsrRouting> dsr = node->GetObject<dsr::DsrRouting>();
+                Ptr <dsr::DsrRouting> dsr = node->GetObject<dsr::DsrRouting>();
                 dsr->CancelLinkPacketTimer(newEntry);
             }
 
             // Receive only IP packets and packets destined for other hosts
             if (packetType == NetDevice::PACKET_OTHERHOST) {
                 //just to minimize debug output
-                NS_LOG_INFO (this << from << to << packetType << *pktMinusIpHdr);
+                NS_LOG_INFO(this << from << to << packetType << *pktMinusIpHdr);
 
                 uint8_t offset = dsrRouting.GetDsrOptionsOffset();        // Get the offset for option header, 4 bytes in this case
                 uint8_t nextHeader = dsrRouting.GetNextHeader();
@@ -1135,22 +1137,22 @@ namespace ns3 {
                 uint8_t optionType = 0;
                 optionType = *(data);
 
-                Ptr<dsr::DsrOptions> dsrOption;
+                Ptr <dsr::DsrOptions> dsrOption;
 
                 if (optionType == 96)        // This is the source route option
                 {
                     Ipv4Address promiscSource = GetIPfromMAC(Mac48Address::ConvertFrom(from));
                     dsrOption = GetOption(
                             optionType);       // Get the relative DSR option and demux to the process function
-                    NS_LOG_DEBUG (Simulator::Now().GetSeconds() <<
-                                                                " DSR node " << m_mainAddress <<
-                                                                " overhearing packet PID: " << pktMinusIpHdr->GetUid()
-                                                                <<
-                                                                " from " << promiscSource <<
-                                                                " to " << GetIPfromMAC(Mac48Address::ConvertFrom(to)) <<
-                                                                " with source IP " << ipv4Header.GetSource() <<
-                                                                " and destination IP " << ipv4Header.GetDestination() <<
-                                                                " and packet : " << *pktMinusDsrHdr);
+                    NS_LOG_DEBUG(Simulator::Now().GetSeconds() <<
+                                                               " DSR node " << m_mainAddress <<
+                                                               " overhearing packet PID: " << pktMinusIpHdr->GetUid()
+                                                               <<
+                                                               " from " << promiscSource <<
+                                                               " to " << GetIPfromMAC(Mac48Address::ConvertFrom(to)) <<
+                                                               " with source IP " << ipv4Header.GetSource() <<
+                                                               " and destination IP " << ipv4Header.GetDestination() <<
+                                                               " and packet : " << *pktMinusDsrHdr);
 
                     bool isPromisc = true;                     // Set the boolean value isPromisc as true
                     dsrOption->Process(pktMinusIpHdr, pktMinusDsrHdr, m_mainAddress, source, ipv4Header, nextHeader,
@@ -1163,30 +1165,30 @@ namespace ns3 {
         }
 
         void
-        DsrRouting::PacketNewRoute(Ptr<Packet> packet,
+        DsrRouting::PacketNewRoute(Ptr <Packet> packet,
                                    Ipv4Address source,
                                    Ipv4Address destination,
                                    uint8_t protocol) {
-            NS_LOG_FUNCTION (this << packet << source << destination << (uint32_t) protocol);
+            NS_LOG_FUNCTION(this << packet << source << destination << (uint32_t) protocol);
             // Look up routes for the specific destination
             DsrRouteCacheEntry toDst;
             bool findRoute = m_routeCache->LookupRoute(destination, toDst);
             // Queue the packet if there is no route pre-existing
             if (!findRoute) {
-                NS_LOG_INFO (Simulator::Now().GetSeconds()
-                                     << "s " << m_mainAddress
-                                     << " there is no route for this packet, queue the packet");
+                NS_LOG_INFO(Simulator::Now().GetSeconds()
+                                    << "s " << m_mainAddress
+                                    << " there is no route for this packet, queue the packet");
 
-                Ptr<Packet> p = packet->Copy();
+                Ptr <Packet> p = packet->Copy();
                 DsrSendBuffEntry newEntry(p, destination, m_sendBufferTimeout,
                                           protocol);     // Create a new entry for send buffer
                 bool result = m_sendBuffer.Enqueue(newEntry);     // Enqueue the packet in send buffer
                 if (result) {
-                    NS_LOG_INFO (Simulator::Now().GetSeconds()
-                                         << "s Add packet PID: " << packet->GetUid() << " to queue. Packet: "
-                                         << *packet);
+                    NS_LOG_INFO(Simulator::Now().GetSeconds()
+                                        << "s Add packet PID: " << packet->GetUid() << " to queue. Packet: "
+                                        << *packet);
 
-                    NS_LOG_LOGIC ("Send RREQ to" << destination);
+                    NS_LOG_LOGIC("Send RREQ to" << destination);
                     if ((m_addressReqTimer.find(destination) == m_addressReqTimer.end()) &&
                         (m_nonPropReqTimer.find(destination) == m_nonPropReqTimer.end())) {
                         /*
@@ -1196,7 +1198,7 @@ namespace ns3 {
                     }
                 }
             } else {
-                Ptr<Packet> cleanP = packet->Copy();
+                Ptr <Packet> cleanP = packet->Copy();
                 DsrRoutingHeader dsrRoutingHeader;
                 dsrRoutingHeader.SetNextHeader(protocol);
                 dsrRoutingHeader.SetMessageType(2);
@@ -1204,7 +1206,7 @@ namespace ns3 {
                 dsrRoutingHeader.SetDestId(GetIDfromIP(destination));
 
                 DsrOptionSRHeader sourceRoute;
-                std::vector<Ipv4Address> nodeList = toDst.GetVector();     // Get the route from the route entry we found
+                std::vector <Ipv4Address> nodeList = toDst.GetVector();     // Get the route from the route entry we found
                 for (uint16_t i = 0; i < nodeList.size(); i++)   //处理数据转发，使得SearchNextHop能够找到
                 {
                     for (uint16_t j = 0; j < od_addressVector.size(); j++)
@@ -1269,7 +1271,7 @@ namespace ns3 {
                     if (m_linkAck) {
                         ScheduleLinkPacketRetry(newEntry, protocol);
                     } else {
-                        NS_LOG_LOGIC ("Not using link acknowledgment");
+                        NS_LOG_LOGIC("Not using link acknowledgment");
                         if (nextHop != destination) {
                             SchedulePassivePacketRetry(newEntry, protocol);
                         } else {
@@ -1284,7 +1286,7 @@ namespace ns3 {
         void
         DsrRouting::SendUnreachError(Ipv4Address unreachNode, Ipv4Address destination, Ipv4Address originalDst,
                                      uint8_t salvage, uint8_t protocol) {
-            NS_LOG_FUNCTION (
+            NS_LOG_FUNCTION(
                     this << unreachNode << destination << originalDst << (uint32_t) salvage << (uint32_t) protocol);
             DsrRoutingHeader dsrRoutingHeader;
             dsrRoutingHeader.SetNextHeader(protocol);
@@ -1306,34 +1308,34 @@ namespace ns3 {
             DsrRouteCacheEntry toDst;
             bool findRoute = m_routeCache->LookupRoute(destination, toDst);
             // Queue the packet if there is no route pre-existing
-            Ptr<Packet> newPacket = Create<Packet>();
+            Ptr <Packet> newPacket = Create<Packet>();
             if (!findRoute) {
                 if (destination == m_mainAddress) {
-                    NS_LOG_INFO ("We are the error source, send request to original dst " << originalDst);
+                    NS_LOG_INFO("We are the error source, send request to original dst " << originalDst);
                     // Send error request message if we are the source node
                     SendErrorRequest(rerrUnreachHeader, protocol);   //odd todo
                 } else {
-                    NS_LOG_INFO (Simulator::Now().GetSeconds()
-                                         << "s " << m_mainAddress
-                                         << " there is no route for this packet, queue the packet");
+                    NS_LOG_INFO(Simulator::Now().GetSeconds()
+                                        << "s " << m_mainAddress
+                                        << " there is no route for this packet, queue the packet");
 
                     dsrRoutingHeader.SetPayloadLength(rerrLength + 2);
                     dsrRoutingHeader.AddDsrOption(rerrUnreachHeader);
                     newPacket->AddHeader(dsrRoutingHeader);
-                    Ptr<Packet> p = newPacket->Copy();
+                    Ptr <Packet> p = newPacket->Copy();
                     // Save the error packet in the error buffer
                     DsrErrorBuffEntry newEntry(p, destination, m_mainAddress, unreachNode, m_sendBufferTimeout,
                                                protocol);
                     bool result = m_errorBuffer.Enqueue(
                             newEntry);                    // Enqueue the packet in send buffer
                     if (result) {
-                        NS_LOG_INFO (Simulator::Now().GetSeconds()
-                                             << "s Add packet PID: " << p->GetUid() << " to queue. Packet: " << *p);
-                        NS_LOG_LOGIC ("Send RREQ to" << destination);
+                        NS_LOG_INFO(Simulator::Now().GetSeconds()
+                                            << "s Add packet PID: " << p->GetUid() << " to queue. Packet: " << *p);
+                        NS_LOG_LOGIC("Send RREQ to" << destination);
                         if ((m_addressReqTimer.find(destination) == m_addressReqTimer.end()) &&
                             (m_nonPropReqTimer.find(destination) == m_nonPropReqTimer.end())) {
-                            NS_LOG_DEBUG ("When there is no existing route request for " << destination
-                                                                                         << ", initialize one");
+                            NS_LOG_DEBUG("When there is no existing route request for " << destination
+                                                                                        << ", initialize one");
                             /*
                  * Call the send request function, it will update the request table entry and ttl there
                  */
@@ -1342,10 +1344,10 @@ namespace ns3 {
                     }
                 }
             } else {
-                std::vector<Ipv4Address> nodeList = toDst.GetVector();
+                std::vector <Ipv4Address> nodeList = toDst.GetVector();
                 Ipv4Address nextHop = SearchNextHop(m_mainAddress, nodeList);
                 if (nextHop == "0.0.0.0") {
-                    NS_LOG_DEBUG ("The route is not right");
+                    NS_LOG_DEBUG("The route is not right");
                     return;
                     PacketNewRoute(newPacket, m_mainAddress, destination, protocol);
 
@@ -1366,15 +1368,16 @@ namespace ns3 {
                 newPacket->AddHeader(dsrRoutingHeader);
 
                 SetRoute(nextHop, m_mainAddress);
-                Ptr<NetDevice> dev = m_ip->GetNetDevice(m_ip->GetInterfaceForAddress(m_mainAddress));
+                Ptr <NetDevice> dev = m_ip->GetNetDevice(m_ip->GetInterfaceForAddress(m_mainAddress));
                 m_ipv4Route->SetOutputDevice(dev);
-                NS_LOG_INFO ("Send the packet to the next hop address " << nextHop << " from " << m_mainAddress
-                                                                        << " with the size " << newPacket->GetSize());
+                NS_LOG_INFO("Send the packet to the next hop address " << nextHop << " from " << m_mainAddress
+                                                                       << " with the size " << newPacket->GetSize());
 
                 uint32_t priority = GetPriority(DSR_CONTROL_PACKET);
-                std::map<uint32_t, Ptr<dsr::DsrNetworkQueue> >::iterator i = m_priorityQueue.find(priority);
-                Ptr<dsr::DsrNetworkQueue> dsrNetworkQueue = i->second;
-                NS_LOG_DEBUG ("Will be inserting into priority queue " << dsrNetworkQueue << " number: " << priority);
+                std::map < uint32_t, Ptr < dsr::DsrNetworkQueue > > ::iterator
+                i = m_priorityQueue.find(priority);
+                Ptr <dsr::DsrNetworkQueue> dsrNetworkQueue = i->second;
+                NS_LOG_DEBUG("Will be inserting into priority queue " << dsrNetworkQueue << " number: " << priority);
 
                 //m_downTarget (newPacket, m_mainAddress, nextHop, GetProtocolNumber (), m_ipv4Route);
 
@@ -1384,7 +1387,7 @@ namespace ns3 {
                 if (dsrNetworkQueue->Enqueue(newEntry)) {
                     Scheduler(priority);
                 } else {
-                    NS_LOG_INFO ("Packet dropped as dsr network queue is full");
+                    NS_LOG_INFO("Packet dropped as dsr network queue is full");
                 }
             }
         }
@@ -1394,9 +1397,9 @@ namespace ns3 {
                                      DsrOptionSRHeader &sourceRoute,
                                      Ipv4Address nextHop,
                                      uint8_t protocol,
-                                     Ptr<Ipv4Route> route) {
-            NS_LOG_FUNCTION (this << rerr << sourceRoute << nextHop << (uint32_t) protocol << route);
-            NS_ASSERT_MSG (!m_downTarget.IsNull(), "Error, DsrRouting cannot send downward");
+                                     Ptr <Ipv4Route> route) {
+            NS_LOG_FUNCTION(this << rerr << sourceRoute << nextHop << (uint32_t) protocol << route);
+            NS_ASSERT_MSG(!m_downTarget.IsNull(), "Error, DsrRouting cannot send downward");
             DsrRoutingHeader dsrRoutingHeader;
             dsrRoutingHeader.SetNextHeader(protocol);
             dsrRoutingHeader.SetMessageType(1);
@@ -1407,15 +1410,16 @@ namespace ns3 {
             dsrRoutingHeader.SetPayloadLength(uint16_t(length) + 4);
             dsrRoutingHeader.AddDsrOption(rerr);
             dsrRoutingHeader.AddDsrOption(sourceRoute);
-            Ptr<Packet> packet = Create<Packet>();
+            Ptr <Packet> packet = Create<Packet>();
             packet->AddHeader(dsrRoutingHeader);
-            Ptr<NetDevice> dev = m_ip->GetNetDevice(m_ip->GetInterfaceForAddress(m_mainAddress));
+            Ptr <NetDevice> dev = m_ip->GetNetDevice(m_ip->GetInterfaceForAddress(m_mainAddress));
             route->SetOutputDevice(dev);
 
             uint32_t priority = GetPriority(DSR_CONTROL_PACKET);
-            std::map<uint32_t, Ptr<dsr::DsrNetworkQueue> >::iterator i = m_priorityQueue.find(priority);
-            Ptr<dsr::DsrNetworkQueue> dsrNetworkQueue = i->second;
-            NS_LOG_DEBUG ("Will be inserting into priority queue " << dsrNetworkQueue << " number: " << priority);
+            std::map < uint32_t, Ptr < dsr::DsrNetworkQueue > > ::iterator
+            i = m_priorityQueue.find(priority);
+            Ptr <dsr::DsrNetworkQueue> dsrNetworkQueue = i->second;
+            NS_LOG_DEBUG("Will be inserting into priority queue " << dsrNetworkQueue << " number: " << priority);
 
             //m_downTarget (packet, m_mainAddress, nextHop, GetProtocolNumber (), route);
 
@@ -1425,16 +1429,16 @@ namespace ns3 {
             if (dsrNetworkQueue->Enqueue(newEntry)) {
                 Scheduler(priority);
             } else {
-                NS_LOG_INFO ("Packet dropped as dsr network queue is full");
+                NS_LOG_INFO("Packet dropped as dsr network queue is full");
             }
         }
 
         void
-        DsrRouting::Send(Ptr<Packet> packet,
+        DsrRouting::Send(Ptr <Packet> packet,
                          Ipv4Address source,
                          Ipv4Address destination,
                          uint8_t protocol,
-                         Ptr<Ipv4Route> route) {
+                         Ptr <Ipv4Route> route) {
             std::cout << "DSR::SEND PACKETTAG----------------------- " << packet->GetTag() << std::endl;
             Ipv4Mask odMask;
             odMask.Set(0xffffff00);
@@ -1446,36 +1450,36 @@ namespace ns3 {
                 }
             }
 
-            NS_LOG_FUNCTION (this << packet << source << destination << (uint32_t) protocol << route);
-            NS_ASSERT_MSG (!m_downTarget.IsNull(), "Error, DsrRouting cannot send downward");
+            NS_LOG_FUNCTION(this << packet << source << destination << (uint32_t) protocol << route);
+            NS_ASSERT_MSG(!m_downTarget.IsNull(), "Error, DsrRouting cannot send downward");
 
             if (protocol == 1) {
-                NS_LOG_INFO ("Drop packet. Not handling ICMP packet for now");
+                NS_LOG_INFO("Drop packet. Not handling ICMP packet for now");
             } else {
                 // Look up routes for the specific destination
                 DsrRouteCacheEntry toDst;
                 bool findRoute = m_routeCache->LookupRoute(destination, toDst);
                 // Queue the packet if there is no route pre-existing
                 if (!findRoute) {
-                    NS_LOG_INFO (Simulator::Now().GetSeconds()
-                                         << "s " << m_mainAddress
-                                         << " there is no route for this packet, queue the packet");
+                    NS_LOG_INFO(Simulator::Now().GetSeconds()
+                                        << "s " << m_mainAddress
+                                        << " there is no route for this packet, queue the packet");
 
-                    Ptr<Packet> p = packet->Copy();
+                    Ptr <Packet> p = packet->Copy();
                     DsrSendBuffEntry newEntry(p, destination, m_sendBufferTimeout,
                                               protocol);     // Create a new entry for send buffer
                     bool result = m_sendBuffer.Enqueue(newEntry);     // Enqueue the packet in send buffer
                     if (result) {
-                        NS_LOG_INFO (Simulator::Now().GetSeconds()
-                                             << "s Add packet PID: " << packet->GetUid() << " to send buffer. Packet: "
-                                             << *packet);
+                        NS_LOG_INFO(Simulator::Now().GetSeconds()
+                                            << "s Add packet PID: " << packet->GetUid() << " to send buffer. Packet: "
+                                            << *packet);
                         // Only when there is no existing route request timer when new route request is scheduled
                         if ((m_addressReqTimer.find(destination) == m_addressReqTimer.end()) &&
                             (m_nonPropReqTimer.find(destination) == m_nonPropReqTimer.end())) {
                             /*
                    * Call the send request function, it will update the request table entry and ttl value
                    */
-                            NS_LOG_LOGIC ("Send initial RREQ to " << destination);
+                            NS_LOG_LOGIC("Send initial RREQ to " << destination);
                             uint16_t destRadioType = FindRadioType(destination);
 
                             uint16_t tempType;
@@ -1497,12 +1501,12 @@ namespace ns3 {
                             }
 
                         } else {
-                            NS_LOG_LOGIC ("There is existing route request timer with request count "
-                                                  << m_rreqTable->GetRreqCnt(destination));
+                            NS_LOG_LOGIC("There is existing route request timer with request count "
+                                                 << m_rreqTable->GetRreqCnt(destination));
                         }
                     }
                 } else {
-                    Ptr<Packet> cleanP = packet->Copy();
+                    Ptr <Packet> cleanP = packet->Copy();
                     DsrRoutingHeader dsrRoutingHeader;
                     dsrRoutingHeader.SetNextHeader(protocol);
                     dsrRoutingHeader.SetMessageType(2);
@@ -1510,7 +1514,7 @@ namespace ns3 {
                     dsrRoutingHeader.SetDestId(GetIDfromIP(destination));
 
                     DsrOptionSRHeader sourceRoute;
-                    std::vector<Ipv4Address> nodeList = toDst.GetVector();       // Get the route from the route entry we found
+                    std::vector <Ipv4Address> nodeList = toDst.GetVector();       // Get the route from the route entry we found
                     Ipv4Address nextHop = SearchNextHop(m_mainAddress,
                                                         nodeList);        // Get the next hop address for the route
                     if (nextHop == "0.0.0.0") {
@@ -1535,7 +1539,7 @@ namespace ns3 {
                     cleanP->AddHeader(dsrRoutingHeader);
 
                     Ptr<const Packet> mtP = cleanP->Copy();
-                    NS_LOG_DEBUG ("maintain packet size " << cleanP->GetSize());
+                    NS_LOG_DEBUG("maintain packet size " << cleanP->GetSize());
                     // Put the data packet in the maintenance queue for data packet retransmission
                     DsrMaintainBuffEntry newEntry(/*Packet=*/ mtP, /*ourAddress=*/ m_mainAddress, /*nextHop=*/ nextHop,
                             /*source=*/ source, /*destination=*/ destination, /*ackId=*/ 0,
@@ -1569,7 +1573,7 @@ namespace ns3 {
                         if (m_linkAck) {
                             ScheduleLinkPacketRetry(newEntry, protocol);
                         } else {
-                            NS_LOG_LOGIC ("Not using link acknowledgment");
+                            NS_LOG_LOGIC("Not using link acknowledgment");
                             if (nextHop != destination) {
                                 SchedulePassivePacketRetry(newEntry, protocol);
                             } else {
@@ -1589,11 +1593,11 @@ namespace ns3 {
         }
 
         uint16_t
-        DsrRouting::AddAckReqHeader(Ptr<Packet> &packet, Ipv4Address nextHop) {
-            NS_LOG_FUNCTION (this << packet << nextHop);
+        DsrRouting::AddAckReqHeader(Ptr <Packet> &packet, Ipv4Address nextHop) {
+            NS_LOG_FUNCTION(this << packet << nextHop);
             // This packet is used to peek option type
-            Ptr<Packet> dsrP = packet->Copy();
-            Ptr<Packet> tmpP = packet->Copy();
+            Ptr <Packet> dsrP = packet->Copy();
+            Ptr <Packet> tmpP = packet->Copy();
 
             DsrRoutingHeader dsrRoutingHeader;
             dsrP->RemoveHeader(dsrRoutingHeader);          // Remove the DSR header in whole
@@ -1631,17 +1635,18 @@ namespace ns3 {
         }
 
         void
-        DsrRouting::SendPacket(Ptr<Packet> packet, Ipv4Address source, Ipv4Address nextHop, uint8_t protocol) {
-            NS_LOG_FUNCTION (this << packet << source << nextHop << (uint32_t) protocol);
+        DsrRouting::SendPacket(Ptr <Packet> packet, Ipv4Address source, Ipv4Address nextHop, uint8_t protocol) {
+            NS_LOG_FUNCTION(this << packet << source << nextHop << (uint32_t) protocol);
             // Send out the data packet
             m_ipv4Route = SetRoute(nextHop, m_mainAddress);
-            Ptr<NetDevice> dev = m_ip->GetNetDevice(m_ip->GetInterfaceForAddress(m_mainAddress));
+            Ptr <NetDevice> dev = m_ip->GetNetDevice(m_ip->GetInterfaceForAddress(m_mainAddress));
             m_ipv4Route->SetOutputDevice(dev);
 
             uint32_t priority = GetPriority(DSR_DATA_PACKET);
-            std::map<uint32_t, Ptr<dsr::DsrNetworkQueue> >::iterator i = m_priorityQueue.find(priority);
-            Ptr<dsr::DsrNetworkQueue> dsrNetworkQueue = i->second;
-            NS_LOG_INFO ("Will be inserting into priority queue number: " << priority);
+            std::map < uint32_t, Ptr < dsr::DsrNetworkQueue > > ::iterator
+            i = m_priorityQueue.find(priority);
+            Ptr <dsr::DsrNetworkQueue> dsrNetworkQueue = i->second;
+            NS_LOG_INFO("Will be inserting into priority queue number: " << priority);
 
             //m_downTarget (packet, source, nextHop, GetProtocolNumber (), m_ipv4Route);
 
@@ -1656,7 +1661,7 @@ namespace ns3 {
                     m_ipv4Route->SetDestination(Ipv4Address("198.6.1.2"));
                     m_ipv4Route->SetGateway(Ipv4Address("198.6.1.2"));
                     nextHop = Ipv4Address("198.6.1.2");
-                    Ptr<NetDevice> Odie = m_ip->GetNetDevice(
+                    Ptr <NetDevice> Odie = m_ip->GetNetDevice(
                             m_ip->GetInterfaceForAddress(Ipv4Address("198.6.1.1")));
                     m_ipv4Route->SetOutputDevice(Odie);
                 }
@@ -1669,7 +1674,7 @@ namespace ns3 {
                     m_ipv4Route->SetDestination(Ipv4Address("198.6.1.1"));
                     m_ipv4Route->SetGateway(Ipv4Address("198.6.1.1"));
                     nextHop = Ipv4Address("198.6.1.1");
-                    Ptr<NetDevice> Odie2 = m_ip->GetNetDevice(
+                    Ptr <NetDevice> Odie2 = m_ip->GetNetDevice(
                             m_ip->GetInterfaceForAddress(Ipv4Address("198.6.1.2")));
                     m_ipv4Route->SetOutputDevice(Odie2);
                 }
@@ -1681,7 +1686,7 @@ namespace ns3 {
                     m_ipv4Route->SetDestination(Ipv4Address("198.2.1.6"));
                     m_ipv4Route->SetGateway(Ipv4Address("198.2.1.6"));
                     nextHop = Ipv4Address("198.2.1.6");
-                    Ptr<NetDevice> Odie3 = m_ip->GetNetDevice(
+                    Ptr <NetDevice> Odie3 = m_ip->GetNetDevice(
                             m_ip->GetInterfaceForAddress(Ipv4Address("198.2.1.1")));
                     m_ipv4Route->SetOutputDevice(Odie3);
                 }
@@ -1692,7 +1697,7 @@ namespace ns3 {
                     m_ipv4Route->SetDestination(Ipv4Address("198.2.1.1"));
                     m_ipv4Route->SetGateway(Ipv4Address("198.2.1.1"));
                     nextHop = Ipv4Address("198.2.1.1");
-                    Ptr<NetDevice> odie4 = m_ip->GetNetDevice(
+                    Ptr <NetDevice> odie4 = m_ip->GetNetDevice(
                             m_ip->GetInterfaceForAddress(Ipv4Address("198.2.1.6")));
                     m_ipv4Route->SetOutputDevice(odie4);
                 }
@@ -1703,7 +1708,7 @@ namespace ns3 {
                     m_ipv4Route->SetDestination(Ipv4Address("198.2.1.6"));
                     m_ipv4Route->SetGateway(Ipv4Address("198.2.1.6"));
                     nextHop = Ipv4Address("198.2.1.6");
-                    Ptr<NetDevice> Odie5 = m_ip->GetNetDevice(
+                    Ptr <NetDevice> Odie5 = m_ip->GetNetDevice(
                             m_ip->GetInterfaceForAddress(Ipv4Address("198.2.1.2")));
                     m_ipv4Route->SetOutputDevice(Odie5);
                 }
@@ -1714,7 +1719,7 @@ namespace ns3 {
                     m_ipv4Route->SetDestination(Ipv4Address("198.2.1.2"));
                     m_ipv4Route->SetGateway(Ipv4Address("198.2.1.2"));
                     nextHop = Ipv4Address("198.2.1.2");
-                    Ptr<NetDevice> odie6 = m_ip->GetNetDevice(
+                    Ptr <NetDevice> odie6 = m_ip->GetNetDevice(
                             m_ip->GetInterfaceForAddress(Ipv4Address("198.2.1.6")));
                     m_ipv4Route->SetOutputDevice(odie6);
                 }
@@ -1726,7 +1731,7 @@ namespace ns3 {
                     m_ipv4Route->SetDestination(Ipv4Address("198.2.1.6"));
                     m_ipv4Route->SetGateway(Ipv4Address("198.2.1.6"));
                     nextHop = Ipv4Address("198.2.1.6");
-                    Ptr<NetDevice> Odie7 = m_ip->GetNetDevice(
+                    Ptr <NetDevice> Odie7 = m_ip->GetNetDevice(
                             m_ip->GetInterfaceForAddress(Ipv4Address("198.2.1.3")));
                     m_ipv4Route->SetOutputDevice(Odie7);
                 }
@@ -1737,7 +1742,7 @@ namespace ns3 {
                     m_ipv4Route->SetDestination(Ipv4Address("198.2.1.3"));
                     m_ipv4Route->SetGateway(Ipv4Address("198.2.1.3"));
                     nextHop = Ipv4Address("198.2.1.3");
-                    Ptr<NetDevice> odie8 = m_ip->GetNetDevice(
+                    Ptr <NetDevice> odie8 = m_ip->GetNetDevice(
                             m_ip->GetInterfaceForAddress(Ipv4Address("198.2.1.6")));
                     m_ipv4Route->SetOutputDevice(odie8);
                 }
@@ -1749,7 +1754,7 @@ namespace ns3 {
                     m_ipv4Route->SetDestination(Ipv4Address("198.2.1.6"));
                     m_ipv4Route->SetGateway(Ipv4Address("198.2.1.6"));
                     nextHop = Ipv4Address("198.2.1.6");
-                    Ptr<NetDevice> Odie7 = m_ip->GetNetDevice(
+                    Ptr <NetDevice> Odie7 = m_ip->GetNetDevice(
                             m_ip->GetInterfaceForAddress(Ipv4Address("198.2.1.3")));
                     m_ipv4Route->SetOutputDevice(Odie7);
                 }
@@ -1760,7 +1765,7 @@ namespace ns3 {
                     m_ipv4Route->SetDestination(Ipv4Address("198.2.1.3"));
                     m_ipv4Route->SetGateway(Ipv4Address("198.2.1.3"));
                     nextHop = Ipv4Address("198.2.1.3");
-                    Ptr<NetDevice> odie8 = m_ip->GetNetDevice(
+                    Ptr <NetDevice> odie8 = m_ip->GetNetDevice(
                             m_ip->GetInterfaceForAddress(Ipv4Address("198.2.1.6")));
                     m_ipv4Route->SetOutputDevice(odie8);
                 }
@@ -1772,7 +1777,7 @@ namespace ns3 {
                     m_ipv4Route->SetDestination(Ipv4Address("198.2.1.6"));
                     m_ipv4Route->SetGateway(Ipv4Address("198.2.1.6"));
                     nextHop = Ipv4Address("198.2.1.6");
-                    Ptr<NetDevice> Odie9 = m_ip->GetNetDevice(
+                    Ptr <NetDevice> Odie9 = m_ip->GetNetDevice(
                             m_ip->GetInterfaceForAddress(Ipv4Address("198.2.1.4")));
                     m_ipv4Route->SetOutputDevice(Odie9);
                 }
@@ -1783,7 +1788,7 @@ namespace ns3 {
                     m_ipv4Route->SetDestination(Ipv4Address("198.2.1.4"));
                     m_ipv4Route->SetGateway(Ipv4Address("198.2.1.4"));
                     nextHop = Ipv4Address("198.2.1.4");
-                    Ptr<NetDevice> odie10 = m_ip->GetNetDevice(
+                    Ptr <NetDevice> odie10 = m_ip->GetNetDevice(
                             m_ip->GetInterfaceForAddress(Ipv4Address("198.2.1.6")));
                     m_ipv4Route->SetOutputDevice(odie10);
                 }
@@ -1795,7 +1800,7 @@ namespace ns3 {
                     m_ipv4Route->SetDestination(Ipv4Address("198.2.1.6"));
                     m_ipv4Route->SetGateway(Ipv4Address("198.2.1.6"));
                     nextHop = Ipv4Address("198.2.1.6");
-                    Ptr<NetDevice> Odie9 = m_ip->GetNetDevice(
+                    Ptr <NetDevice> Odie9 = m_ip->GetNetDevice(
                             m_ip->GetInterfaceForAddress(Ipv4Address("198.2.1.5")));
                     m_ipv4Route->SetOutputDevice(Odie9);
                 }
@@ -1806,7 +1811,7 @@ namespace ns3 {
                     m_ipv4Route->SetDestination(Ipv4Address("198.2.1.5"));
                     m_ipv4Route->SetGateway(Ipv4Address("198.2.1.5"));
                     nextHop = Ipv4Address("198.2.1.5");
-                    Ptr<NetDevice> odie10 = m_ip->GetNetDevice(
+                    Ptr <NetDevice> odie10 = m_ip->GetNetDevice(
                             m_ip->GetInterfaceForAddress(Ipv4Address("198.2.1.6")));
                     m_ipv4Route->SetOutputDevice(odie10);
                 }
@@ -1818,7 +1823,7 @@ namespace ns3 {
                     m_ipv4Route->SetDestination(Ipv4Address("198.2.2.6"));
                     m_ipv4Route->SetGateway(Ipv4Address("198.2.2.6"));
                     nextHop = Ipv4Address("198.2.2.6");
-                    Ptr<NetDevice> Odie3 = m_ip->GetNetDevice(
+                    Ptr <NetDevice> Odie3 = m_ip->GetNetDevice(
                             m_ip->GetInterfaceForAddress(Ipv4Address("198.2.2.1")));
                     m_ipv4Route->SetOutputDevice(Odie3);
                 }
@@ -1829,7 +1834,7 @@ namespace ns3 {
                     m_ipv4Route->SetDestination(Ipv4Address("198.2.2.1"));
                     m_ipv4Route->SetGateway(Ipv4Address("198.2.2.1"));
                     nextHop = Ipv4Address("198.2.2.1");
-                    Ptr<NetDevice> odiex4 = m_ip->GetNetDevice(
+                    Ptr <NetDevice> odiex4 = m_ip->GetNetDevice(
                             m_ip->GetInterfaceForAddress(Ipv4Address("198.2.2.6")));
                     m_ipv4Route->SetOutputDevice(odiex4);
                 }
@@ -1841,7 +1846,7 @@ namespace ns3 {
                     m_ipv4Route->SetDestination(Ipv4Address("198.2.2.6"));
                     m_ipv4Route->SetGateway(Ipv4Address("198.2.2.6"));
                     nextHop = Ipv4Address("198.2.2.6");
-                    Ptr<NetDevice> Odie5 = m_ip->GetNetDevice(
+                    Ptr <NetDevice> Odie5 = m_ip->GetNetDevice(
                             m_ip->GetInterfaceForAddress(Ipv4Address("198.2.2.2")));
                     m_ipv4Route->SetOutputDevice(Odie5);
                 }
@@ -1852,7 +1857,7 @@ namespace ns3 {
                     m_ipv4Route->SetDestination(Ipv4Address("198.2.2.2"));
                     m_ipv4Route->SetGateway(Ipv4Address("198.2.2.2"));
                     nextHop = Ipv4Address("198.2.2.2");
-                    Ptr<NetDevice> odiex6 = m_ip->GetNetDevice(
+                    Ptr <NetDevice> odiex6 = m_ip->GetNetDevice(
                             m_ip->GetInterfaceForAddress(Ipv4Address("198.2.2.6")));
                     m_ipv4Route->SetOutputDevice(odiex6);
                 }
@@ -1864,7 +1869,7 @@ namespace ns3 {
                     m_ipv4Route->SetDestination(Ipv4Address("198.2.2.6"));
                     m_ipv4Route->SetGateway(Ipv4Address("198.2.2.6"));
                     nextHop = Ipv4Address("198.2.2.6");
-                    Ptr<NetDevice> Odie7 = m_ip->GetNetDevice(
+                    Ptr <NetDevice> Odie7 = m_ip->GetNetDevice(
                             m_ip->GetInterfaceForAddress(Ipv4Address("198.2.2.3")));
                     m_ipv4Route->SetOutputDevice(Odie7);
                 }
@@ -1875,7 +1880,7 @@ namespace ns3 {
                     m_ipv4Route->SetDestination(Ipv4Address("198.2.2.3"));
                     m_ipv4Route->SetGateway(Ipv4Address("198.2.2.3"));
                     nextHop = Ipv4Address("198.2.2.3");
-                    Ptr<NetDevice> odiex8 = m_ip->GetNetDevice(
+                    Ptr <NetDevice> odiex8 = m_ip->GetNetDevice(
                             m_ip->GetInterfaceForAddress(Ipv4Address("198.2.2.6")));
                     m_ipv4Route->SetOutputDevice(odiex8);
                 }
@@ -1887,7 +1892,7 @@ namespace ns3 {
                     m_ipv4Route->SetDestination(Ipv4Address("198.2.2.6"));
                     m_ipv4Route->SetGateway(Ipv4Address("198.2.2.6"));
                     nextHop = Ipv4Address("198.2.2.6");
-                    Ptr<NetDevice> Odie7 = m_ip->GetNetDevice(
+                    Ptr <NetDevice> Odie7 = m_ip->GetNetDevice(
                             m_ip->GetInterfaceForAddress(Ipv4Address("198.2.2.3")));
                     m_ipv4Route->SetOutputDevice(Odie7);
                 }
@@ -1898,7 +1903,7 @@ namespace ns3 {
                     m_ipv4Route->SetDestination(Ipv4Address("198.2.2.3"));
                     m_ipv4Route->SetGateway(Ipv4Address("198.2.2.3"));
                     nextHop = Ipv4Address("198.2.2.3");
-                    Ptr<NetDevice> odiex8 = m_ip->GetNetDevice(
+                    Ptr <NetDevice> odiex8 = m_ip->GetNetDevice(
                             m_ip->GetInterfaceForAddress(Ipv4Address("198.2.2.6")));
                     m_ipv4Route->SetOutputDevice(odiex8);
                 }
@@ -1910,7 +1915,7 @@ namespace ns3 {
                     m_ipv4Route->SetDestination(Ipv4Address("198.2.2.6"));
                     m_ipv4Route->SetGateway(Ipv4Address("198.2.2.6"));
                     nextHop = Ipv4Address("198.2.2.6");
-                    Ptr<NetDevice> Odie9 = m_ip->GetNetDevice(
+                    Ptr <NetDevice> Odie9 = m_ip->GetNetDevice(
                             m_ip->GetInterfaceForAddress(Ipv4Address("198.2.2.4")));
                     m_ipv4Route->SetOutputDevice(Odie9);
                 }
@@ -1921,7 +1926,7 @@ namespace ns3 {
                     m_ipv4Route->SetDestination(Ipv4Address("198.2.2.4"));
                     m_ipv4Route->SetGateway(Ipv4Address("198.2.2.4"));
                     nextHop = Ipv4Address("198.2.2.4");
-                    Ptr<NetDevice> odiex10 = m_ip->GetNetDevice(
+                    Ptr <NetDevice> odiex10 = m_ip->GetNetDevice(
                             m_ip->GetInterfaceForAddress(Ipv4Address("198.2.2.6")));
                     m_ipv4Route->SetOutputDevice(odiex10);
                 }
@@ -1933,7 +1938,7 @@ namespace ns3 {
                     m_ipv4Route->SetDestination(Ipv4Address("198.2.2.6"));
                     m_ipv4Route->SetGateway(Ipv4Address("198.2.2.6"));
                     nextHop = Ipv4Address("198.2.2.6");
-                    Ptr<NetDevice> Odie9 = m_ip->GetNetDevice(
+                    Ptr <NetDevice> Odie9 = m_ip->GetNetDevice(
                             m_ip->GetInterfaceForAddress(Ipv4Address("198.2.2.5")));
                     m_ipv4Route->SetOutputDevice(Odie9);
                 }
@@ -1944,7 +1949,7 @@ namespace ns3 {
                     m_ipv4Route->SetDestination(Ipv4Address("198.2.2.5"));
                     m_ipv4Route->SetGateway(Ipv4Address("198.2.2.5"));
                     nextHop = Ipv4Address("198.2.2.5");
-                    Ptr<NetDevice> odiex10 = m_ip->GetNetDevice(
+                    Ptr <NetDevice> odiex10 = m_ip->GetNetDevice(
                             m_ip->GetInterfaceForAddress(Ipv4Address("198.2.2.6")));
                     m_ipv4Route->SetOutputDevice(odiex10);
                 }
@@ -1956,19 +1961,19 @@ namespace ns3 {
             if (dsrNetworkQueue->Enqueue(newEntry)) {
                 Scheduler(priority);
             } else {
-                NS_LOG_INFO ("Packet dropped as dsr network queue is full");
+                NS_LOG_INFO("Packet dropped as dsr network queue is full");
             }
         }
 
         void
         DsrRouting::Scheduler(uint32_t priority) {
-            NS_LOG_FUNCTION (this);
+            NS_LOG_FUNCTION(this);
             PriorityScheduler(priority, true);
         }
 
         void
         DsrRouting::PriorityScheduler(uint32_t priority, bool continueWithFirst) {
-            NS_LOG_FUNCTION (this << priority << continueWithFirst);
+            NS_LOG_FUNCTION(this << priority << continueWithFirst);
             uint32_t numPriorities;
             if (continueWithFirst) {
                 numPriorities = 0;
@@ -1977,8 +1982,9 @@ namespace ns3 {
             }
             // priorities ranging from 0 to m_numPriorityQueues, with 0 as the highest priority
             for (uint32_t i = priority; numPriorities < m_numPriorityQueues; numPriorities++) {
-                std::map<uint32_t, Ptr<DsrNetworkQueue> >::iterator q = m_priorityQueue.find(i);
-                Ptr<dsr::DsrNetworkQueue> dsrNetworkQueue = q->second;
+                std::map < uint32_t, Ptr < DsrNetworkQueue > > ::iterator
+                q = m_priorityQueue.find(i);
+                Ptr <dsr::DsrNetworkQueue> dsrNetworkQueue = q->second;
                 uint32_t queueSize = dsrNetworkQueue->GetSize();
                 if (queueSize == 0) {
                     if ((i == (m_numPriorityQueues - 1)) && continueWithFirst) {
@@ -1988,12 +1994,13 @@ namespace ns3 {
                     }
                 } else {
                     uint32_t totalQueueSize = 0;
-                    for (std::map<uint32_t, Ptr<dsr::DsrNetworkQueue> >::iterator j = m_priorityQueue.begin();
-                         j != m_priorityQueue.end(); j++) {
-                        NS_LOG_INFO (
+                    for (std::map < uint32_t, Ptr < dsr::DsrNetworkQueue > > ::iterator j = m_priorityQueue.begin();
+                            j != m_priorityQueue.end();
+                    j++) {
+                        NS_LOG_INFO(
                                 "The size of the network queue for " << j->first << " is " << j->second->GetSize());
                         totalQueueSize += j->second->GetSize();
-                        NS_LOG_INFO ("The total network queue size is " << totalQueueSize);
+                        NS_LOG_INFO("The total network queue size is " << totalQueueSize);
                     }
                     if (totalQueueSize > 5) {
                         // Here the queue size is larger than 5, we need to increase the retransmission timer for each packet in the network queue
@@ -2002,14 +2009,14 @@ namespace ns3 {
                     DsrNetworkQueueEntry newEntry;
                     dsrNetworkQueue->Dequeue(newEntry);
                     if (SendRealDown(newEntry)) {
-                        NS_LOG_LOGIC ("Packet sent by Dsr. Calling PriorityScheduler after some time");
+                        NS_LOG_LOGIC("Packet sent by Dsr. Calling PriorityScheduler after some time");
                         // packet was successfully sent down. call scheduler after some time
                         Simulator::Schedule(MicroSeconds(m_uniformRandomVariable->GetInteger(0, 1000)),
                                             &DsrRouting::PriorityScheduler, this, i, false);
                     } else {
                         // packet was dropped by Dsr. Call scheduler immediately so that we can
                         // send another packet immediately.
-                        NS_LOG_LOGIC ("Packet dropped by Dsr. Calling PriorityScheduler immediately");
+                        NS_LOG_LOGIC("Packet dropped by Dsr. Calling PriorityScheduler immediately");
                         Simulator::Schedule(Seconds(0), &DsrRouting::PriorityScheduler, this, i, false);
                     }
 
@@ -2024,20 +2031,21 @@ namespace ns3 {
 
         void
         DsrRouting::IncreaseRetransTimer() {
-            NS_LOG_FUNCTION (this);
+            NS_LOG_FUNCTION(this);
             // We may want to get the queue first and then we need to save a vector of the entries here and then find
             uint32_t priority = GetPriority(DSR_DATA_PACKET);
-            std::map<uint32_t, Ptr<dsr::DsrNetworkQueue> >::iterator i = m_priorityQueue.find(priority);
-            Ptr<dsr::DsrNetworkQueue> dsrNetworkQueue = i->second;
+            std::map < uint32_t, Ptr < dsr::DsrNetworkQueue > > ::iterator
+            i = m_priorityQueue.find(priority);
+            Ptr <dsr::DsrNetworkQueue> dsrNetworkQueue = i->second;
 
-            std::vector<DsrNetworkQueueEntry> newNetworkQueue = dsrNetworkQueue->GetQueue();
+            std::vector <DsrNetworkQueueEntry> newNetworkQueue = dsrNetworkQueue->GetQueue();
             for (std::vector<DsrNetworkQueueEntry>::iterator i = newNetworkQueue.begin();
                  i != newNetworkQueue.end(); i++) {
                 Ipv4Address nextHop = i->GetNextHopAddress();
                 for (std::map<NetworkKey, Timer>::iterator j = m_addressForwardTimer.begin();
                      j != m_addressForwardTimer.end(); j++) {
                     if (nextHop == j->first.m_nextHop) {
-                        NS_LOG_DEBUG ("The network delay left is " << j->second.GetDelayLeft());
+                        NS_LOG_DEBUG("The network delay left is " << j->second.GetDelayLeft());
                         j->second.SetDelay(j->second.GetDelayLeft() + m_retransIncr);
                     }
                 }
@@ -2046,11 +2054,11 @@ namespace ns3 {
 
         bool
         DsrRouting::SendRealDown(DsrNetworkQueueEntry &newEntry) {
-            NS_LOG_FUNCTION (this);
+            NS_LOG_FUNCTION(this);
             Ipv4Address source = newEntry.GetSourceAddress();
             Ipv4Address nextHop = newEntry.GetNextHopAddress();
-            Ptr<Packet> packet = newEntry.GetPacket()->Copy();
-            Ptr<Ipv4Route> route = newEntry.GetIpv4Route();
+            Ptr <Packet> packet = newEntry.GetPacket()->Copy();
+            Ptr <Ipv4Route> route = newEntry.GetIpv4Route();
 //
 //  if(source==Ipv4Address("198.1.1.1")&&nextHop==Ipv4Address("198.2.1.1"))
 //  {
@@ -2070,9 +2078,10 @@ namespace ns3 {
             Ipv4Mask odMask;
             odMask.Set(0xffffff00);
             if (!odMask.IsMatch(source, nextHop) && !nextHop.IsSubnetDirectedBroadcast("255.255.255.0")) {
-                std::map<Ipv4Address, Ptr<Ipv4L3Protocol>>::const_iterator iter = nodeInterface.find(nextHop);
+                std::map < Ipv4Address, Ptr < Ipv4L3Protocol >> ::const_iterator
+                iter = nodeInterface.find(nextHop);
                 NS_ASSERT_MSG(iter != nodeInterface.end(), "Not Found NextHop in Map!");
-                Ptr<Ipv4L3Protocol> ipv4od = iter->second;
+                Ptr <Ipv4L3Protocol> ipv4od = iter->second;
                 for (uint16_t i = 1; i < ipv4od->GetNInterfaces(); i++) {
                     if (odMask.IsMatch(source, ipv4od->GetAddress(i, 0).GetLocal())) {
                         nextHop = ipv4od->GetAddress(i, 0).GetLocal();
@@ -2088,20 +2097,20 @@ namespace ns3 {
 
         void
         DsrRouting::SendPacketFromBuffer(DsrOptionSRHeader const &sourceRoute, Ipv4Address nextHop, uint8_t protocol) {
-            NS_LOG_FUNCTION (this << nextHop << (uint32_t) protocol);
-            NS_ASSERT_MSG (!m_downTarget.IsNull(), "Error, DsrRouting cannot send downward");
+            NS_LOG_FUNCTION(this << nextHop << (uint32_t) protocol);
+            NS_ASSERT_MSG(!m_downTarget.IsNull(), "Error, DsrRouting cannot send downward");
 
             // Reconstruct the route and Retransmit the data packet
-            std::vector<Ipv4Address> nodeList = sourceRoute.GetNodesAddress();
+            std::vector <Ipv4Address> nodeList = sourceRoute.GetNodesAddress();
             Ipv4Address destination = nodeList.back();
             Ipv4Address source = nodeList.front();       // Get the source address
-            NS_LOG_INFO ("The nexthop address " << nextHop << " the source " << source << " the destination "
-                                                << destination);
+            NS_LOG_INFO("The nexthop address " << nextHop << " the source " << source << " the destination "
+                                               << destination);
             /*
    * Here we try to find data packet from send buffer, if packet with this destination found, send it out
    */
             if (m_sendBuffer.Find(destination)) {
-                NS_LOG_DEBUG ("destination over here " << destination);
+                NS_LOG_DEBUG("destination over here " << destination);
 
                 /// When found a route and use it, UseExtends to the link cache
                 if (m_routeCache->IsLinkCache()) {
@@ -2121,8 +2130,8 @@ namespace ns3 {
                         ++cnt;
                     }
                     //***************************************************************************************************odie
-                    Ptr<Packet> packet = entry.GetPacket()->Copy();
-                    Ptr<Packet> p = packet->Copy();      // get a copy of the packet
+                    Ptr <Packet> packet = entry.GetPacket()->Copy();
+                    Ptr <Packet> p = packet->Copy();      // get a copy of the packet
 
                     // Set the source route option
                     DsrRoutingHeader dsrRoutingHeader;
@@ -2172,7 +2181,7 @@ namespace ns3 {
                         if (m_linkAck) {
                             ScheduleLinkPacketRetry(newEntry, protocol);
                         } else {
-                            NS_LOG_LOGIC ("Not using link acknowledgment");
+                            NS_LOG_LOGIC("Not using link acknowledgment");
                             if (nextHop != destination) {
                                 SchedulePassivePacketRetry(newEntry, protocol);
                             } else {
@@ -2182,15 +2191,15 @@ namespace ns3 {
                         }
                     }
 
-                    NS_LOG_DEBUG ("send buffer size here and the destination " << m_sendBuffer.GetSize() << " "
-                                                                               << destination);
+                    NS_LOG_DEBUG("send buffer size here and the destination " << m_sendBuffer.GetSize() << " "
+                                                                              << destination);
                     if (m_sendBuffer.GetSize() != 0 && m_sendBuffer.Find(destination)) {
-                        NS_LOG_LOGIC ("Schedule sending the next packet in send buffer");
+                        NS_LOG_LOGIC("Schedule sending the next packet in send buffer");
                         Simulator::Schedule(MilliSeconds(m_uniformRandomVariable->GetInteger(0, 100)),
                                             &DsrRouting::SendPacketFromBuffer, this, sourceRoute, nextHop, protocol);
                     }
                 } else {
-                    NS_LOG_LOGIC ("All queued packets are out-dated for the destination in send buffer");
+                    NS_LOG_LOGIC("All queued packets are out-dated for the destination in send buffer");
                 }
             }
                 /*
@@ -2199,12 +2208,12 @@ namespace ns3 {
             else if (m_errorBuffer.Find(destination)) {
                 DsrErrorBuffEntry entry;
                 if (m_errorBuffer.Dequeue(destination, entry)) {
-                    Ptr<Packet> packet = entry.GetPacket()->Copy();
-                    NS_LOG_DEBUG ("The queued packet size " << packet->GetSize());
+                    Ptr <Packet> packet = entry.GetPacket()->Copy();
+                    NS_LOG_DEBUG("The queued packet size " << packet->GetSize());
 
                     DsrRoutingHeader dsrRoutingHeader;
-                    Ptr<Packet> copyP = packet->Copy();
-                    Ptr<Packet> dsrPacket = packet->Copy();
+                    Ptr <Packet> copyP = packet->Copy();
+                    Ptr <Packet> dsrPacket = packet->Copy();
                     dsrPacket->RemoveHeader(dsrRoutingHeader);
                     uint32_t offset = dsrRoutingHeader.GetDsrOptionsOffset();
                     copyP->RemoveAtStart(
@@ -2218,19 +2227,19 @@ namespace ns3 {
 
                     uint8_t optionType = 0;
                     optionType = *(data);
-                    NS_LOG_DEBUG ("The option type value in send packet " << (uint32_t) optionType);
+                    NS_LOG_DEBUG("The option type value in send packet " << (uint32_t) optionType);
                     if (optionType == 3) {
-                        NS_LOG_DEBUG ("The packet is error packet");
-                        Ptr<dsr::DsrOptions> dsrOption;
+                        NS_LOG_DEBUG("The packet is error packet");
+                        Ptr <dsr::DsrOptions> dsrOption;
                         DsrOptionHeader dsrOptionHeader;
 
                         uint8_t errorType = *(data + 2);
-                        NS_LOG_DEBUG ("The error type");
+                        NS_LOG_DEBUG("The error type");
                         if (errorType == 1) {
-                            NS_LOG_DEBUG ("The packet is route error unreach packet");
+                            NS_LOG_DEBUG("The packet is route error unreach packet");
                             DsrOptionRerrUnreachHeader rerr;
                             copyP->RemoveHeader(rerr);
-                            NS_ASSERT (copyP->GetSize() == 0);
+                            NS_ASSERT(copyP->GetSize() == 0);
                             uint8_t length = (sourceRoute.GetLength() + rerr.GetLength());
 
                             DsrOptionRerrUnreachHeader newUnreach;
@@ -2242,7 +2251,7 @@ namespace ns3 {
                             newUnreach.SetSalvage(
                                     rerr.GetSalvage());       // Set the value about whether to salvage a packet or not
 
-                            std::vector<Ipv4Address> nodeList = sourceRoute.GetNodesAddress();
+                            std::vector <Ipv4Address> nodeList = sourceRoute.GetNodesAddress();
                             DsrRoutingHeader newRoutingHeader;
                             newRoutingHeader.SetNextHeader(protocol);
                             newRoutingHeader.SetMessageType(1);
@@ -2256,17 +2265,18 @@ namespace ns3 {
                                 m_routeCache->UseExtends(nodeList);
                             }
                             SetRoute(nextHop, m_mainAddress);
-                            Ptr<Packet> newPacket = Create<Packet>();
+                            Ptr <Packet> newPacket = Create<Packet>();
                             newPacket->AddHeader(
                                     newRoutingHeader);       // Add the extension header with rerr and sourceRoute attached to it
-                            Ptr<NetDevice> dev = m_ip->GetNetDevice(m_ip->GetInterfaceForAddress(m_mainAddress));
+                            Ptr <NetDevice> dev = m_ip->GetNetDevice(m_ip->GetInterfaceForAddress(m_mainAddress));
                             m_ipv4Route->SetOutputDevice(dev);
 
                             uint32_t priority = GetPriority(DSR_CONTROL_PACKET);
-                            std::map<uint32_t, Ptr<dsr::DsrNetworkQueue> >::iterator i = m_priorityQueue.find(priority);
-                            Ptr<dsr::DsrNetworkQueue> dsrNetworkQueue = i->second;
-                            NS_LOG_DEBUG ("Will be inserting into priority queue " << dsrNetworkQueue << " number: "
-                                                                                   << priority);
+                            std::map < uint32_t, Ptr < dsr::DsrNetworkQueue > > ::iterator
+                            i = m_priorityQueue.find(priority);
+                            Ptr <dsr::DsrNetworkQueue> dsrNetworkQueue = i->second;
+                            NS_LOG_DEBUG("Will be inserting into priority queue " << dsrNetworkQueue << " number: "
+                                                                                  << priority);
 
                             //m_downTarget (newPacket, m_mainAddress, nextHop, GetProtocolNumber (), m_ipv4Route);
 
@@ -2277,28 +2287,29 @@ namespace ns3 {
                             if (dsrNetworkQueue->Enqueue(newEntry)) {
                                 Scheduler(priority);
                             } else {
-                                NS_LOG_INFO ("Packet dropped as dsr network queue is full");
+                                NS_LOG_INFO("Packet dropped as dsr network queue is full");
                             }
                         }
                     }
 
                     if (m_errorBuffer.GetSize() != 0 && m_errorBuffer.Find(destination)) {
-                        NS_LOG_LOGIC ("Schedule sending the next packet in error buffer");
+                        NS_LOG_LOGIC("Schedule sending the next packet in error buffer");
                         Simulator::Schedule(MilliSeconds(m_uniformRandomVariable->GetInteger(0, 100)),
                                             &DsrRouting::SendPacketFromBuffer, this, sourceRoute, nextHop, protocol);
                     }
                 }
             } else {
-                NS_LOG_DEBUG ("Packet not found in either the send or error buffer");
+                NS_LOG_DEBUG("Packet not found in either the send or error buffer");
             }
         }
 
         bool
-        DsrRouting::PassiveEntryCheck(Ptr<Packet> packet, Ipv4Address source, Ipv4Address destination, uint8_t segsLeft,
+        DsrRouting::PassiveEntryCheck(Ptr <Packet> packet, Ipv4Address source, Ipv4Address destination,
+                                      uint8_t segsLeft,
                                       uint16_t fragmentOffset, uint16_t identification, bool saveEntry) {
-            NS_LOG_FUNCTION (this << packet << source << destination << (uint32_t) segsLeft);
+            NS_LOG_FUNCTION(this << packet << source << destination << (uint32_t) segsLeft);
 
-            Ptr<Packet> p = packet->Copy();
+            Ptr <Packet> p = packet->Copy();
             // Here the segments left value need to plus one to check the earlier hop maintain buffer entry
             DsrPassiveBuffEntry newEntry;
             newEntry.SetPacket(p);
@@ -2309,12 +2320,12 @@ namespace ns3 {
             newEntry.SetSegsLeft(segsLeft);  // We try to make sure the segments left is larger for 1
 
 
-            NS_LOG_DEBUG ("The passive buffer size " << m_passiveBuffer->GetSize());
+            NS_LOG_DEBUG("The passive buffer size " << m_passiveBuffer->GetSize());
 
             if (m_passiveBuffer->AllEqual(newEntry) && (!saveEntry)) {
                 // The PromiscEqual function will remove the maintain buffer entry if equal value found
                 // It only compares the source and destination address, ackId, and the segments left value
-                NS_LOG_DEBUG ("We get the all equal for passive buffer here");
+                NS_LOG_DEBUG("We get the all equal for passive buffer here");
 
                 DsrMaintainBuffEntry mbEntry;
                 mbEntry.SetPacket(p);
@@ -2334,13 +2345,13 @@ namespace ns3 {
         }
 
         bool
-        DsrRouting::CancelPassiveTimer(Ptr<Packet> packet, Ipv4Address source, Ipv4Address destination,
+        DsrRouting::CancelPassiveTimer(Ptr <Packet> packet, Ipv4Address source, Ipv4Address destination,
                                        uint8_t segsLeft) {
-            NS_LOG_FUNCTION (this << packet << source << destination << (uint32_t) segsLeft);
+            NS_LOG_FUNCTION(this << packet << source << destination << (uint32_t) segsLeft);
 
-            NS_LOG_DEBUG ("Cancel the passive timer");
+            NS_LOG_DEBUG("Cancel the passive timer");
 
-            Ptr<Packet> p = packet->Copy();
+            Ptr <Packet> p = packet->Copy();
             // Here the segments left value need to plus one to check the earlier hop maintain buffer entry
             DsrMaintainBuffEntry newEntry;
             newEntry.SetPacket(p);
@@ -2361,14 +2372,14 @@ namespace ns3 {
         void
         DsrRouting::CallCancelPacketTimer(uint16_t ackId, Ipv4Header const &ipv4Header, Ipv4Address realSrc,
                                           Ipv4Address realDst) {
-            NS_LOG_FUNCTION (this << (uint32_t) ackId << ipv4Header << realSrc << realDst);
+            NS_LOG_FUNCTION(this << (uint32_t) ackId << ipv4Header << realSrc << realDst);
             Ipv4Address sender = ipv4Header.GetDestination();
             Ipv4Address receiver = ipv4Header.GetSource();
             /*
    * Create a packet to fill maintenance buffer, not used to compare with maintainance entry
    * The reason is ack header doesn't have the original packet copy
    */
-            Ptr<Packet> mainP = Create<Packet>();
+            Ptr <Packet> mainP = Create<Packet>();
             DsrMaintainBuffEntry newEntry(/*Packet=*/ mainP, /*ourAddress=*/ sender, /*nextHop=*/ receiver,
                     /*source=*/ realSrc, /*destination=*/ realDst, /*ackId=*/ ackId,
                     /*SegsLeft=*/ 0, /*expire time=*/ Simulator::Now());
@@ -2377,7 +2388,7 @@ namespace ns3 {
 
         void
         DsrRouting::CancelPacketAllTimer(DsrMaintainBuffEntry &mb) {
-            NS_LOG_FUNCTION (this);
+            NS_LOG_FUNCTION(this);
             CancelLinkPacketTimer(mb);
             CancelNetworkPacketTimer(mb);
             CancelPassivePacketTimer(mb);
@@ -2385,7 +2396,7 @@ namespace ns3 {
 
         void
         DsrRouting::CancelLinkPacketTimer(DsrMaintainBuffEntry &mb) {
-            NS_LOG_FUNCTION (this);
+            NS_LOG_FUNCTION(this);
             LinkKey linkKey;
             linkKey.m_ourAdd = mb.GetOurAdd();
             linkKey.m_nextHop = mb.GetNextHop();
@@ -2404,9 +2415,9 @@ namespace ns3 {
             std::map<LinkKey, Timer>::const_iterator i =
                     m_linkAckTimer.find(linkKey);
             if (i == m_linkAckTimer.end()) {
-                NS_LOG_INFO ("did not find the link timer");
+                NS_LOG_INFO("did not find the link timer");
             } else {
-                NS_LOG_INFO ("did find the link timer");
+                NS_LOG_INFO("did find the link timer");
                 /*
        * Schedule the packet retry
        * Push back the nextHop, source, destination address
@@ -2414,22 +2425,22 @@ namespace ns3 {
                 m_linkAckTimer[linkKey].Cancel();
                 m_linkAckTimer[linkKey].Remove();
                 if (m_linkAckTimer[linkKey].IsRunning()) {
-                    NS_LOG_INFO ("Timer not canceled");
+                    NS_LOG_INFO("Timer not canceled");
                 }
                 m_linkAckTimer.erase(linkKey);
             }
 
             // Erase the maintenance entry
             // yet this does not check the segments left value here
-            NS_LOG_DEBUG ("The link buffer size " << m_maintainBuffer.GetSize());
+            NS_LOG_DEBUG("The link buffer size " << m_maintainBuffer.GetSize());
             if (m_maintainBuffer.LinkEqual(mb)) {
-                NS_LOG_INFO ("Link acknowledgment received, remove same maintenance buffer entry");
+                NS_LOG_INFO("Link acknowledgment received, remove same maintenance buffer entry");
             }
         }
 
         void
         DsrRouting::CancelNetworkPacketTimer(DsrMaintainBuffEntry &mb) {
-            NS_LOG_FUNCTION (this);
+            NS_LOG_FUNCTION(this);
             NetworkKey networkKey;
             networkKey.m_ackId = mb.GetAckId();
             networkKey.m_ourAdd = mb.GetOurAdd();
@@ -2442,17 +2453,17 @@ namespace ns3 {
             m_addressForwardCnt[networkKey] = 0;
             m_addressForwardCnt.erase(networkKey);
 
-            NS_LOG_INFO ("ackId " << mb.GetAckId() << " ourAdd " << mb.GetOurAdd() << " nextHop " << mb.GetNextHop()
-                                  << " source " << mb.GetSrc() << " destination " << mb.GetDst()
-                                  << " segsLeft " << (uint32_t) mb.GetSegsLeft()
+            NS_LOG_INFO("ackId " << mb.GetAckId() << " ourAdd " << mb.GetOurAdd() << " nextHop " << mb.GetNextHop()
+                                 << " source " << mb.GetSrc() << " destination " << mb.GetDst()
+                                 << " segsLeft " << (uint32_t) mb.GetSegsLeft()
             );
             // Find the network acknowledgment timer
             std::map<NetworkKey, Timer>::const_iterator i =
                     m_addressForwardTimer.find(networkKey);
             if (i == m_addressForwardTimer.end()) {
-                NS_LOG_INFO ("did not find the packet timer");
+                NS_LOG_INFO("did not find the packet timer");
             } else {
-                NS_LOG_INFO ("did find the packet timer");
+                NS_LOG_INFO("did find the packet timer");
                 /*
        * Schedule the packet retry
        * Push back the nextHop, source, destination address
@@ -2460,20 +2471,20 @@ namespace ns3 {
                 m_addressForwardTimer[networkKey].Cancel();
                 m_addressForwardTimer[networkKey].Remove();
                 if (m_addressForwardTimer[networkKey].IsRunning()) {
-                    NS_LOG_INFO ("Timer not canceled");
+                    NS_LOG_INFO("Timer not canceled");
                 }
                 m_addressForwardTimer.erase(networkKey);
             }
             // Erase the maintenance entry
             // yet this does not check the segments left value here
             if (m_maintainBuffer.NetworkEqual(mb)) {
-                NS_LOG_INFO ("Remove same maintenance buffer entry based on network acknowledgment");
+                NS_LOG_INFO("Remove same maintenance buffer entry based on network acknowledgment");
             }
         }
 
         void
         DsrRouting::CancelPassivePacketTimer(DsrMaintainBuffEntry &mb) {
-            NS_LOG_FUNCTION (this);
+            NS_LOG_FUNCTION(this);
             PassiveKey passiveKey;
             passiveKey.m_ackId = 0;
             passiveKey.m_source = mb.GetSrc();
@@ -2487,16 +2498,16 @@ namespace ns3 {
             std::map<PassiveKey, Timer>::const_iterator j =
                     m_passiveAckTimer.find(passiveKey);
             if (j == m_passiveAckTimer.end()) {
-                NS_LOG_INFO ("did not find the passive timer");
+                NS_LOG_INFO("did not find the passive timer");
             } else {
-                NS_LOG_INFO ("find the passive timer");
+                NS_LOG_INFO("find the passive timer");
                 /*
        * Cancel passive acknowledgment timer
        */
                 m_passiveAckTimer[passiveKey].Cancel();
                 m_passiveAckTimer[passiveKey].Remove();
                 if (m_passiveAckTimer[passiveKey].IsRunning()) {
-                    NS_LOG_INFO ("Timer not canceled");
+                    NS_LOG_INFO("Timer not canceled");
                 }
                 m_passiveAckTimer.erase(passiveKey);
             }
@@ -2504,17 +2515,17 @@ namespace ns3 {
 
         void
         DsrRouting::CancelPacketTimerNextHop(Ipv4Address nextHop, uint8_t protocol) {
-            NS_LOG_FUNCTION (this << nextHop << (uint32_t) protocol);
+            NS_LOG_FUNCTION(this << nextHop << (uint32_t) protocol);
 
             DsrMaintainBuffEntry entry;
-            std::vector<Ipv4Address> previousErrorDst;
+            std::vector <Ipv4Address> previousErrorDst;
             if (m_maintainBuffer.Dequeue(nextHop, entry)) {
                 Ipv4Address source = entry.GetSrc();
                 Ipv4Address destination = entry.GetDst();
 
-                Ptr<Packet> dsrP = entry.GetPacket()->Copy();
-                Ptr<Packet> p = dsrP->Copy();
-                Ptr<Packet> packet = dsrP->Copy();
+                Ptr <Packet> dsrP = entry.GetPacket()->Copy();
+                Ptr <Packet> p = dsrP->Copy();
+                Ptr <Packet> packet = dsrP->Copy();
                 DsrRoutingHeader dsrRoutingHeader;
                 dsrP->RemoveHeader(dsrRoutingHeader);          // Remove the dsr header in whole
                 uint32_t offset = dsrRoutingHeader.GetDsrOptionsOffset();
@@ -2524,11 +2535,11 @@ namespace ns3 {
                 uint8_t buf[2];
                 p->CopyData(buf, sizeof(buf));
                 uint8_t numberAddress = (buf[1] - 2) / 4;
-                NS_LOG_DEBUG ("The number of addresses " << (uint32_t) numberAddress);
+                NS_LOG_DEBUG("The number of addresses " << (uint32_t) numberAddress);
                 DsrOptionSRHeader sourceRoute;
                 sourceRoute.SetNumberAddress(numberAddress);
                 p->RemoveHeader(sourceRoute);
-                std::vector<Ipv4Address> nodeList = sourceRoute.GetNodesAddress();
+                std::vector <Ipv4Address> nodeList = sourceRoute.GetNodesAddress();
                 uint8_t salvage = sourceRoute.GetSalvage();
                 Ipv4Address address1 = nodeList[1];
                 PrintVector(nodeList);
@@ -2547,7 +2558,7 @@ namespace ns3 {
                 if (std::find(previousErrorDst.begin(), previousErrorDst.end(), destination) ==
                     previousErrorDst.end()) {
                     return;//todo odd
-                    NS_LOG_DEBUG ("have not seen this dst before " << errorDst << " in " << previousErrorDst.size());
+                    NS_LOG_DEBUG("have not seen this dst before " << errorDst << " in " << previousErrorDst.size());
                     SendUnreachError(nextHop, errorDst, destination, salvage, protocol);
                     previousErrorDst.push_back(errorDst);
                 }
@@ -2560,22 +2571,22 @@ namespace ns3 {
                 SalvagePacket(packet, source, destination, protocol);
 
                 if (m_maintainBuffer.GetSize() && m_maintainBuffer.Find(nextHop)) {
-                    NS_LOG_INFO ("Cancel the packet timer for next maintenance entry");
+                    NS_LOG_INFO("Cancel the packet timer for next maintenance entry");
                     Simulator::Schedule(MilliSeconds(m_uniformRandomVariable->GetInteger(0, 100)),
                                         &DsrRouting::CancelPacketTimerNextHop, this, nextHop, protocol);
                 }
             } else {
-                NS_LOG_INFO ("Maintenance buffer entry not found");
+                NS_LOG_INFO("Maintenance buffer entry not found");
             }
             /// TODO need to think about whether we need the network queue entry or not
         }
 
         void
         DsrRouting::SalvagePacket(Ptr<const Packet> packet, Ipv4Address source, Ipv4Address dst, uint8_t protocol) {
-            NS_LOG_FUNCTION (this << packet << source << dst << (uint32_t) protocol);
+            NS_LOG_FUNCTION(this << packet << source << dst << (uint32_t) protocol);
             // Create two copies of packet
-            Ptr<Packet> p = packet->Copy();
-            Ptr<Packet> newPacket = packet->Copy();
+            Ptr <Packet> p = packet->Copy();
+            Ptr <Packet> newPacket = packet->Copy();
             // Remove the routing header in a whole to get a clean packet
             DsrRoutingHeader dsrRoutingHeader;
             p->RemoveHeader(dsrRoutingHeader);
@@ -2598,14 +2609,14 @@ namespace ns3 {
             DsrRouteCacheEntry toDst;
             bool findRoute = m_routeCache->LookupRoute(dst, toDst);
             if (findRoute && (salvage < m_maxSalvageCount)) {
-                NS_LOG_DEBUG ("We have found a route for the packet");
+                NS_LOG_DEBUG("We have found a route for the packet");
                 DsrRoutingHeader newDsrRoutingHeader;
                 newDsrRoutingHeader.SetNextHeader(protocol);
                 newDsrRoutingHeader.SetMessageType(2);
                 newDsrRoutingHeader.SetSourceId(GetIDfromIP(source));
                 newDsrRoutingHeader.SetDestId(GetIDfromIP(dst));
 
-                std::vector<Ipv4Address> nodeList = toDst.GetVector();     // Get the route from the route entry we found
+                std::vector <Ipv4Address> nodeList = toDst.GetVector();     // Get the route from the route entry we found
                 Ipv4Address nextHop = SearchNextHop(m_mainAddress,
                                                     nodeList);      // Get the next hop address for the route
                 if (nextHop == "0.0.0.0") {
@@ -2625,20 +2636,21 @@ namespace ns3 {
                     m_routeCache->UseExtends(nodeList);
                 }
                 uint8_t length = sourceRoute.GetLength();
-                NS_LOG_INFO ("length of source route header " << (uint32_t) (sourceRoute.GetLength()));
+                NS_LOG_INFO("length of source route header " << (uint32_t)(sourceRoute.GetLength()));
                 newDsrRoutingHeader.SetPayloadLength(uint16_t(length) + 2);
                 newDsrRoutingHeader.AddDsrOption(sourceRoute);
                 p->AddHeader(newDsrRoutingHeader);
 
                 SetRoute(nextHop, m_mainAddress);
-                Ptr<NetDevice> dev = m_ip->GetNetDevice(m_ip->GetInterfaceForAddress(m_mainAddress));
+                Ptr <NetDevice> dev = m_ip->GetNetDevice(m_ip->GetInterfaceForAddress(m_mainAddress));
                 m_ipv4Route->SetOutputDevice(dev);
 
                 // Send out the data packet
                 uint32_t priority = GetPriority(DSR_DATA_PACKET);
-                std::map<uint32_t, Ptr<dsr::DsrNetworkQueue> >::iterator i = m_priorityQueue.find(priority);
-                Ptr<dsr::DsrNetworkQueue> dsrNetworkQueue = i->second;
-                NS_LOG_DEBUG ("Will be inserting into priority queue " << dsrNetworkQueue << " number: " << priority);
+                std::map < uint32_t, Ptr < dsr::DsrNetworkQueue > > ::iterator
+                i = m_priorityQueue.find(priority);
+                Ptr <dsr::DsrNetworkQueue> dsrNetworkQueue = i->second;
+                NS_LOG_DEBUG("Will be inserting into priority queue " << dsrNetworkQueue << " number: " << priority);
 
                 //m_downTarget (p, m_mainAddress, nextHop, GetProtocolNumber (), m_ipv4Route);
 
@@ -2648,7 +2660,7 @@ namespace ns3 {
                 if (dsrNetworkQueue->Enqueue(newEntry)) {
                     Scheduler(priority);
                 } else {
-                    NS_LOG_INFO ("Packet dropped as dsr network queue is full");
+                    NS_LOG_INFO("Packet dropped as dsr network queue is full");
                 }
 
                 /*
@@ -2657,16 +2669,16 @@ namespace ns3 {
 //      NS_LOG_DEBUG ("Save the next hop node in blacklist");
 //      m_rreqTable->MarkLinkAsUnidirectional (nextHop, m_blacklistTimeout);
             } else {
-                NS_LOG_DEBUG ("Will not salvage this packet, silently drop");
+                NS_LOG_DEBUG("Will not salvage this packet, silently drop");
             }
         }
 
         void
         DsrRouting::ScheduleLinkPacketRetry(DsrMaintainBuffEntry &mb,
                                             uint8_t protocol) {
-            NS_LOG_FUNCTION (this << (uint32_t) protocol);
+            NS_LOG_FUNCTION(this << (uint32_t) protocol);
 
-            Ptr<Packet> p = mb.GetPacket()->Copy();
+            Ptr <Packet> p = mb.GetPacket()->Copy();
             Ipv4Address source = mb.GetSrc();
             Ipv4Address nextHop = mb.GetNextHop();
 
@@ -2695,9 +2707,9 @@ namespace ns3 {
         void
         DsrRouting::SchedulePassivePacketRetry(DsrMaintainBuffEntry &mb,
                                                uint8_t protocol) {
-            NS_LOG_FUNCTION (this << (uint32_t) protocol);
+            NS_LOG_FUNCTION(this << (uint32_t) protocol);
 
-            Ptr<Packet> p = mb.GetPacket()->Copy();
+            Ptr <Packet> p = mb.GetPacket()->Copy();
             Ipv4Address source = mb.GetSrc();
             Ipv4Address nextHop = mb.GetNextHop();
 
@@ -2714,7 +2726,7 @@ namespace ns3 {
                 Timer timer(Timer::CANCEL_ON_DESTROY);
                 m_passiveAckTimer[passiveKey] = timer;
             }
-            NS_LOG_DEBUG ("The passive acknowledgment option for data packet");
+            NS_LOG_DEBUG("The passive acknowledgment option for data packet");
             m_passiveAckTimer[passiveKey].SetFunction(&DsrRouting::PassiveScheduleTimerExpire, this);
             m_passiveAckTimer[passiveKey].Remove();
             m_passiveAckTimer[passiveKey].SetArguments(mb, protocol);
@@ -2725,12 +2737,12 @@ namespace ns3 {
         DsrRouting::ScheduleNetworkPacketRetry(DsrMaintainBuffEntry &mb,
                                                bool isFirst,
                                                uint8_t protocol) {
-            Ptr<Packet> p = Create<Packet>();
-            Ptr<Packet> dsrP = Create<Packet>();
+            Ptr <Packet> p = Create<Packet>();
+            Ptr <Packet> dsrP = Create<Packet>();
             // The new entry will be used for retransmission
             NetworkKey networkKey;
             Ipv4Address nextHop = mb.GetNextHop();
-            NS_LOG_DEBUG ("is the first retry or not " << isFirst);
+            NS_LOG_DEBUG("is the first retry or not " << isFirst);
             if (isFirst) {
                 // This is the very first network packet retry
                 p = mb.GetPacket()->Copy();
@@ -2758,7 +2770,7 @@ namespace ns3 {
 
                 m_addressForwardCnt[networkKey] = 0;
                 if (!m_maintainBuffer.Enqueue(newEntry)) {
-                    NS_LOG_ERROR ("Failed to enqueue packet retry");
+                    NS_LOG_ERROR("Failed to enqueue packet retry");
                 }
 
                 if (m_addressForwardTimer.find(networkKey) == m_addressForwardTimer.end()) {
@@ -2770,9 +2782,9 @@ namespace ns3 {
                 m_addressForwardTimer[networkKey].SetFunction(&DsrRouting::NetworkScheduleTimerExpire, this);
                 m_addressForwardTimer[networkKey].Remove();
                 m_addressForwardTimer[networkKey].SetArguments(newEntry, protocol);
-                NS_LOG_DEBUG ("The packet retries time for " << newEntry.GetAckId() << " is " << m_sendRetries
-                                                             << " and the delay time is "
-                                                             << Time(2 * m_nodeTraversalTime).GetSeconds());
+                NS_LOG_DEBUG("The packet retries time for " << newEntry.GetAckId() << " is " << m_sendRetries
+                                                            << " and the delay time is "
+                                                            << Time(2 * m_nodeTraversalTime).GetSeconds());
                 // Back-off mechanism
                 m_addressForwardTimer[networkKey].Schedule(Time(2 * m_nodeTraversalTime));
             } else {
@@ -2785,7 +2797,7 @@ namespace ns3 {
        * Here we have found the entry for send retries, so we get the value and increase it by one
        */
                 m_sendRetries = m_addressForwardCnt[networkKey];
-                NS_LOG_DEBUG ("The packet retry we have done " << m_sendRetries);
+                NS_LOG_DEBUG("The packet retry we have done " << m_sendRetries);
 
                 p = mb.GetPacket()->Copy();
                 dsrP = mb.GetPacket()->Copy();
@@ -2795,7 +2807,7 @@ namespace ns3 {
                 // Send the data packet out before schedule the next packet transmission
                 SendPacket(p, source, nextHop, protocol);
 
-                NS_LOG_DEBUG ("The packet with dsr header " << dsrP->GetSize());
+                NS_LOG_DEBUG("The packet with dsr header " << dsrP->GetSize());
                 networkKey.m_ackId = mb.GetAckId();
                 networkKey.m_ourAdd = mb.GetOurAdd();
                 networkKey.m_nextHop = mb.GetNextHop();
@@ -2817,9 +2829,9 @@ namespace ns3 {
                 m_addressForwardTimer[networkKey].SetFunction(&DsrRouting::NetworkScheduleTimerExpire, this);
                 m_addressForwardTimer[networkKey].Remove();
                 m_addressForwardTimer[networkKey].SetArguments(mb, protocol);
-                NS_LOG_DEBUG ("The packet retries time for " << mb.GetAckId() << " is " << m_sendRetries
-                                                             << " and the delay time is " << Time(2 * m_sendRetries *
-                                                                                                  m_nodeTraversalTime).GetSeconds());
+                NS_LOG_DEBUG("The packet retries time for " << mb.GetAckId() << " is " << m_sendRetries
+                                                            << " and the delay time is " << Time(2 * m_sendRetries *
+                                                                                                 m_nodeTraversalTime).GetSeconds());
                 // Back-off mechanism
                 m_addressForwardTimer[networkKey].Schedule(Time(2 * m_sendRetries * m_nodeTraversalTime));
             }
@@ -2828,11 +2840,11 @@ namespace ns3 {
         void
         DsrRouting::LinkScheduleTimerExpire(DsrMaintainBuffEntry &mb,
                                             uint8_t protocol) {
-            NS_LOG_FUNCTION (this << (uint32_t) protocol);
+            NS_LOG_FUNCTION(this << (uint32_t) protocol);
             Ipv4Address nextHop = mb.GetNextHop();
             Ptr<const Packet> packet = mb.GetPacket();
             SetRoute(nextHop, m_mainAddress);
-            Ptr<Packet> p = packet->Copy();
+            Ptr <Packet> p = packet->Copy();
 
             LinkKey lk;
             lk.m_source = mb.GetSrc();
@@ -2844,7 +2856,7 @@ namespace ns3 {
             m_linkAckTimer[lk].Cancel();
             m_linkAckTimer[lk].Remove();
             if (m_linkAckTimer[lk].IsRunning()) {
-                NS_LOG_DEBUG ("Timer not canceled");
+                NS_LOG_DEBUG("Timer not canceled");
             }
             m_linkAckTimer.erase(lk);
 
@@ -2855,7 +2867,7 @@ namespace ns3 {
                 m_linkCnt[lk] = ++m_linkRetries;
                 ScheduleLinkPacketRetry(mb, protocol);
             } else {
-                NS_LOG_INFO ("We need to send error messages now");
+                NS_LOG_INFO("We need to send error messages now");
 
                 // Delete all the routes including the links
                 //  m_routeCache->DeleteAllRoutesIncludeLink (m_mainAddress, nextHop, m_mainAddress); //删除"错误"路由ODD，其实并未错误，具体原因未知
@@ -2871,11 +2883,11 @@ namespace ns3 {
         void
         DsrRouting::PassiveScheduleTimerExpire(DsrMaintainBuffEntry &mb,
                                                uint8_t protocol) {
-            NS_LOG_FUNCTION (this << (uint32_t) protocol);
+            NS_LOG_FUNCTION(this << (uint32_t) protocol);
             Ipv4Address nextHop = mb.GetNextHop();
             Ptr<const Packet> packet = mb.GetPacket();
             SetRoute(nextHop, m_mainAddress);
-            Ptr<Packet> p = packet->Copy();
+            Ptr <Packet> p = packet->Copy();
 
             PassiveKey pk;
             pk.m_ackId = 0;
@@ -2887,7 +2899,7 @@ namespace ns3 {
             m_passiveAckTimer[pk].Cancel();
             m_passiveAckTimer[pk].Remove();
             if (m_passiveAckTimer[pk].IsRunning()) {
-                NS_LOG_DEBUG ("Timer not canceled");
+                NS_LOG_DEBUG("Timer not canceled");
             }
             m_passiveAckTimer.erase(pk);
 
@@ -2906,7 +2918,7 @@ namespace ns3 {
 
         int64_t
         DsrRouting::AssignStreams(int64_t stream) {
-            NS_LOG_FUNCTION (this << stream);
+            NS_LOG_FUNCTION(this << stream);
             m_uniformRandomVariable->SetStream(stream);
             return 1;
         }
@@ -2914,7 +2926,7 @@ namespace ns3 {
         void
         DsrRouting::NetworkScheduleTimerExpire(DsrMaintainBuffEntry &mb,
                                                uint8_t protocol) {
-            Ptr<Packet> p = mb.GetPacket()->Copy();
+            Ptr <Packet> p = mb.GetPacket()->Copy();
             Ipv4Address source = mb.GetSrc();
             Ipv4Address nextHop = mb.GetNextHop();
             Ipv4Address dst = mb.GetDst();
@@ -2951,10 +2963,10 @@ namespace ns3 {
                                   Ipv4Address nextHop,
                                   Ipv4Address targetAddress,
                                   uint8_t protocol,
-                                  Ptr<Ipv4Route> route) {
-            NS_LOG_FUNCTION (this << packet << sourceRoute << source << nextHop << targetAddress << (uint32_t) protocol
-                                  << route);
-            NS_ASSERT_MSG (!m_downTarget.IsNull(), "Error, DsrRouting cannot send downward");
+                                  Ptr <Ipv4Route> route) {
+            NS_LOG_FUNCTION(this << packet << sourceRoute << source << nextHop << targetAddress << (uint32_t) protocol
+                                 << route);
+            NS_ASSERT_MSG(!m_downTarget.IsNull(), "Error, DsrRouting cannot send downward");
 
             //Our Forwarding Machanism
             Ipv4Mask odMask;
@@ -2993,7 +3005,7 @@ namespace ns3 {
 
 
             // We get the salvage value in sourceRoute header and set it to route error header if triggered error
-            Ptr<Packet> p = packet->Copy();
+            Ptr <Packet> p = packet->Copy();
             uint8_t length = sourceRoute.GetLength();
             dsrRoutingHeader.SetPayloadLength(uint16_t(length) + 2);
             dsrRoutingHeader.AddDsrOption(sourceRoute);
@@ -3033,7 +3045,7 @@ namespace ns3 {
                 if (m_linkAck) {
                     ScheduleLinkPacketRetry(newEntry, protocol);
                 } else {
-                    NS_LOG_LOGIC ("Not using link acknowledgment");
+                    NS_LOG_LOGIC("Not using link acknowledgment");
                     if (nextHop != targetAddress) {
                         SchedulePassivePacketRetry(newEntry, protocol);
                     } else {
@@ -3048,10 +3060,10 @@ namespace ns3 {
         DsrRouting::SendInitialRequest(Ipv4Address source,
                                        Ipv4Address destination,
                                        uint8_t protocol) {
-            NS_LOG_FUNCTION (this << source << destination << (uint32_t) protocol);
-            NS_ASSERT_MSG (!m_downTarget.IsNull(), "Error, DsrRouting cannot send downward");
-            Ptr<Packet> packet = Create<Packet>();
-            Ptr<Ipv4Route> route;
+            NS_LOG_FUNCTION(this << source << destination << (uint32_t) protocol);
+            NS_ASSERT_MSG(!m_downTarget.IsNull(), "Error, DsrRouting cannot send downward");
+            Ptr <Packet> packet = Create<Packet>();
+            Ptr <Ipv4Route> route;
             /*
    * Construct the route request option header
    */
@@ -3078,7 +3090,7 @@ namespace ns3 {
 
             // Schedule the route requests retry with non-propagation set true
             bool nonProp = true;
-            std::vector<Ipv4Address> address;
+            std::vector <Ipv4Address> address;
             address.push_back(source);
             address.push_back(destination);
             /*
@@ -3086,7 +3098,7 @@ namespace ns3 {
    */
             SocketIpTtlTag tag;
             tag.SetTtl(0);
-            Ptr<Packet> nonPropPacket = packet->Copy();
+            Ptr <Packet> nonPropPacket = packet->Copy();
             nonPropPacket->AddPacketTag(tag);
             // Increase the request count
             m_rreqTable->FindAndUpdate(destination);
@@ -3098,14 +3110,14 @@ namespace ns3 {
         void
         DsrRouting::SendErrorRequest(DsrOptionRerrUnreachHeader &rerr, uint8_t protocol) {
             return;//todo
-            NS_LOG_FUNCTION (this << (uint32_t) protocol);
-            NS_ASSERT_MSG (!m_downTarget.IsNull(), "Error, DsrRouting cannot send downward");
+            NS_LOG_FUNCTION(this << (uint32_t) protocol);
+            NS_ASSERT_MSG(!m_downTarget.IsNull(), "Error, DsrRouting cannot send downward");
             uint8_t salvage = rerr.GetSalvage();
             Ipv4Address dst = rerr.GetOriginalDst();
-            NS_LOG_DEBUG ("our own address here " << m_mainAddress << " error source " << rerr.GetErrorSrc()
-                                                  << " error destination " << rerr.GetErrorDst()
-                                                  << " error next hop " << rerr.GetUnreachNode() << " original dst "
-                                                  << rerr.GetOriginalDst()
+            NS_LOG_DEBUG("our own address here " << m_mainAddress << " error source " << rerr.GetErrorSrc()
+                                                 << " error destination " << rerr.GetErrorDst()
+                                                 << " error next hop " << rerr.GetUnreachNode() << " original dst "
+                                                 << rerr.GetOriginalDst()
             );
             DsrRouteCacheEntry toDst;
             if (m_routeCache->LookupRoute(dst, toDst)) {
@@ -3113,7 +3125,7 @@ namespace ns3 {
        * Found a route the dst, construct the source route option header
        */
                 DsrOptionSRHeader sourceRoute;
-                std::vector<Ipv4Address> ip = toDst.GetVector();
+                std::vector <Ipv4Address> ip = toDst.GetVector();
                 sourceRoute.SetNodesAddress(ip);
                 /// When found a route and use it, UseExtends to the link cache
                 if (m_routeCache->IsLinkCache()) {
@@ -3122,10 +3134,10 @@ namespace ns3 {
                 sourceRoute.SetSegmentsLeft((ip.size() - 2));
                 sourceRoute.SetSalvage(salvage);
                 Ipv4Address nextHop = SearchNextHop(m_mainAddress, ip);       // Get the next hop address
-                NS_LOG_DEBUG ("The nextHop address " << nextHop);
-                Ptr<Packet> packet = Create<Packet>();
+                NS_LOG_DEBUG("The nextHop address " << nextHop);
+                Ptr <Packet> packet = Create<Packet>();
                 if (nextHop == "0.0.0.0") {
-                    NS_LOG_DEBUG ("Error next hop address");
+                    NS_LOG_DEBUG("Error next hop address");
                     PacketNewRoute(packet, m_mainAddress, dst, protocol);
                     return;
                 }
@@ -3135,14 +3147,14 @@ namespace ns3 {
                 if (m_sendBuffer.GetSize() != 0 && m_sendBuffer.Find(dst)) {
                     SendPacketFromBuffer(sourceRoute, nextHop, protocol);
                 }
-                NS_LOG_LOGIC ("Route to " << dst << " found");
+                NS_LOG_LOGIC("Route to " << dst << " found");
                 return;
             } else {
-                NS_LOG_INFO ("No route found, initiate route error request");
-                Ptr<Packet> packet = Create<Packet>();
+                NS_LOG_INFO("No route found, initiate route error request");
+                Ptr <Packet> packet = Create<Packet>();
                 Ipv4Address originalDst = rerr.GetOriginalDst();
                 // Create an empty route ptr
-                Ptr<Ipv4Route> route = 0;
+                Ptr <Ipv4Route> route = 0;
                 /*
        * Construct the route request option header
        */
@@ -3152,7 +3164,7 @@ namespace ns3 {
                 dsrRoutingHeader.SetSourceId(GetIDfromIP(m_mainAddress));
                 dsrRoutingHeader.SetDestId(m_mainAddress.GetSubnetDirectedBroadcast(Ipv4Mask("255.255.255.0")));
 
-                Ptr<Packet> dstP = Create<Packet>();
+                Ptr <Packet> dstP = Create<Packet>();
                 DsrOptionRreqHeader rreqHeader;                                // has an alignment of 4n+0
                 rreqHeader.AddNodeAddress(m_mainAddress);                     // Add our own address in the header
                 rreqHeader.SetTarget(originalDst);
@@ -3167,26 +3179,26 @@ namespace ns3 {
                 dstP->AddHeader(dsrRoutingHeader);
                 // Schedule the route requests retry, propagate the route request message as it contains error
                 bool nonProp = false;
-                std::vector<Ipv4Address> address;
+                std::vector <Ipv4Address> address;
                 address.push_back(m_mainAddress);
                 address.push_back(originalDst);
-                /*
+                /**
        * Add the socket ip ttl tag to the packet to limit the scope of route requests
        */
                 SocketIpTtlTag tag;
                 tag.SetTtl((uint8_t) m_discoveryHopLimit);
-                Ptr<Packet> propPacket = dstP->Copy();
+                Ptr <Packet> propPacket = dstP->Copy();
                 propPacket->AddPacketTag(tag);
 
                 if ((m_addressReqTimer.find(originalDst) == m_addressReqTimer.end()) &&
                     (m_nonPropReqTimer.find(originalDst) == m_nonPropReqTimer.end())) {
-                    NS_LOG_INFO (
+                    NS_LOG_INFO(
                             "Only when there is no existing route request time when the initial route request is scheduled");
                     SendRequest(propPacket, m_mainAddress);
                     ScheduleRreqRetry(dstP, address, nonProp, m_requestId, protocol);
                 } else {
-                    NS_LOG_INFO ("There is existing route request, find the existing route request entry");
-                    /*
+                    NS_LOG_INFO("There is existing route request, find the existing route request entry");
+                    /**
            * Cancel the route request timer first before scheduling the route request
            * in this case, we do not want to remove the route request entry, so the isRemove value is false
            */
@@ -3198,31 +3210,31 @@ namespace ns3 {
 
         void
         DsrRouting::CancelRreqTimer(Ipv4Address dst, bool isRemove) {
-            NS_LOG_FUNCTION (this << dst << isRemove);
+            NS_LOG_FUNCTION(this << dst << isRemove);
             // Cancel the non propagation request timer if found
             if (m_nonPropReqTimer.find(dst) == m_nonPropReqTimer.end()) {
-                NS_LOG_DEBUG ("Did not find the non-propagation timer");
+                NS_LOG_DEBUG("Did not find the non-propagation timer");
             } else {
-                NS_LOG_DEBUG ("did find the non-propagation timer");
+                NS_LOG_DEBUG("did find the non-propagation timer");
             }
             m_nonPropReqTimer[dst].Cancel();
             m_nonPropReqTimer[dst].Remove();
 
             if (m_nonPropReqTimer[dst].IsRunning()) {
-                NS_LOG_DEBUG ("Timer not canceled");
+                NS_LOG_DEBUG("Timer not canceled");
             }
             m_nonPropReqTimer.erase(dst);
 
             // Cancel the address request timer if found
             if (m_addressReqTimer.find(dst) == m_addressReqTimer.end()) {
-                NS_LOG_DEBUG ("Did not find the propagation timer");
+                NS_LOG_DEBUG("Did not find the propagation timer");
             } else {
-                NS_LOG_DEBUG ("did find the propagation timer");
+                NS_LOG_DEBUG("did find the propagation timer");
             }
             m_addressReqTimer[dst].Cancel();
             m_addressReqTimer[dst].Remove();
             if (m_addressReqTimer[dst].IsRunning()) {
-                NS_LOG_DEBUG ("Timer not canceled");
+                NS_LOG_DEBUG("Timer not canceled");
             }
             m_addressReqTimer.erase(dst);
             /*
@@ -3236,9 +3248,9 @@ namespace ns3 {
         }
 
         void
-        DsrRouting::ScheduleRreqRetry(Ptr<Packet> packet, std::vector<Ipv4Address> address, bool nonProp,
+        DsrRouting::ScheduleRreqRetry(Ptr <Packet> packet, std::vector <Ipv4Address> address, bool nonProp,
                                       uint32_t requestId, uint8_t protocol) {
-            NS_LOG_FUNCTION (this << packet << nonProp << requestId << (uint32_t) protocol);
+            NS_LOG_FUNCTION(this << packet << nonProp << requestId << (uint32_t) protocol);
             Ipv4Address source = address[0];
             Ipv4Address dst = address[1];
             if (nonProp) {
@@ -3247,7 +3259,7 @@ namespace ns3 {
                     Timer timer(Timer::CANCEL_ON_DESTROY);
                     m_nonPropReqTimer[dst] = timer;
                 }
-                std::vector<Ipv4Address> address;
+                std::vector <Ipv4Address> address;
                 address.push_back(source);
                 address.push_back(dst);
                 m_nonPropReqTimer[dst].SetFunction(&DsrRouting::RouteRequestTimerExpire, this);
@@ -3259,7 +3271,7 @@ namespace ns3 {
                 m_nonPropReqTimer[dst].Cancel();
                 m_nonPropReqTimer[dst].Remove();
                 if (m_nonPropReqTimer[dst].IsRunning()) {
-                    NS_LOG_DEBUG ("Timer not canceled");
+                    NS_LOG_DEBUG("Timer not canceled");
                 }
                 m_nonPropReqTimer.erase(dst);
 
@@ -3267,7 +3279,7 @@ namespace ns3 {
                     Timer timer(Timer::CANCEL_ON_DESTROY);
                     m_addressReqTimer[dst] = timer;
                 }
-                std::vector<Ipv4Address> address;
+                std::vector <Ipv4Address> address;
                 address.push_back(source);
                 address.push_back(dst);
                 m_addressReqTimer[dst].SetFunction(&DsrRouting::RouteRequestTimerExpire, this);
@@ -3284,25 +3296,25 @@ namespace ns3 {
                     // This is the first route request retry
                     rreqDelay = m_requestPeriod;
                 }
-                NS_LOG_LOGIC ("Request count for " << dst << " " << m_rreqTable->GetRreqCnt(dst) << " with delay time "
-                                                   << rreqDelay.GetSeconds() << " second");
+                NS_LOG_LOGIC("Request count for " << dst << " " << m_rreqTable->GetRreqCnt(dst) << " with delay time "
+                                                  << rreqDelay.GetSeconds() << " second");
                 if (rreqDelay > m_maxRequestPeriod) {
                     // use the max request period
-                    NS_LOG_LOGIC ("The max request delay time " << m_maxRequestPeriod.GetSeconds());
+                    NS_LOG_LOGIC("The max request delay time " << m_maxRequestPeriod.GetSeconds());
                     m_addressReqTimer[dst].Schedule(m_maxRequestPeriod);
                 } else {
-                    NS_LOG_LOGIC ("The request delay time " << rreqDelay.GetSeconds() << " second");
+                    NS_LOG_LOGIC("The request delay time " << rreqDelay.GetSeconds() << " second");
                     m_addressReqTimer[dst].Schedule(rreqDelay);
                 }
             }
         }
 
         void
-        DsrRouting::RouteRequestTimerExpire(Ptr<Packet> packet, std::vector<Ipv4Address> address, uint32_t requestId,
+        DsrRouting::RouteRequestTimerExpire(Ptr <Packet> packet, std::vector <Ipv4Address> address, uint32_t requestId,
                                             uint8_t protocol) {
-            NS_LOG_FUNCTION (this << packet << requestId << (uint32_t) protocol);
+            NS_LOG_FUNCTION(this << packet << requestId << (uint32_t) protocol);
             // Get a clean packet without dsr header
-            Ptr<Packet> dsrP = packet->Copy();
+            Ptr <Packet> dsrP = packet->Copy();
             DsrRoutingHeader dsrRoutingHeader;
             dsrP->RemoveHeader(dsrRoutingHeader);          // Remove the dsr header in whole
 
@@ -3310,78 +3322,79 @@ namespace ns3 {
             Ipv4Address dst = address[1];
             DsrRouteCacheEntry toDst;
             if (m_routeCache->LookupRoute(dst, toDst)) {
-                /*
+                /**
        * Found a route the dst, construct the source route option header
        */
                 DsrOptionSRHeader sourceRoute;
-                std::vector<Ipv4Address> ip = toDst.GetVector();
+                std::vector <Ipv4Address> ip = toDst.GetVector();
                 sourceRoute.SetNodesAddress(ip);
                 // When we found the route and use it, UseExtends for the link cache
                 if (m_routeCache->IsLinkCache()) {
                     m_routeCache->UseExtends(ip);
                 }
                 sourceRoute.SetSegmentsLeft((ip.size() - 2));
-                /// Set the salvage value to 0
+                // Set the salvage value to 0
                 sourceRoute.SetSalvage(0);
                 Ipv4Address nextHop = SearchNextHop(m_mainAddress, ip);       // Get the next hop address
-                NS_LOG_INFO ("The nextHop address is " << nextHop);
+                NS_LOG_INFO("The nextHop address is " << nextHop);
                 if (nextHop == "0.0.0.0") {
-                    NS_LOG_DEBUG ("Error next hop address");
+                    NS_LOG_DEBUG("Error next hop address");
                     PacketNewRoute(dsrP, source, dst, protocol);
                     return;
                 }
                 SetRoute(nextHop, m_mainAddress);
                 CancelRreqTimer(dst, true);
-                /// Try to send out data packet from the send buffer if found
+                // Try to send out data packet from the send buffer if found
                 if (m_sendBuffer.GetSize() != 0 && m_sendBuffer.Find(dst)) {
                     SendPacketFromBuffer(sourceRoute, nextHop, protocol);
                 }
-                NS_LOG_LOGIC ("Route to " << dst << " found");
+                NS_LOG_LOGIC("Route to " << dst << " found");
                 return;
             }
-            /*
+            /**
    *  If a route discovery has been attempted m_rreqRetries times at the maximum TTL without
    *  receiving any RREP, all data packets destined for the corresponding destination SHOULD be
    *  dropped from the buffer and a Destination Unreachable message SHOULD be delivered to the application.
    */
-            NS_LOG_LOGIC ("The new request count for " << dst << " is " << m_rreqTable->GetRreqCnt(dst) << " the max "
-                                                       << m_rreqRetries);
+            NS_LOG_LOGIC("The new request count for " << dst << " is " << m_rreqTable->GetRreqCnt(dst) << " the max "
+                                                      << m_rreqRetries);
             if (m_rreqTable->GetRreqCnt(dst) >= m_rreqRetries) {
-                NS_LOG_LOGIC ("Route discovery to " << dst << " has been attempted " << m_rreqRetries << " times");
+                NS_LOG_LOGIC("Route discovery to " << dst << " has been attempted " << m_rreqRetries << " times");
                 CancelRreqTimer(dst, true);
-                NS_LOG_DEBUG ("Route not found. Drop packet with dst " << dst);
+                NS_LOG_DEBUG("Route not found. Drop packet with dst " << dst);
                 m_sendBuffer.DropPacketWithDst(dst);
             } else {
                 SocketIpTtlTag tag;
                 tag.SetTtl((uint8_t) m_discoveryHopLimit);
-                Ptr<Packet> propPacket = packet->Copy();
+                Ptr <Packet> propPacket = packet->Copy();
                 propPacket->AddPacketTag(tag);
                 // Increase the request count
                 m_rreqTable->FindAndUpdate(dst);
                 SendRequest(propPacket, source);
-                NS_LOG_DEBUG ("Check the route request entry " << source << " " << dst);
+                NS_LOG_DEBUG("Check the route request entry " << source << " " << dst);
                 ScheduleRreqRetry(packet, address, false, requestId, protocol);
             }
             return;
         }
 
         void
-        DsrRouting::SendRequest(Ptr<Packet> packet,
+        DsrRouting::SendRequest(Ptr <Packet> packet,
                                 Ipv4Address source) {
-            NS_LOG_FUNCTION (this << packet << source);
+            NS_LOG_FUNCTION(this << packet << source);
 
-            NS_ASSERT_MSG (!m_downTarget.IsNull(), "Error, DsrRouting cannot send downward");
-            /*
+            NS_ASSERT_MSG(!m_downTarget.IsNull(), "Error, DsrRouting cannot send downward");
+            /**
    * The destination address here is directed broadcast address
    */
             uint32_t priority = GetPriority(DSR_CONTROL_PACKET);
-            std::map<uint32_t, Ptr<dsr::DsrNetworkQueue> >::iterator i = m_priorityQueue.find(priority);
-            Ptr<dsr::DsrNetworkQueue> dsrNetworkQueue = i->second;
-            NS_LOG_LOGIC ("Inserting into priority queue number: " << priority);
+            std::map < uint32_t, Ptr < dsr::DsrNetworkQueue > > ::iterator
+            i = m_priorityQueue.find(priority);
+            Ptr <dsr::DsrNetworkQueue> dsrNetworkQueue = i->second;
+            NS_LOG_LOGIC("Inserting into priority queue number: " << priority);
 
             //m_downTarget (packet, source, m_broadcast, GetProtocolNumber (), 0);
 
-            /// \todo New DsrNetworkQueueEntry
+            //New DsrNetworkQueueEntry
             Ipv4Mask odMask;
             odMask.Set(0xffffff00);
             for (uint16_t od = 0; od < od_broadcastVector.size(); ++od) {
@@ -3404,14 +3417,14 @@ namespace ns3 {
             if (dsrNetworkQueue->Enqueue(newEntry)) {
                 Scheduler(priority);
             } else {
-                NS_LOG_INFO ("Packet dropped as dsr network queue is full");
+                NS_LOG_INFO("Packet dropped as dsr network queue is full");
             }
         }
 
         void
-        DsrRouting::ScheduleInterRequest(Ptr<Packet> packet, Ipv4Address ipv4Address) {
-            NS_LOG_FUNCTION (this << packet);
-            /*
+        DsrRouting::ScheduleInterRequest(Ptr <Packet> packet, Ipv4Address ipv4Address) {
+            NS_LOG_FUNCTION(this << packet);
+            /**
    * This is a forwarding case when sending route requests, a random delay time [0, m_broadcastJitter]
    * used before forwarding as link-layer broadcast
    */
@@ -3423,16 +3436,16 @@ namespace ns3 {
         }
 
         void
-        DsrRouting::SendGratuitousReply(Ipv4Address source, Ipv4Address srcAddress, std::vector<Ipv4Address> &nodeList,
+        DsrRouting::SendGratuitousReply(Ipv4Address source, Ipv4Address srcAddress, std::vector <Ipv4Address> &nodeList,
                                         uint8_t protocol) {
-            NS_LOG_FUNCTION (this << source << srcAddress << (uint32_t) protocol);
+            NS_LOG_FUNCTION(this << source << srcAddress << (uint32_t) protocol);
             if (!(m_graReply.FindAndUpdate(source, srcAddress,
                                            m_gratReplyHoldoff)))     // Find the gratuitous reply entry
             {
-                NS_LOG_LOGIC ("Update gratuitous reply " << source);
+                NS_LOG_LOGIC("Update gratuitous reply " << source);
                 GraReplyEntry graReplyEntry(source, srcAddress, m_gratReplyHoldoff + Simulator::Now());
                 m_graReply.AddEntry(graReplyEntry);
-                /*
+                /**
        * Automatic route shortening
        */
                 m_finalRoute.clear();      // Clear the final route vector
@@ -3453,11 +3466,11 @@ namespace ns3 {
                 // Get the real reply source and destination
                 Ipv4Address replySrc = m_finalRoute.back();
                 Ipv4Address replyDst = m_finalRoute.front();
-                /*
+                /**
        * Set the route and use it in send back route reply
        */
                 m_ipv4Route = SetRoute(srcAddress, m_mainAddress);
-                /*
+                /**
        * This part adds DSR header to the packet and send reply
        */
                 DsrRoutingHeader dsrRoutingHeader;
@@ -3469,25 +3482,25 @@ namespace ns3 {
                 uint8_t length = rrep.GetLength();        // Get the length of the rrep header excluding the type header
                 dsrRoutingHeader.SetPayloadLength(uint16_t(length) + 2);
                 dsrRoutingHeader.AddDsrOption(rrep);
-                Ptr<Packet> newPacket = Create<Packet>();
+                Ptr <Packet> newPacket = Create<Packet>();
                 newPacket->AddHeader(dsrRoutingHeader);
-                /*
+                /**
        * Send gratuitous reply
        */
-                NS_LOG_INFO ("Send back gratuitous route reply");
+                NS_LOG_INFO("Send back gratuitous route reply");
                 SendReply(newPacket, m_mainAddress, srcAddress, m_ipv4Route);
             } else {
-                NS_LOG_INFO ("The same gratuitous route reply has already sent");
+                NS_LOG_INFO("The same gratuitous route reply has already sent");
             }
         }
 
         void
-        DsrRouting::SendReply(Ptr<Packet> packet,
+        DsrRouting::SendReply(Ptr <Packet> packet,
                               Ipv4Address source,
                               Ipv4Address nextHop,
-                              Ptr<Ipv4Route> route) {
-            NS_LOG_FUNCTION (this << packet << source << nextHop);
-            NS_ASSERT_MSG (!m_downTarget.IsNull(), "Error, DsrRouting cannot send downward");
+                              Ptr <Ipv4Route> route) {
+            NS_LOG_FUNCTION(this << packet << source << nextHop);
+            NS_ASSERT_MSG(!m_downTarget.IsNull(), "Error, DsrRouting cannot send downward");
 
 
             //233333333333333333333
@@ -3502,43 +3515,44 @@ namespace ns3 {
             }
 
 
-            Ptr<NetDevice> dev = m_ipv4->GetNetDevice(m_ipv4->GetInterfaceForAddress(m_mainAddress));
+            Ptr <NetDevice> dev = m_ipv4->GetNetDevice(m_ipv4->GetInterfaceForAddress(m_mainAddress));
             route->SetOutputDevice(dev);  //
-            NS_LOG_INFO ("The output device " << dev << " packet is: " << *packet);
+            NS_LOG_INFO("The output device " << dev << " packet is: " << *packet);
 
             uint32_t priority = GetPriority(DSR_CONTROL_PACKET);
-            std::map<uint32_t, Ptr<dsr::DsrNetworkQueue> >::iterator i = m_priorityQueue.find(priority);
-            Ptr<dsr::DsrNetworkQueue> dsrNetworkQueue = i->second;
-            NS_LOG_INFO ("Inserting into priority queue number: " << priority);
+            std::map < uint32_t, Ptr < dsr::DsrNetworkQueue > > ::iterator
+            i = m_priorityQueue.find(priority);
+            Ptr <dsr::DsrNetworkQueue> dsrNetworkQueue = i->second;
+            NS_LOG_INFO("Inserting into priority queue number: " << priority);
 
             //m_downTarget (packet, source, nextHop, GetProtocolNumber (), route);
 
-            /// \todo New DsrNetworkQueueEntry
+            //New DsrNetworkQueueEntry
             DsrNetworkQueueEntry newEntry(packet, source, nextHop, Simulator::Now(), route);
             if (dsrNetworkQueue->Enqueue(newEntry)) {
                 Scheduler(priority);
             } else {
-                NS_LOG_INFO ("Packet dropped as dsr network queue is full");
+                NS_LOG_INFO("Packet dropped as dsr network queue is full");
             }
         }
 
         void
-        DsrRouting::ScheduleInitialReply(Ptr<Packet> packet,
+        DsrRouting::ScheduleInitialReply(Ptr <Packet> packet,
                                          Ipv4Address source,
                                          Ipv4Address nextHop,
-                                         Ptr<Ipv4Route> route) {
-            NS_LOG_FUNCTION (this << packet << source << nextHop);
+                                         Ptr <Ipv4Route> route) {
+            NS_LOG_FUNCTION(this << packet << source << nextHop);
             Simulator::ScheduleNow(&DsrRouting::SendReply, this,
                                    packet, source, nextHop, route);
         }
 
         void
-        DsrRouting::ScheduleCachedReply(Ptr<Packet> packet,
+        DsrRouting::ScheduleCachedReply(Ptr <Packet> packet,
                                         Ipv4Address source,
                                         Ipv4Address destination,
-                                        Ptr<Ipv4Route> route,
+                                        Ptr <Ipv4Route> route,
                                         double hops) {
-            NS_LOG_FUNCTION (this << packet << source << destination);
+            NS_LOG_FUNCTION(this << packet << source << destination);
             Simulator::Schedule(Time(2 * m_nodeTraversalTime * (hops - 1 + m_uniformRandomVariable->GetValue(0, 1))),
                                 &DsrRouting::SendReply, this, packet, source, destination, route);
         }
@@ -3549,9 +3563,9 @@ namespace ns3 {
                             Ipv4Address realSrc,
                             Ipv4Address realDst,
                             uint8_t protocol,
-                            Ptr<Ipv4Route> route) {
-            NS_LOG_FUNCTION (this << ackId << destination << realSrc << realDst << (uint32_t) protocol << route);
-            NS_ASSERT_MSG (!m_downTarget.IsNull(), "Error, DsrRouting cannot send downward");
+                            Ptr <Ipv4Route> route) {
+            NS_LOG_FUNCTION(this << ackId << destination << realSrc << realDst << (uint32_t) protocol << route);
+            NS_ASSERT_MSG(!m_downTarget.IsNull(), "Error, DsrRouting cannot send downward");
 
             // This is a route reply option header
             DsrRoutingHeader dsrRoutingHeader;
@@ -3561,7 +3575,7 @@ namespace ns3 {
             dsrRoutingHeader.SetDestId(GetIDfromIP(destination));
 
             DsrOptionAckHeader ack;
-            /*
+            /**
    * Set the ack Id and set the ack source address and destination address
    */
             ack.SetAckId(ackId);
@@ -3572,36 +3586,37 @@ namespace ns3 {
             dsrRoutingHeader.SetPayloadLength(uint16_t(length) + 2);
             dsrRoutingHeader.AddDsrOption(ack);
 
-            Ptr<Packet> packet = Create<Packet>();
+            Ptr <Packet> packet = Create<Packet>();
             packet->AddHeader(dsrRoutingHeader);
-            Ptr<NetDevice> dev = m_ip->GetNetDevice(m_ip->GetInterfaceForAddress(m_mainAddress));
+            Ptr <NetDevice> dev = m_ip->GetNetDevice(m_ip->GetInterfaceForAddress(m_mainAddress));
             route->SetOutputDevice(dev);
 
             uint32_t priority = GetPriority(DSR_CONTROL_PACKET);
-            std::map<uint32_t, Ptr<dsr::DsrNetworkQueue> >::iterator i = m_priorityQueue.find(priority);
-            Ptr<dsr::DsrNetworkQueue> dsrNetworkQueue = i->second;
+            std::map < uint32_t, Ptr < dsr::DsrNetworkQueue > > ::iterator
+            i = m_priorityQueue.find(priority);
+            Ptr <dsr::DsrNetworkQueue> dsrNetworkQueue = i->second;
 
-            NS_LOG_LOGIC ("Will be inserting into priority queue " << dsrNetworkQueue << " number: " << priority);
+            NS_LOG_LOGIC("Will be inserting into priority queue " << dsrNetworkQueue << " number: " << priority);
 
             //m_downTarget (packet, m_mainAddress, destination, GetProtocolNumber (), route);
 
-            /// \todo New DsrNetworkQueueEntry
+            //New DsrNetworkQueueEntry
             DsrNetworkQueueEntry newEntry(packet, m_mainAddress, destination, Simulator::Now(), route);
             if (dsrNetworkQueue->Enqueue(newEntry)) {
                 Scheduler(priority);
             } else {
-                NS_LOG_INFO ("Packet dropped as dsr network queue is full");
+                NS_LOG_INFO("Packet dropped as dsr network queue is full");
             }
         }
 
         enum IpL4Protocol::RxStatus
-        DsrRouting::Receive(Ptr<Packet> p,
+        DsrRouting::Receive(Ptr <Packet> p,
                             Ipv4Header const &ip,
-                            Ptr<Ipv4Interface> incomingInterface) {
-            Ptr<Packet> CRAp = p->Copy();
+                            Ptr <Ipv4Interface> incomingInterface) {
+            Ptr <Packet> CRAp = p->Copy();
 
 
-            std::map<Ipv4Address, uint16_t> m_RreqOnce;
+            std::map <Ipv4Address, uint16_t> m_RreqOnce;
 //	m_RreqOnce[m_ipv4->GetAddress(1, 0).GetLocal()] =1;
 
             Ipv4Mask odMask;
@@ -3613,29 +3628,29 @@ namespace ns3 {
                 }
             }
 
-            NS_LOG_FUNCTION (this << p << ip << incomingInterface);
+            NS_LOG_FUNCTION(this << p << ip << incomingInterface);
 
-            NS_LOG_INFO (
+            NS_LOG_INFO(
                     "Our own IP address " << m_mainAddress << " The incoming interface address " << incomingInterface);
 
             m_node = GetNode();                        // Get the node
-            Ptr<Packet> packet = p->Copy();            // Save a copy of the received packet
+            Ptr <Packet> packet = p->Copy();            // Save a copy of the received packet
 
 
-            /*
+            /**
    * When forwarding or local deliver packets, this one should be used always!!
    */
             DsrRoutingHeader dsrRoutingHeader;
             packet->RemoveHeader(dsrRoutingHeader);          // Remove the DSR header in whole
-            Ptr<Packet> copy = packet->Copy();
+            Ptr <Packet> copy = packet->Copy();
 
             uint8_t protocol = dsrRoutingHeader.GetNextHeader();
             Ipv4Address sourceId = dsrRoutingHeader.GetSourceId();
             Ipv4Address dstId = dsrRoutingHeader.GetDestId();
 
             Ipv4Address source = GetIPfromID(sourceId);
-            NS_LOG_INFO ("The source address " << source << " with source id " << sourceId);
-            /*
+            NS_LOG_INFO("The source address " << source << " with source id " << sourceId);
+            /**
    * Get the IP source and destination address
    */
             Ipv4Address src = ip.GetSource();
@@ -3646,9 +3661,9 @@ namespace ns3 {
             // This packet is used to peek option type
             p->RemoveAtStart(offset);
 
-            Ptr<dsr::DsrOptions> dsrOption;
+            Ptr <dsr::DsrOptions> dsrOption;
             DsrOptionHeader dsrOptionHeader;
-            /*
+            /**
    * Peek data to get the option type as well as length and segmentsLeft field
    */
             uint32_t size = p->GetSize();
@@ -3660,9 +3675,9 @@ namespace ns3 {
             uint8_t segmentsLeft = 0;
 
             optionType = *(data);
-            NS_LOG_LOGIC ("The option type value " << (uint32_t) optionType << " with packet id " << p->GetUid());
+            NS_LOG_LOGIC("The option type value " << (uint32_t) optionType << " with packet id " << p->GetUid());
             dsrOption = GetOption(optionType);       // Get the relative dsr option and demux to the process function
-            Ipv4Address promiscSource;      /// this is just here for the sake of passing in the promisc source
+            Ipv4Address promiscSource;      // this is just here for the sake of passing in the promisc source
 
 
             if (optionType == 1)        // This is the request option
@@ -3670,70 +3685,47 @@ namespace ns3 {
 
                 BlackList *blackList = m_rreqTable->FindUnidirectional(src);
                 if (blackList) {
-                    NS_LOG_INFO ("Discard this packet due to unidirectional link");
+                    NS_LOG_INFO("Discard this packet due to unidirectional link");
                     m_dropTrace(p);
                 }
 
                 dsrOption = GetOption(optionType);
 
-                Ptr<Packet> p3 = p->Copy(); // Note: The packet here doesn't contain the fixed size dsr header
+                Ptr <Packet> p3 = p->Copy(); // Note: The packet here doesn't contain the fixed size dsr header
                 uint8_t buf[2];
                 p3->CopyData(buf, sizeof(buf));
                 uint8_t numberAddress = (buf[1] - 6) / 4;
                 DsrOptionRreqHeader rreq3;
                 rreq3.SetNumberAddress(numberAddress);
                 p3->RemoveHeader(rreq3);
-                Ipv4Address m_TargetAddress = rreq3.GetTarget();/////////////////////Odie
+                Ipv4Address m_TargetAddress = rreq3.GetTarget();
                 commonTargetAddr = m_TargetAddress;
-                std::vector<Ipv4Address> nodeList2 = rreq3.GetNodesAddresses();
+                std::vector <Ipv4Address> nodeList2 = rreq3.GetNodesAddresses();
 
-                if (m_mainAddress == Ipv4Address("198.2.1.13")) {
-                    cout << "nodeList2.size sssss = " << nodeList2.size() << endl;
-                }
-
-
-                //////////////////////////////Odie, If this is Malicious, adding the Tag
                 if (isMalicious == 1) {
-                    std::cout << "This is A Malicious Node, and then drop all the packet\n";
                     packet->SetMaliciousType(1);
                 } else if (isMalicious == 2) {
-                    std::cout << "This is A Malicious Node, and then selectively drop some packets\n";
                     Ipv4Address maliciousIp;
                     maliciousIp = m_ipv4->GetAddress(1, 0).GetLocal();
                     packet->SetMaliciousType(2);
                     DsrRouteCacheEntry m_toDst;
 
                     bool findRoute = m_routeCache->LookupRoute(m_TargetAddress, m_toDst);
-                    //static uint16_t m_RreqOnlyOne = 1;//todo 需要修改下，如果是多个恶意节点只会发一个节点的RREQ
 
                     if (malicious_RREQ_Once.find(m_TargetAddress) == malicious_RREQ_Once.end()) {
                         malicious_RREQ_Once[m_TargetAddress] = false;
                     }
                     if ((!findRoute) && (!(malicious_RREQ_Once[m_TargetAddress]))) {
-                        //todo 恶意节点没有到达Target的路线，重新构造一帧到Target的RREQ
-                        Ptr<Packet> m_Rreq_Packet = Create<Packet>();
-                        Ptr<Ipv4Route> route;
+                        Ptr <Packet> m_Rreq_Packet = Create<Packet>();
+                        Ptr <Ipv4Route> route;
                         DsrRoutingHeader m_dsrRoutingHeader;
                         m_dsrRoutingHeader.SetNextHeader(protocol);
                         m_dsrRoutingHeader.SetMessageType(1);
                         m_dsrRoutingHeader.SetSourceId(GetIDfromIP(maliciousIp));
                         m_dsrRoutingHeader.SetDestId(maliciousIp.GetSubnetDirectedBroadcast(Ipv4Mask("255.255.255.0")));
 
-//    	    	  std::ofstream OdieF("rreqOnce.txt", std::ios::app);
-//    	    	  if(OdieF.good())
-//    	    	  {
-//    	    		  OdieF << "\n\n---------------------------------------\n";
-//    	    		  OdieF << "Odie MAddr = ";
-//    	    		  OdieF << maliciousIp;
-//    	    		  OdieF << " Target = ";
-//    	    		  OdieF << m_TargetAddress << std::endl;
-//    	    	  }
-//    	    	  OdieF.close();
-//    	    	  std::cout<<"Odie MAddr = "<<maliciousIp<<" Target = "<<m_TargetAddress<<std::endl;
-
                         DsrOptionRreqHeader m_rreqHeader;// has an alignment of 4n+0
-                        m_rreqHeader.AddNodeAddress(
-                                maliciousIp);  //todo    m_mainAddress                 // Add our own address in the header
+                        m_rreqHeader.AddNodeAddress(maliciousIp);
                         m_rreqHeader.SetTarget(m_TargetAddress);
                         m_requestId = m_rreqTable->CheckUniqueRreqId(
                                 m_TargetAddress);      // Check the Id cache for duplicate ones
@@ -3746,7 +3738,7 @@ namespace ns3 {
                         m_Rreq_Packet->AddHeader(m_dsrRoutingHeader);
 
                         // Schedule the route requests retry with non-propagation set true
-                        std::vector<Ipv4Address> address;
+                        std::vector <Ipv4Address> address;
                         address.push_back(maliciousIp);
                         address.push_back(m_TargetAddress);
                         /*
@@ -3754,19 +3746,16 @@ namespace ns3 {
     	    	   */
                         SocketIpTtlTag tag;
                         tag.SetTtl(0);
-                        Ptr<Packet> nonPropPacket = m_Rreq_Packet->Copy();
+                        Ptr <Packet> nonPropPacket = m_Rreq_Packet->Copy();
                         nonPropPacket->AddPacketTag(tag);
                         // Increase the request count
                         m_rreqTable->FindAndUpdate(m_TargetAddress);
                         SendRequest(nonPropPacket, maliciousIp);
-                        //++m_RreqOnlyOne;
-                        //malicious_RREQ_Once[m_ipv4->GetAddress(1, 0).GetLocal()] = true;
                         malicious_RREQ_Once[m_TargetAddress] = true;
                     }
                 } else if (isMalicious == 0) {
 
                 }
-                //Odie, If this is, adding the Tag
 
                 for (uint16_t i = 0; i < nodeList2.size(); i++)   //处理数据转发，使得SearchNextHop能够找到
                 {
@@ -3776,21 +3765,8 @@ namespace ns3 {
                             return IpL4Protocol::RX_OK;
                         }
                 }
-
-//		Ipv4Address destId = dsrRoutingHeader.GetDestId(); /////// 不得不有无脑转发 /////////////////////
-
-//		uint16_t destRadioType = FindRadioType(destId); /////// 不得不有无脑转发 /////////////////////
-
-//		uint16_t tempType; /////// 不得不有无脑转发 /////////////////////
                 for (uint16_t ptr = 0; ptr < od_addressVector.size(); ++ptr) {
-//			tempType = FindRadioType(od_addressVector[ptr]); /////// 不得不有无脑转发 /////////////////////
                     if (1) { /////// 不得不有无脑转发 ///////////////////// if(tempType == destRadioType)
-//				Simulator::Schedule(Seconds(0.01), &DsrOptionRreq::Process, dsrOption, p, packet,
-//						od_addressVector[ptr], source, ip, protocol, isPromisc,
-//						promiscSource);
-
-                        // todo 限制节点RREQ转发周期，一个节点10ms只能转发一次 Tips:解决广播风暴的一个办法
-//				if(Simulator::Now() - rreqInterval >= MilliSeconds(1))
                         if (1) {
                             cout << "mainAddr: " << m_mainAddress << " rreqInterval = "
                                  << rreqInterval.GetMicroSeconds()
@@ -3819,7 +3795,7 @@ namespace ns3 {
 //    	}
 
                 if (optionLength == 0) {
-                    NS_LOG_INFO ("Discard this packet");
+                    NS_LOG_INFO("Discard this packet");
                     m_dropTrace(p);
                 }
             } else if (optionType == 2) {
@@ -3828,18 +3804,18 @@ namespace ns3 {
                                                   promiscSource);
 
                 if (optionLength == 0) {
-                    NS_LOG_INFO ("Discard this packet");
+                    NS_LOG_INFO("Discard this packet");
                     m_dropTrace(p);
                 }
             } else if (optionType == 32)       // This is the ACK option
             {
-                NS_LOG_INFO ("This is the ack option");
+                NS_LOG_INFO("This is the ack option");
                 dsrOption = GetOption(optionType);
                 optionLength = dsrOption->Process(p, packet, m_mainAddress, source, ip, protocol, isPromisc,
                                                   promiscSource);
 
                 if (optionLength == 0) {
-                    NS_LOG_INFO ("Discard this packet");
+                    NS_LOG_INFO("Discard this packet");
                     m_dropTrace(p);
                 }
             } else if (optionType == 3)       // This is a route error header
@@ -3847,17 +3823,17 @@ namespace ns3 {
                 std::cout << " receive DSR   error " << std::endl;
                 return IpL4Protocol::RX_OK;
                 // populate this route error
-                NS_LOG_INFO ("The option type value " << (uint32_t) optionType);
+                NS_LOG_INFO("The option type value " << (uint32_t) optionType);
 
                 dsrOption = GetOption(optionType);
                 optionLength = dsrOption->Process(p, packet, m_mainAddress, source, ip, protocol, isPromisc,
                                                   promiscSource);
 
                 if (optionLength == 0) {
-                    NS_LOG_INFO ("Discard this packet");
+                    NS_LOG_INFO("Discard this packet");
                     m_dropTrace(p);
                 }
-                NS_LOG_INFO ("The option Length " << (uint32_t) optionLength);
+                NS_LOG_INFO("The option Length " << (uint32_t) optionLength);
             } else if (optionType == 96)       // This is the source route option
             {
 
@@ -3881,7 +3857,7 @@ namespace ns3 {
                                            Seconds(60.0))) // /* Drop Condition */Simulator::Now()>Seconds(80.0)&&Simulator::Now()<Seconds(90.0)))
                 {
                     std::cout << "恶意节点的IP地址： " << m_ipv4->GetAddress(1, 0).GetLocal() << std::endl;
-                    std::map<Ipv4Address, Ipv4Address> kk;
+                    std::map <Ipv4Address, Ipv4Address> kk;
                     kk[sourceId] = dstId;
                     if (packetCntMap.find(kk) == packetCntMap.end()) {
                         packetCntMap[kk] = 1;
@@ -3962,29 +3938,29 @@ namespace ns3 {
 
 
                 ///////////////////////////Odie, 当恶意节点找到去Target的路径后，将路径取出来
-                std::vector<Ipv4Address> m_routePath;
+                std::vector <Ipv4Address> m_routePath;
 
                 ///////////////////////////Odie, 当恶意节点找到去Target的路径后，将路径取出来
 
-                Ptr<Packet> p2 = p->Copy();
-                Ptr<Packet> p3 = p->Copy();
+                Ptr <Packet> p2 = p->Copy();
+                Ptr <Packet> p3 = p->Copy();
                 // Get the number of routers' address field
                 uint8_t buf[2];
                 p2->CopyData(buf, sizeof(buf));
                 uint8_t numberAddress2 = (buf[1] - 2) / 4;
                 DsrOptionSRHeader sourceRoute2;
                 DsrOptionSRHeader sourceRoute3;
-                std::vector<Ipv4Address> nodeList2;
-                std::vector<Ipv4Address> nodeList3;
+                std::vector <Ipv4Address> nodeList2;
+                std::vector <Ipv4Address> nodeList3;
                 sourceRoute3.SetNumberAddress(numberAddress2);
                 p3->RemoveHeader(sourceRoute3);
                 nodeList3 = sourceRoute3.GetNodesAddress();
 
-                set<Ipv4Address> s1 = {"198.3.1.26", "198.3.1.27", "198.3.1.28"};
-                set<Ipv4Address> s2 = {"198.3.1.26", "198.3.1.27", "198.3.1.28", "198.3.1.29", "198.3.1.30",
-                                       "198.3.1.31"};
+                set <Ipv4Address> s1 = {"198.3.1.26", "198.3.1.27", "198.3.1.28"};
+                set <Ipv4Address> s2 = {"198.3.1.26", "198.3.1.27", "198.3.1.28", "198.3.1.29", "198.3.1.30",
+                                        "198.3.1.31"};
 
-                std::set<Ipv4Address> maliciousIpAddr2;//登记
+                std::set <Ipv4Address> maliciousIpAddr2;//登记
                 maliciousIpAddr2 = s2;
 
                 if ((!nodeList3.empty()) && (maliciousIpAddr2.find(nodeList3.front()) == maliciousIpAddr2.end())) {
@@ -4097,12 +4073,13 @@ namespace ns3 {
                 if ((!tempMaskt2.IsMatch(NextHopAdd, m_mainAddress)) &&
                     flag2 == 1)//得到与下一跳节点相同网段的接口 并且下一节点和当前接口不是同一个网段，也不是目的节点
                 {
-                    Ptr<Ipv4L3Protocol> tempIpv4L3;
+                    Ptr <Ipv4L3Protocol> tempIpv4L3;
                     Ipv4Address tempAddr;
                     Ipv4Mask tempMask;
                     tempMask.Set(0xffffff00);
                     uint16_t NextHopType = FindRadioType(NextHopAdd);
-                    std::map<Ipv4Address, Ptr<Ipv4L3Protocol>>::const_iterator iterOdie = nodeInterface.find(
+                    std::map < Ipv4Address, Ptr < Ipv4L3Protocol >> ::const_iterator
+                    iterOdie = nodeInterface.find(
                             NextHopAdd);
                     NS_ASSERT_MSG(iterOdie != nodeInterface.end(), "Not Found NextHop in Map!");
 
@@ -4133,21 +4110,21 @@ namespace ns3 {
 
                 segmentsLeft = *(data + 3);
                 if (optionLength == 0) {
-                    NS_LOG_INFO ("Discard this packet");
+                    NS_LOG_INFO("Discard this packet");
                     m_dropTrace(p);
                 } else {
                     if (segmentsLeft == 0) {
                         // / Get the next header
                         uint8_t nextHeader = dsrRoutingHeader.GetNextHeader();
-                        Ptr<Ipv4L3Protocol> l3proto = m_node->GetObject<Ipv4L3Protocol>();
-                        Ptr<IpL4Protocol> nextProto = l3proto->GetProtocol(nextHeader);
+                        Ptr <Ipv4L3Protocol> l3proto = m_node->GetObject<Ipv4L3Protocol>();
+                        Ptr <IpL4Protocol> nextProto = l3proto->GetProtocol(nextHeader);
                         if (nextProto != 0) {
                             // we need to make a copy in the unlikely event we hit the
                             // RX_ENDPOINT_UNREACH code path
                             // Here we can use the packet that has been get off whole DSR header
                             enum IpL4Protocol::RxStatus status =
                                     nextProto->Receive(copy, ip, incomingInterface);
-                            NS_LOG_DEBUG ("The receive status " << status);
+                            NS_LOG_DEBUG("The receive status " << status);
                             switch (status) {
                                 case IpL4Protocol::RX_OK:
                                     // fall through
@@ -4164,15 +4141,15 @@ namespace ns3 {
                             }
                             return status;
                         } else {
-                            NS_FATAL_ERROR ("Should not have 0 next protocol value");
+                            NS_FATAL_ERROR("Should not have 0 next protocol value");
                         }
                     } else {
-                        NS_LOG_INFO (
+                        NS_LOG_INFO(
                                 "This is not the final destination, the packet has already been forward to next hop");
                     }
                 }
             } else {
-                NS_LOG_LOGIC ("Unknown Option. Drop!");
+                NS_LOG_LOGIC("Unknown Option. Drop!");
                 /*
        * Initialize the salvage value to 0
        */
@@ -4196,19 +4173,19 @@ namespace ns3 {
             return IpL4Protocol::RX_OK;
         }
 
-        Ipv4Address DsrRouting::SearchMainAddress(Ipv4Address ipv4Address, std::vector<Ipv4Address> &vec) {
-            NS_LOG_FUNCTION (this << ipv4Address);
+        Ipv4Address DsrRouting::SearchMainAddress(Ipv4Address ipv4Address, std::vector <Ipv4Address> &vec) {
+            NS_LOG_FUNCTION(this << ipv4Address);
             Ipv4Address nextHop;
-            NS_LOG_DEBUG ("the vector size " << vec.size());
+            NS_LOG_DEBUG("the vector size " << vec.size());
             if (vec.size() == 2) {
-                NS_ASSERT ("Ipv4Address SearchMainAddress   if (vec.size () == 2) ???"); //odd
-                NS_LOG_DEBUG ("The two nodes are neighbors");
+                NS_ASSERT("Ipv4Address SearchMainAddress   if (vec.size () == 2) ???"); //odd
+                NS_LOG_DEBUG("The two nodes are neighbors");
                 nextHop = vec[1];
                 return nextHop;
             } else {
                 if (ipv4Address == vec.back()) {
-                    NS_LOG_DEBUG ("We have reached to the final destination " << ipv4Address << " " << vec.back());
-                    NS_ASSERT ("Ipv4Address SearchMainAddress   if (ipv4Address == vec.back ()) ???"); //odd
+                    NS_LOG_DEBUG("We have reached to the final destination " << ipv4Address << " " << vec.back());
+                    NS_ASSERT("Ipv4Address SearchMainAddress   if (ipv4Address == vec.back ()) ???"); //odd
                     return ipv4Address;
                 }
                 for (std::vector<Ipv4Address>::const_iterator i = vec.begin(); i != vec.end(); ++i) {
@@ -4218,17 +4195,17 @@ namespace ns3 {
                     }
                 }
             }
-            NS_LOG_DEBUG ("next hop address not found, route corrupted");
+            NS_LOG_DEBUG("next hop address not found, route corrupted");
             Ipv4Address none = "0.0.0.0";
             return none;
         }
 
 
         enum IpL4Protocol::RxStatus
-        DsrRouting::Receive(Ptr<Packet> p,
+        DsrRouting::Receive(Ptr <Packet> p,
                             Ipv6Header const &ip,
-                            Ptr<Ipv6Interface> incomingInterface) {
-            NS_LOG_FUNCTION (this << p << ip.GetSourceAddress() << ip.GetDestinationAddress() << incomingInterface);
+                            Ptr <Ipv6Interface> incomingInterface) {
+            NS_LOG_FUNCTION(this << p << ip.GetSourceAddress() << ip.GetDestinationAddress() << incomingInterface);
             return IpL4Protocol::RX_ENDPOINT_UNREACH;
         }
 
@@ -4239,7 +4216,7 @@ namespace ns3 {
 
         void
         DsrRouting::SetDownTarget6(DownTargetCallback6 callback) {
-            NS_FATAL_ERROR ("Unimplemented");
+            NS_FATAL_ERROR("Unimplemented");
         }
 
 
@@ -4250,15 +4227,15 @@ namespace ns3 {
 
         IpL4Protocol::DownTargetCallback6
         DsrRouting::GetDownTarget6(void) const {
-            NS_FATAL_ERROR ("Unimplemented");
-            return MakeNullCallback<void, Ptr<Packet>, Ipv6Address, Ipv6Address, uint8_t, Ptr<Ipv6Route> >();
+            NS_FATAL_ERROR("Unimplemented");
+            return MakeNullCallback < void, Ptr < Packet >, Ipv6Address, Ipv6Address, uint8_t, Ptr < Ipv6Route > > ();
         }
 
-        void DsrRouting::Insert(Ptr<dsr::DsrOptions> option) {
+        void DsrRouting::Insert(Ptr <dsr::DsrOptions> option) {
             m_options.push_back(option);
         }
 
-        Ptr<dsr::DsrOptions> DsrRouting::GetOption(int optionNumber) {
+        Ptr <dsr::DsrOptions> DsrRouting::GetOption(int optionNumber) {
             for (DsrOptionList_t::iterator i = m_options.begin(); i != m_options.end(); ++i) {
                 if ((*i)->GetOptionNumber() == optionNumber) {
                     return *i;
