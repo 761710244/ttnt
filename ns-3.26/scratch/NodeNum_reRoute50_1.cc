@@ -39,11 +39,11 @@ void TxCallback(Ptr<CounterCalculator<uint32_t>> datac, std::string path,
 
 int main(int argc, char *argv[]) {
 
-    uint32_t ttntTotal = 61; // -------
+    uint32_t ttntTotal = 60; // -------
     bool verbose = true;
 
     uint8_t kind = 1;  // Number of business type
-    uint32_t business = 19;  // hack: Add 1 per test. Range: [1, 30]
+    uint32_t business = 6;  // hack: Add 1 per test. Range: [1, 30]
     uint32_t ttnt;
     uint32_t dir = 0;  // Output file path suffix
 
@@ -103,8 +103,8 @@ int main(int argc, char *argv[]) {
     mobility.SetPositionAllocator("ns3::GridPositionAllocator",//按照设置好的行列参数把节点等间距放置在一个二维笛卡尔坐标系中
                                   "MinX", DoubleValue(0.0),   // 起始坐标 (0, 0)
                                   "MinY", DoubleValue(0.0),
-                                  "DeltaX", DoubleValue(50), // X轴节点间距：0.01m
-                                  "DeltaY", DoubleValue(50), // y轴节点间距：0.01m
+                                  "DeltaX", DoubleValue(150), // X轴节点间距：0.01m
+                                  "DeltaY", DoubleValue(150), // y轴节点间距：0.01m
                                   "GridWidth", UintegerValue(6),  // 每行最大节点数
                                   "LayoutType", StringValue("RowFirst"));  // 行优先放
     mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
@@ -1757,8 +1757,8 @@ int main(int argc, char *argv[]) {
     }
 
 
-    if (0) {
-        phySinc.EnablePcap("NodeNum", ttntDevice.Get(1));
+    if (1) {
+        phySinc.EnablePcap("NodeNum", ttntDevice.Get(3));
     }
 
     Simulator::Stop(Seconds(simulation_time));

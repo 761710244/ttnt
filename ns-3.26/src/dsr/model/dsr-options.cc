@@ -542,8 +542,8 @@ uint8_t DsrOptionRreq::Process (Ptr<Packet> packet, Ptr<Packet> dsrP, Ipv4Addres
   uint8_t numberAddress = (buf[1] - 6) / 4;
   NS_LOG_DEBUG ("The number of Ip addresses " << (uint32_t)numberAddress);
 
-//todo 8跳限制了距离
-if(numberAddress >= 16)
+//todo change
+if(numberAddress >= 6)
   {
       NS_LOG_DEBUG ("Discard the packet, malformed header since two many ip addresses in route");
       m_dropTrace (packet); // call the drop trace to show in the tracing

@@ -61,27 +61,27 @@ int main(int argc, char *argv[]) {
     TTNTNode.Create(ttnt);
 
     /** 创建物理层：Yans */
-    ttnt::WifiHelper wifiSinc;
-    ttnt::YansWifiChannelHelper channelSinc =
+    ttnt::WifiHelper wifiTTNT;
+    ttnt::YansWifiChannelHelper channelTTNT =
             ttnt::YansWifiChannelHelper::Default(); //使用默认的信道模型
-    ttnt::YansWifiPhyHelper phySinc = ttnt::YansWifiPhyHelper::Default();      //使用默认的PHY模型
+    ttnt::YansWifiPhyHelper phyTTNT = ttnt::YansWifiPhyHelper::Default();      //使用默认的PHY模型
 
-    phySinc.SetChannel(channelSinc.Create()); //创建通道对象并把他关联到物理层对象管理器
-    wifiSinc.SetStandard(ttnt::WIFI_PHY_STANDARD_80211b);  // 设置wifi标准
+    phyTTNT.SetChannel(channelTTNT.Create()); //创建通道对象并把他关联到物理层对象管理器
+    wifiTTNT.SetStandard(ttnt::WIFI_PHY_STANDARD_80211b);  // 设置wifi标准
 
 
     /** 创建MAC层 */
-    ttnt::NqosWifiMacHelper wifiMacSinc =
+    ttnt::NqosWifiMacHelper wifiMacTTNT =
             ttnt::NqosWifiMacHelper::Default();
     // 指定wifi运行模式：基础或ad hoc模式(P153)
-    wifiMacSinc.SetType("ns3::sinc-AdhocWifiMac");
+    wifiMacTTNT.SetType("ns3::TTNT-AdhocWifiMac");
 
-//    wifiSinc.SetRemoteStationManager("ns3::sinc-ArfWifiManager",
+//    wifiTTNT.SetRemoteStationManager("ns3::TTNT-ArfWifiManager",
 //            "MaxSlrc",UintegerValue(0));
 
 
     /** 创建网络设备 */
-    NetDeviceContainer ttntDevice = wifiSinc.Install(phySinc, wifiMacSinc, TTNTNode);
+    NetDeviceContainer ttntDevice = wifiTTNT.Install(phyTTNT, wifiMacTTNT, TTNTNode);
 
 
     /** 指定移动模型 ：
@@ -139,7 +139,7 @@ int main(int argc, char *argv[]) {
     double simulation_time = (ttnt / 2) * 57;
 
     //// 设置MaxSlrc 的方法
-//    Config::Set("/NodeList/*/DeviceList/*/$ns3::sinc-WifiNetDevice/RemoteStationManager/$ns3::sinc-ArfWifiManager/MaxSlrc",UintegerValue (0));
+//    Config::Set("/NodeList/*/DeviceList/*/$ns3::TTNT-WifiNetDevice/RemoteStationManager/$ns3::TTNT-ArfWifiManager/MaxSlrc",UintegerValue (0));
 //    Ptr<NetDevice> dev = TTNTNode.Get(0)->GetDevice(0);
 //    Ptr<ttnt::WifiNetDevice> wdev = dev->GetObject<ttnt::WifiNetDevice>();
 //    Ptr<ttnt::WifiRemoteStationManager> RSM = wdev->GetRemoteStationManager();  // error
@@ -1746,7 +1746,7 @@ int main(int argc, char *argv[]) {
 
 
     if (0) {
-        phySinc.EnablePcap("NodeNum", ttntDevice.Get(1));
+        phyTTNT.EnablePcap("NodeNum", ttntDevice.Get(1));
     }
 
     Simulator::Stop(Seconds(simulation_time));
