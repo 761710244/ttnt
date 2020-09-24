@@ -1759,6 +1759,11 @@ int main(int argc, char *argv[]) {
 
     if (1) {
         phySinc.EnablePcap("NodeNum", ttntDevice.Get(3));
+        phySinc.EnablePcap("NodeNum", ttntDevice.Get(4));
+        phySinc.EnablePcap("NodeNum", ttntDevice.Get(5));
+        phySinc.EnablePcap("NodeNum", ttntDevice.Get(9));
+        phySinc.EnablePcap("NodeNum", ttntDevice.Get(10));
+        phySinc.EnablePcap("NodeNum", ttntDevice.Get(11));
     }
 
     Simulator::Stop(Seconds(simulation_time));
