@@ -24,7 +24,7 @@ using namespace std;
 
 NS_LOG_COMPONENT_DEFINE("ThirdScriptExample");
 
-void TxCallback(Ptr<CounterCalculator<uint32_t>> datac, std::string path,
+void TxCallback(Ptr <CounterCalculator<uint32_t>> datac, std::string path,
                 Ptr<const Packet> packet) {
     NS_LOG_INFO("Sent frame counted in " << datac->GetKey());
     datac->Update();
@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
     bool verbose = true;
 
     uint8_t kind = 1;  // Number of business type
-    uint32_t business = 9;  // hack: Add 1 per test. Range: [1, 30]
+    uint32_t business = 2;  // hack: Add 1 per test. Range: [1, 30]
     uint32_t ttnt;
     uint32_t dir = 0;  // Output file path suffix
 
@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
     cmd.AddValue("business", "Number of traffic flows of a single type", business);
     cmd.Parse(argc, argv);
 
-    ttnt = kind * business * 2;
+    ttnt = ((kind * business * 2) / 6 + 1) * 6;
     ns3::UdpServer::dirSuffix = dir;
     UdpServer::reInit(kind, business);
     dsr::DsrOptions::partitionWindow("Optimize");
@@ -150,7 +150,7 @@ int main(int argc, char *argv[]) {
         for (uint8_t j = 1; j <= business; j++) {
             packet_size[(i - 1) * business + j] = size;
         }
-        size -= 20;
+        size -= 40;
     }
 
     /** workflow: 1: 0->3 */
@@ -1766,12 +1766,12 @@ int main(int argc, char *argv[]) {
 
     if (0) //得出每个节点的真实位置与IP地址
     {
-        map<std::string, uint32_t> mapIpv4 = anim.getIpv4AddressNodeIdTable();
-        multimap<uint32_t, std::string> mapipv4 = anim.GetIpv4AddressNodeIdTable();
-        map<uint32_t, Vector> mapPositon = anim.getNodePosition();
+        map <std::string, uint32_t> mapIpv4 = anim.getIpv4AddressNodeIdTable();
+        multimap <uint32_t, std::string> mapipv4 = anim.GetIpv4AddressNodeIdTable();
+        map <uint32_t, Vector> mapPositon = anim.getNodePosition();
 
-        map<std::string, Vector> NodeIPandPosition;
-        map<uint32_t, map<std::string, Vector>> NodeIDandIPandPosition;
+        map <std::string, Vector> NodeIPandPosition;
+        map <uint32_t, map<std::string, Vector>> NodeIDandIPandPosition;
 
         if (mapPositon.size() == mapIpv4.size()) //判断两个map大小是否相等
         {
