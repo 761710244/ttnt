@@ -5,4 +5,4 @@ rm yuzhi.txt
 rm delay*
 rm *pcap
 rm *xml
-./waf --run scratch/NodeNum_reRoute50_1
+./waf --run scratch/reRoute50_optimiza
