@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
     bool verbose = true;
 
     uint8_t kind = 1;  // Number of business type
-    uint32_t business = 2;  // hack: Add 1 per test. Range: [1, 30]
+    uint32_t business = 9;  // hack: Add 1 per test. Range: [1, 30]
     uint32_t ttnt;
     uint32_t dir = 0;  // Output file path suffix
 
@@ -49,7 +49,8 @@ int main(int argc, char *argv[]) {
     cmd.AddValue("business", "Number of traffic flows of a single type", business);
     cmd.Parse(argc, argv);
 
-    ttnt = ((kind * business * 2) / 6 + 1) * 6;
+    ttnt = kind * business * 2;
+    ttntTotal = ((kind * business - 1) / 3 + 1) * 6;
     ns3::UdpServer::dirSuffix = dir;
     UdpServer::reInit(kind, business);
     dsr::DsrOptions::partitionWindow("Optimize");
@@ -65,7 +66,7 @@ int main(int argc, char *argv[]) {
 
     /** 创建节点 */
     NodeContainer TTNTNode;
-    TTNTNode.Create(ttnt);
+    TTNTNode.Create(ttntTotal);
 
     /** 创建物理层：Yans */
     ttnt::WifiHelper wifiSinc;
