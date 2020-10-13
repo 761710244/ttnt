@@ -41,14 +41,14 @@
 #include "ns3/nstime.h"
 namespace ns3 {namespace ttnt {
 
-NS_LOG_COMPONENT_DEFINE ("sinAdhocWifiMac");
+NS_LOG_COMPONENT_DEFINE ("ttntAdhocWifiMac");
 
 NS_OBJECT_ENSURE_REGISTERED (AdhocWifiMac);
 
 TypeId
 AdhocWifiMac::GetTypeId (void)
 {
-  static TypeId tid = TypeId ("ns3::sinc-AdhocWifiMac")
+  static TypeId tid = TypeId ("ns3::ttnt-AdhocWifiMac")
     .SetParent<RegularWifiMac> ()
     .SetGroupName ("Wifi")
     .AddConstructor<AdhocWifiMac> ()
