@@ -1,11 +1,6 @@
 //
-// Created by yf518 on 9/9/20.
+// Created by pinganzhang on 2020/10/13.
 //
-
-/**
- * 性能测试
- * 测试两种业务类型的吞吐量和时延s
- */
 
 #include "ns3/core-module.h"
 #include "ns3/point-to-point-module.h"
@@ -38,7 +33,7 @@ void TxCallback(Ptr <CounterCalculator<uint32_t>> datac, std::string path, Ptr<c
 int main(int argc, char *argv[]) {
 
     uint8_t kind = 1;
-    uint32_t business = 2;  // hack: Add 1 per test. Range: [1, 15]
+    uint32_t business = 1;  // hack: Add 1 per test. Range: [1, 15]
     uint32_t ttnt;
     bool verbose = true;
     uint32_t dir = 0;  // Output file path suffix
@@ -173,7 +168,7 @@ int main(int argc, char *argv[]) {
         for (uint8_t j = 1; j <= business; j++) {
             packet_size[(i - 1) * business + j] = size;
         }
-        size -= 20;
+        size -= 40;
     }
 
     /**
@@ -1829,3 +1824,4 @@ int main(int argc, char *argv[]) {
     Simulator::Destroy();
     return 0;
 }
+

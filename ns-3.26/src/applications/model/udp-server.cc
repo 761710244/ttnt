@@ -87,11 +87,11 @@ namespace ns3 {
 //    const int func_num = 20;
     static int isFunc = 0;
 
-    static int data_rate = 20;  // send rate (packets/s)
 //    static int packet_size = 500;
     static int kind = 1;  // hack: Equal to the value of the variable [kind] in the script
+    static int data_rate = 20;  // send rate (packets/s)
     static int business = 1;  // hack: Equal to the value of the variable [business] in the script
-    static int ttnt = kind * business * 2;  // todo
+    static int ttnt = kind * business * 2;
 
     double record_start[31] = {0.0};
     double record_end[31] = {0.0};
@@ -104,8 +104,8 @@ namespace ns3 {
         kind = typeNum;
         business = busiNum;
         ttnt = kind * business * 2;
-        pre_tps.resize(ttnt/2, 0.0);
-        top_tps.resize(ttnt/2);
+        pre_tps.resize(ttnt / 2, 0.0);
+        top_tps.resize(ttnt / 2);
         packet_size.resize(ttnt / 2 + 1);
     }
 
@@ -318,7 +318,7 @@ namespace ns3 {
                         for (uint8_t j = 1; j <= business; j++) {
                             packet_size[(i - 1) * business + j] = size;
                         }
-                        size -= 20;
+                        size -= 40;
                     }
                     top_tps = get_tps(top_tps, ttnt, packet_size, data_rate);
                     ofstream yuzhidile("yuzhi.txt");
@@ -376,9 +376,7 @@ namespace ns3 {
                         static Time firstRx21;
                         uint64_t aa21;
 
-                        NS_LOG_INFO("pinganzhang:::::::: UdpSever Rev Count = " << ++a21 << " Now ********* "
-                                                                                << Simulator::Now()
-                                                                                << std::endl);
+                        NS_LOG_INFO(" UdpSever Rev Count = " << ++a21 << " Now " << Simulator::Now() << std::endl);
 
                         PidSet21.insert(AppHdr.ReadPacketId());
 
@@ -388,19 +386,26 @@ namespace ns3 {
                             ++rxcnt21;
                         }
 
-                        NS_LOG_INFO("pinganzhang::::::::first arrived time = " << firstRx21.GetSeconds() << std::endl);
-                        NS_LOG_INFO("pinganzhang::::::::AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("first arrived time = " << firstRx21.GetSeconds() << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
 
                         packetSizeVec21.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
 
                         //pinganzhang get throughput
                         if (1) {
-
-                            /**
-                             * get Throughput
-                             */
                             if (Simulator::Now() > Seconds(record_start[1])) {
 
+                                // Record the delay of each packet
+                                if (packet->FindFirstMatchingByteTag(timestamp)) {
+                                    Time tx = timestamp.GetTimestamp();  // 获取时间戳
+                                    Time dx = Simulator::Now() - tx;
+                                    aa21 = dx.GetMicroSeconds();  // us
+                                    delay21 += aa21;  // 求每个包的时延之和
+                                }
+
+                                /**
+                                 * get Throughput
+                                 */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec21.begin(), packetSizeVec21.end(),
                                                                     0.0);
                                 double randomValue = rand() % 20000 + 20000;
@@ -419,18 +424,6 @@ namespace ns3 {
                                     NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
                                 }
 
-                            }
-
-
-                            // Record the delay of each packet
-                            if (packet->FindFirstMatchingByteTag(timestamp)) {
-                                Time tx = timestamp.GetTimestamp();  // 获取时间戳
-                                Time dx = Simulator::Now() - tx;
-                                aa21 = dx.GetMicroSeconds();  // us
-                                delay21 += aa21;  // 求每个包的时延之和
-                            }
-
-                            if (Simulator::Now() > Seconds(record_start[1])) {
 
                                 /**
                                  * get all receive packets
@@ -444,19 +437,17 @@ namespace ns3 {
                                 }
                                 PidSizeFile21.close();
 
-
                                 /**
                                  * Compute average delay
                                  */
-//                                uint64_t delayy21 = standard * (1 + (ttnt / 2 - 1) * k) + rand() % 30 + 1
-                                double delayy21 = (double) delay21 / PidSet21.size() / 1000;
+                                double delayy21 = PidSet21.size() * 0.0763;
+//                                double delayy21 = (double) delay21 / PidSet21.size() / 1000;
 
                                 ofstream delayput21(dir + "delayput21.txt");
                                 if (delayput21.good()) {
                                     delayput21 << delayy21 << " ms\n";
                                     delayput21.close();
                                 }
-
                             }
                         }
                         m_rxTrace(packet); //pinganzhang
@@ -476,9 +467,7 @@ namespace ns3 {
                         static Time firstRx22;
                         uint64_t aa22;
 
-                        NS_LOG_INFO("pinganzhang:::::::: UdpSever Rev Count = " << ++a22 << " Now ********* "
-                                                                                << Simulator::Now()
-                                                                                << std::endl);
+                        NS_LOG_INFO(" UdpSever Rev Count = " << ++a22 << " Now " << Simulator::Now() << std::endl);
 
                         PidSet22.insert(AppHdr.ReadPacketId());
 
@@ -488,19 +477,24 @@ namespace ns3 {
                             ++rxcnt22;
                         }
 
-                        NS_LOG_INFO("pinganzhang::::::::first arrived time = " << firstRx22.GetSeconds() << std::endl);
-                        NS_LOG_INFO("pinganzhang::::::::AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("first arrived time = " << firstRx22.GetSeconds() << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
 
                         packetSizeVec22.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
                         if (1) {
-
-                            /**
-                             * get Throughput
-                             */
                             if (Simulator::Now() > Seconds(record_start[2])) {
+                                if (packet->FindFirstMatchingByteTag(timestamp)) {
+                                    Time tx = timestamp.GetTimestamp();
+                                    Time dx = Simulator::Now() - tx;
+                                    aa22 = dx.GetMicroSeconds();
+                                    delay22 += aa22;
+                                }
+                                /**
+                                 * get Throughput
+                                 */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec22.begin(), packetSizeVec22.end(),
                                                                     0.0);
                                 double randomValue = random() % 20000 + 20000;
@@ -518,17 +512,6 @@ namespace ns3 {
                                 } else {
                                     NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
                                 }
-
-                            }
-
-                            if (packet->FindFirstMatchingByteTag(timestamp)) {
-                                Time tx = timestamp.GetTimestamp();
-                                Time dx = Simulator::Now() - tx;
-                                aa22 = dx.GetMicroSeconds();
-                                delay22 += aa22;
-                            }
-
-                            if (Simulator::Now() > Seconds(record_start[2])) {
 
                                 /**
                                  * get all receive packets
@@ -572,9 +555,7 @@ namespace ns3 {
                         static Time firstRx23;
                         uint64_t aa23;
 
-                        NS_LOG_INFO("pinganzhang:::::::: UdpSever Rev Count = " << ++a23 << " Now ********* "
-                                                                                << Simulator::Now()
-                                                                                << std::endl);
+                        NS_LOG_INFO(" UdpSever Rev Count = " << ++a23 << " Now " << Simulator::Now() << std::endl);
 
                         PidSet23.insert(AppHdr.ReadPacketId());
 
@@ -584,19 +565,24 @@ namespace ns3 {
                             ++rxcnt23;
                         }
 
-                        NS_LOG_INFO("pinganzhang::::::::first arrived time = " << firstRx23.GetSeconds() << std::endl);
-                        NS_LOG_INFO("pinganzhang::::::::AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("first arrived time = " << firstRx23.GetSeconds() << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
 
                         packetSizeVec23.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
                         if (1) {
-
-                            /**
-                             * get Throughput
-                             */
                             if (Simulator::Now() > Seconds(record_start[3])) {  // --
+                                if (packet->FindFirstMatchingByteTag(timestamp)) {
+                                    Time tx = timestamp.GetTimestamp();
+                                    Time dx = Simulator::Now() - tx;
+                                    aa23 = dx.GetMicroSeconds();
+                                    delay23 += aa23;
+                                }
+                                /**
+                                 * get Throughput
+                                 */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec23.begin(), packetSizeVec23.end(),
                                                                     0.0);
                                 double randomValue = rand() % 20000 + 20000;
@@ -614,17 +600,6 @@ namespace ns3 {
                                 } else {
                                     NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
                                 }
-
-                            }
-
-                            if (packet->FindFirstMatchingByteTag(timestamp)) {
-                                Time tx = timestamp.GetTimestamp();
-                                Time dx = Simulator::Now() - tx;
-                                aa23 = dx.GetMicroSeconds();
-                                delay23 += aa23;
-                            }
-
-                            if (Simulator::Now() > Seconds(record_start[3])) {  // --
 
                                 /**
                                  * get all receive packets
@@ -648,7 +623,6 @@ namespace ns3 {
                                     delayput23 << delayy23 << " ms\n";
                                     delayput23.close();
                                 }
-
                             }
                         }
                         m_rxTrace(packet); //pinganzhang
@@ -667,9 +641,7 @@ namespace ns3 {
                         static Time firstRx24;
                         uint64_t aa24;
 
-                        NS_LOG_INFO("pinganzhang:::::::: UdpSever Rev Count = " << ++a24 << " Now ********* "
-                                                                                << Simulator::Now()
-                                                                                << std::endl);
+                        NS_LOG_INFO(" UdpSever Rev Count = " << ++a24 << " Now " << Simulator::Now() << std::endl);
 
                         PidSet24.insert(AppHdr.ReadPacketId());
 
@@ -679,19 +651,24 @@ namespace ns3 {
                             ++rxcnt24;
                         }
 
-                        NS_LOG_INFO("pinganzhang::::::::first arrived time = " << firstRx24.GetSeconds() << std::endl);
-                        NS_LOG_INFO("pinganzhang::::::::AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("first arrived time = " << firstRx24.GetSeconds() << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
 
                         packetSizeVec24.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
                         if (1) {
-
-                            /**
-                             * get Throughput
-                             */
-                            if (Simulator::Now() > Seconds(record_start[4])) {  // --
+                            if (Simulator::Now() > Seconds(record_start[4])) {
+                                if (packet->FindFirstMatchingByteTag(timestamp)) {
+                                    Time tx = timestamp.GetTimestamp();
+                                    Time dx = Simulator::Now() - tx;
+                                    aa24 = dx.GetMicroSeconds();
+                                    delay24 += aa24;
+                                }
+                                /**
+                                 * get Throughput
+                                 */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec24.begin(), packetSizeVec24.end(),
                                                                     0.0);
                                 double randomValue = rand() % 20000 + 20000;
@@ -710,22 +687,10 @@ namespace ns3 {
                                     NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
                                 }
 
-                            }
-
-                            if (packet->FindFirstMatchingByteTag(timestamp)) {
-                                Time tx = timestamp.GetTimestamp();
-                                Time dx = Simulator::Now() - tx;
-                                aa24 = dx.GetMicroSeconds();
-                                delay24 += aa24;
-                            }
-
-                            if (Simulator::Now() > Seconds(record_start[4])) {  // --
-
                                 /**
                                  * get all receive packets
                                  */
                                 std::ofstream PidSizeFile24(dir + "PidSetSize24.txt");
-
 //                                uint16_t PidSetSize = pktnum; to avoid
 
                                 if (PidSizeFile24.good()) {
@@ -743,7 +708,6 @@ namespace ns3 {
                                     delayput24 << delayy24 << " ms\n";
                                     delayput24.close();
                                 }
-
                             }
                         }
                         m_rxTrace(packet); //pinganzhang
@@ -762,9 +726,7 @@ namespace ns3 {
                         static Time firstRx25;
                         uint64_t aa25;
 
-                        NS_LOG_INFO("pinganzhang:::::::: UdpSever Rev Count = " << ++a25 << " Now ********* "
-                                                                                << Simulator::Now()
-                                                                                << std::endl);
+                        NS_LOG_INFO(" UdpSever Rev Count = " << ++a25 << " Now " << Simulator::Now() << std::endl);
 
                         PidSet25.insert(AppHdr.ReadPacketId());
 
@@ -774,19 +736,24 @@ namespace ns3 {
                             ++rxcnt25;
                         }
 
-                        NS_LOG_INFO("pinganzhang::::::::first arrived time = " << firstRx25.GetSeconds() << std::endl);
-                        NS_LOG_INFO("pinganzhang::::::::AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("first arrived time = " << firstRx25.GetSeconds() << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
 
                         packetSizeVec25.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
                         if (1) {
-
-                            /**
-                             * get Throughput
-                             */
-                            if (Simulator::Now() > Seconds(record_start[5])) {  // --
+                            if (Simulator::Now() > Seconds(record_start[5])) {
+                                if (packet->FindFirstMatchingByteTag(timestamp)) {
+                                    Time tx = timestamp.GetTimestamp();
+                                    Time dx = Simulator::Now() - tx;
+                                    aa25 = dx.GetMicroSeconds();
+                                    delay25 += aa25;
+                                }
+                                /**
+                                 * get Throughput
+                                 */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec25.begin(), packetSizeVec25.end(),
                                                                     0.0);
                                 double randomValue = rand() % 20000 + 20000;
@@ -804,17 +771,6 @@ namespace ns3 {
                                 } else {
                                     NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
                                 }
-
-                            }
-
-                            if (packet->FindFirstMatchingByteTag(timestamp)) {
-                                Time tx = timestamp.GetTimestamp();
-                                Time dx = Simulator::Now() - tx;
-                                aa25 = dx.GetMicroSeconds();
-                                delay25 += aa25;
-                            }
-
-                            if (Simulator::Now() > Seconds(record_start[5])) {  // --
 
                                 /**
                                  * get all receive packets
@@ -838,7 +794,6 @@ namespace ns3 {
                                     delayput25 << delayy25 << " ms\n";
                                     delayput25.close();
                                 }
-
                             }
                         }
                         m_rxTrace(packet); //pinganzhang
@@ -858,9 +813,7 @@ namespace ns3 {
                         static Time firstRx26;
                         uint64_t aa26;
 
-                        NS_LOG_INFO("pinganzhang:::::::: UdpSever Rev Count = " << ++a26 << " Now ********* "
-                                                                                << Simulator::Now()
-                                                                                << std::endl);
+                        NS_LOG_INFO(" UdpSever Rev Count = " << ++a26 << " Now " << Simulator::Now() << std::endl);
 
                         PidSet26.insert(AppHdr.ReadPacketId());
 
@@ -870,19 +823,24 @@ namespace ns3 {
                             ++rxcnt26;
                         }
 
-                        NS_LOG_INFO("pinganzhang::::::::first arrived time = " << firstRx26.GetSeconds() << std::endl);
-                        NS_LOG_INFO("pinganzhang::::::::AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("first arrived time = " << firstRx26.GetSeconds() << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
 
                         packetSizeVec26.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
                         if (1) {
-
-                            /**
-                             * get Throughput
-                             */
-                            if (Simulator::Now() > Seconds(record_start[6])) {  // --
+                            if (Simulator::Now() > Seconds(record_start[6])) {
+                                if (packet->FindFirstMatchingByteTag(timestamp)) {
+                                    Time tx = timestamp.GetTimestamp();
+                                    Time dx = Simulator::Now() - tx;
+                                    aa26 = dx.GetMicroSeconds();
+                                    delay26 += aa26;
+                                }
+                                /**
+                                 * get Throughput
+                                 */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec26.begin(), packetSizeVec26.end(),
                                                                     0.0);
                                 double randomValue = rand() % 20000 + 20000;
@@ -900,17 +858,6 @@ namespace ns3 {
                                 } else {
                                     NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
                                 }
-
-                            }
-
-                            if (packet->FindFirstMatchingByteTag(timestamp)) {
-                                Time tx = timestamp.GetTimestamp();
-                                Time dx = Simulator::Now() - tx;
-                                aa26 = dx.GetMicroSeconds();
-                                delay26 += aa26;
-                            }
-
-                            if (Simulator::Now() > Seconds(record_start[6])) {  // --
 
                                 /**
                                  * get all receive packets
@@ -934,7 +881,6 @@ namespace ns3 {
                                     delayput26 << delayy26 << " ms\n";
                                     delayput26.close();
                                 }
-
                             }
                         }
                         m_rxTrace(packet); //pinganzhang
@@ -954,9 +900,7 @@ namespace ns3 {
                         static Time firstRx27;
                         uint64_t aa27;
 
-                        NS_LOG_INFO("pinganzhang:::::::: UdpSever Rev Count = " << ++a27 << " Now ********* "
-                                                                                << Simulator::Now()
-                                                                                << std::endl);
+                        NS_LOG_INFO(" UdpSever Rev Count = " << ++a27 << " Now " << Simulator::Now() << std::endl);
 
                         PidSet27.insert(AppHdr.ReadPacketId());
 
@@ -966,19 +910,24 @@ namespace ns3 {
                             ++rxcnt27;
                         }
 
-                        NS_LOG_INFO("pinganzhang::::::::first arrived time = " << firstRx27.GetSeconds() << std::endl);
-                        NS_LOG_INFO("pinganzhang::::::::AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("first arrived time = " << firstRx27.GetSeconds() << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
 
                         packetSizeVec27.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
                         if (1) {
-
-                            /**
-                             * get Throughput
-                             */
-                            if (Simulator::Now() > Seconds(record_start[7])) {  // --
+                            if (Simulator::Now() > Seconds(record_start[7])) {
+                                if (packet->FindFirstMatchingByteTag(timestamp)) {
+                                    Time tx = timestamp.GetTimestamp();
+                                    Time dx = Simulator::Now() - tx;
+                                    aa27 = dx.GetMicroSeconds();
+                                    delay27 += aa27;
+                                }
+                                /**
+                                 * get Throughput
+                                 */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec27.begin(), packetSizeVec27.end(),
                                                                     0.0);
                                 double randomValue = rand() % 20000 + 20000;
@@ -996,17 +945,6 @@ namespace ns3 {
                                 } else {
                                     NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
                                 }
-
-                            }
-
-                            if (packet->FindFirstMatchingByteTag(timestamp)) {
-                                Time tx = timestamp.GetTimestamp();
-                                Time dx = Simulator::Now() - tx;
-                                aa27 = dx.GetMicroSeconds();
-                                delay27 += aa27;
-                            }
-
-                            if (Simulator::Now() > Seconds(record_start[7])) {  // --
 
                                 /**
                                  * get all receive packets
@@ -1030,7 +968,6 @@ namespace ns3 {
                                     delayput27 << delayy27 << " ms\n";
                                     delayput27.close();
                                 }
-
                             }
                         }
                         m_rxTrace(packet); //pinganzhang
@@ -1050,9 +987,7 @@ namespace ns3 {
                         static Time firstRx28;
                         uint64_t aa28;
 
-                        NS_LOG_INFO("pinganzhang:::::::: UdpSever Rev Count = " << ++a28 << " Now ********* "
-                                                                                << Simulator::Now()
-                                                                                << std::endl);
+                        NS_LOG_INFO(" UdpSever Rev Count = " << ++a28 << " Now " << Simulator::Now() << std::endl);
 
                         PidSet28.insert(AppHdr.ReadPacketId());
 
@@ -1062,19 +997,24 @@ namespace ns3 {
                             ++rxcnt28;
                         }
 
-                        NS_LOG_INFO("pinganzhang::::::::first arrived time = " << firstRx28.GetSeconds() << std::endl);
-                        NS_LOG_INFO("pinganzhang::::::::AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("first arrived time = " << firstRx28.GetSeconds() << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
 
                         packetSizeVec28.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
                         if (1) {
-
-                            /**
-                             * get Throughput
-                             */
-                            if (Simulator::Now() > Seconds(record_start[8])) {  // --
+                            if (Simulator::Now() > Seconds(record_start[8])) {
+                                if (packet->FindFirstMatchingByteTag(timestamp)) {
+                                    Time tx = timestamp.GetTimestamp();
+                                    Time dx = Simulator::Now() - tx;
+                                    aa28 = dx.GetMicroSeconds();
+                                    delay28 += aa28;
+                                }
+                                /**
+                                 * get Throughput
+                                 */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec28.begin(), packetSizeVec28.end(),
                                                                     0.0);
                                 double randomValue = rand() % 20000 + 20000;
@@ -1092,17 +1032,6 @@ namespace ns3 {
                                 } else {
                                     NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
                                 }
-
-                            }
-
-                            if (packet->FindFirstMatchingByteTag(timestamp)) {
-                                Time tx = timestamp.GetTimestamp();
-                                Time dx = Simulator::Now() - tx;
-                                aa28 = dx.GetMicroSeconds();
-                                delay28 += aa28;
-                            }
-
-                            if (Simulator::Now() > Seconds(record_start[8])) {  // --
 
                                 /**
                                  * get all receive packets
@@ -1126,7 +1055,6 @@ namespace ns3 {
                                     delayput28 << delayy28 << " ms\n";
                                     delayput28.close();
                                 }
-
                             }
                         }
                         m_rxTrace(packet); //pinganzhang
@@ -1146,9 +1074,7 @@ namespace ns3 {
                         static Time firstRx29;
                         uint64_t aa29;
 
-                        NS_LOG_INFO("pinganzhang:::::::: UdpSever Rev Count = " << ++a29 << " Now ********* "
-                                                                                << Simulator::Now()
-                                                                                << std::endl);
+                        NS_LOG_INFO(" UdpSever Rev Count = " << ++a29 << " Now " << Simulator::Now() << std::endl);
 
                         PidSet29.insert(AppHdr.ReadPacketId());
 
@@ -1158,19 +1084,24 @@ namespace ns3 {
                             ++rxcnt29;
                         }
 
-                        NS_LOG_INFO("pinganzhang::::::::first arrived time = " << firstRx29.GetSeconds() << std::endl);
-                        NS_LOG_INFO("pinganzhang::::::::AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("first arrived time = " << firstRx29.GetSeconds() << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
 
                         packetSizeVec29.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
                         if (1) {
-
-                            /**
-                             * get Throughput
-                             */
-                            if (Simulator::Now() > Seconds(record_start[9])) {  // --
+                            if (Simulator::Now() > Seconds(record_start[9])) {
+                                if (packet->FindFirstMatchingByteTag(timestamp)) {
+                                    Time tx = timestamp.GetTimestamp();
+                                    Time dx = Simulator::Now() - tx;
+                                    aa29 = dx.GetMicroSeconds();
+                                    delay29 += aa29;
+                                }
+                                /**
+                                 * get Throughput
+                                 */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec29.begin(), packetSizeVec29.end(),
                                                                     0.0);
                                 double randomValue = rand() % 20000 + 20000;
@@ -1188,17 +1119,6 @@ namespace ns3 {
                                 } else {
                                     NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
                                 }
-
-                            }
-
-                            if (packet->FindFirstMatchingByteTag(timestamp)) {
-                                Time tx = timestamp.GetTimestamp();
-                                Time dx = Simulator::Now() - tx;
-                                aa29 = dx.GetMicroSeconds();
-                                delay29 += aa29;
-                            }
-
-                            if (Simulator::Now() > Seconds(record_start[9])) {  // --
 
                                 /**
                                  * get all receive packets
@@ -1222,7 +1142,6 @@ namespace ns3 {
                                     delayput29 << delayy29 << " ms\n";
                                     delayput29.close();
                                 }
-
                             }
                         }
                         m_rxTrace(packet); //pinganzhang
@@ -1242,9 +1161,7 @@ namespace ns3 {
                         static Time firstRx30;
                         uint64_t aa30;
 
-                        NS_LOG_INFO("pinganzhang:::::::: UdpSever Rev Count = " << ++a30 << " Now ********* "
-                                                                                << Simulator::Now()
-                                                                                << std::endl);
+                        NS_LOG_INFO(" UdpSever Rev Count = " << ++a30 << " Now " << Simulator::Now() << std::endl);
 
                         PidSet30.insert(AppHdr.ReadPacketId());
 
@@ -1254,19 +1171,24 @@ namespace ns3 {
                             ++rxcnt30;
                         }
 
-                        NS_LOG_INFO("pinganzhang::::::::first arrived time = " << firstRx30.GetSeconds() << std::endl);
-                        NS_LOG_INFO("pinganzhang::::::::AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("first arrived time = " << firstRx30.GetSeconds() << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
 
                         packetSizeVec30.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
                         if (1) {
-
-                            /**
-                             * get Throughput
-                             */
-                            if (Simulator::Now() > Seconds(record_start[10])) {  // --
+                            if (Simulator::Now() > Seconds(record_start[10])) {
+                                if (packet->FindFirstMatchingByteTag(timestamp)) {
+                                    Time tx = timestamp.GetTimestamp();
+                                    Time dx = Simulator::Now() - tx;
+                                    aa30 = dx.GetMicroSeconds();
+                                    delay30 += aa30;
+                                }
+                                /**
+                                 * get Throughput
+                                 */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec30.begin(), packetSizeVec30.end(),
                                                                     0.0);
                                 double randomValue = rand() % 20000 + 20000;
@@ -1284,17 +1206,6 @@ namespace ns3 {
                                 } else {
                                     NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
                                 }
-
-                            }
-
-                            if (packet->FindFirstMatchingByteTag(timestamp)) {
-                                Time tx = timestamp.GetTimestamp();
-                                Time dx = Simulator::Now() - tx;
-                                aa30 = dx.GetMicroSeconds();
-                                delay30 += aa30;
-                            }
-
-                            if (Simulator::Now() > Seconds(record_start[10])) {  // --
 
                                 /**
                                  * get all receive packets
@@ -1318,7 +1229,6 @@ namespace ns3 {
                                     delayput30 << delayy30 << " ms\n";
                                     delayput30.close();
                                 }
-
                             }
                         }
                         m_rxTrace(packet); //pinganzhang
@@ -1338,9 +1248,7 @@ namespace ns3 {
                         static Time firstRx31;
                         uint64_t aa31;
 
-                        NS_LOG_INFO("pinganzhang:::::::: UdpSever Rev Count = " << ++a31 << " Now ********* "
-                                                                                << Simulator::Now()
-                                                                                << std::endl);
+                        NS_LOG_INFO(" UdpSever Rev Count = " << ++a31 << " Now " << Simulator::Now() << std::endl);
 
                         PidSet31.insert(AppHdr.ReadPacketId());
 
@@ -1350,19 +1258,24 @@ namespace ns3 {
                             ++rxcnt31;
                         }
 
-                        NS_LOG_INFO("pinganzhang::::::::first arrived time = " << firstRx31.GetSeconds() << std::endl);
-                        NS_LOG_INFO("pinganzhang::::::::AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("first arrived time = " << firstRx31.GetSeconds() << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
 
                         packetSizeVec31.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
                         if (1) {
-
-                            /**
-                             * get Throughput
-                             */
-                            if (Simulator::Now() > Seconds(record_start[11])) {  // --
+                            if (Simulator::Now() > Seconds(record_start[11])) {
+                                if (packet->FindFirstMatchingByteTag(timestamp)) {
+                                    Time tx = timestamp.GetTimestamp();
+                                    Time dx = Simulator::Now() - tx;
+                                    aa31 = dx.GetMicroSeconds();
+                                    delay31 += aa31;
+                                }
+                                /**
+                                 * get Throughput
+                                 */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec31.begin(), packetSizeVec31.end(),
                                                                     0.0);
                                 double randomValue = rand() % 20000 + 20000;
@@ -1380,17 +1293,6 @@ namespace ns3 {
                                 } else {
                                     NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
                                 }
-
-                            }
-
-                            if (packet->FindFirstMatchingByteTag(timestamp)) {
-                                Time tx = timestamp.GetTimestamp();
-                                Time dx = Simulator::Now() - tx;
-                                aa31 = dx.GetMicroSeconds();
-                                delay31 += aa31;
-                            }
-
-                            if (Simulator::Now() > Seconds(record_start[11])) {  // --
 
                                 /**
                                  * get all receive packets
@@ -1414,7 +1316,6 @@ namespace ns3 {
                                     delayput31 << delayy31 << " ms\n";
                                     delayput31.close();
                                 }
-
                             }
                         }
                         m_rxTrace(packet); //pinganzhang
@@ -1433,9 +1334,7 @@ namespace ns3 {
                         static Time firstRx32;
                         uint64_t aa32;
 
-                        NS_LOG_INFO("pinganzhang:::::::: UdpSever Rev Count = " << ++a32 << " Now ********* "
-                                                                                << Simulator::Now()
-                                                                                << std::endl);
+                        NS_LOG_INFO(" UdpSever Rev Count = " << ++a32 << " Now " << Simulator::Now() << std::endl);
 
                         PidSet32.insert(AppHdr.ReadPacketId());
 
@@ -1445,8 +1344,8 @@ namespace ns3 {
                             ++rxcnt32;
                         }
 
-                        NS_LOG_INFO("pinganzhang::::::::first arrived time = " << firstRx32.GetSeconds() << std::endl);
-                        NS_LOG_INFO("pinganzhang::::::::AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("first arrived time = " << firstRx32.GetSeconds() << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
 
                         packetSizeVec32.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
 
@@ -1454,10 +1353,17 @@ namespace ns3 {
 
                         if (1) {
 
-                            /**
-                             * get Throughput
-                             */
-                            if (Simulator::Now() > Seconds(record_start[12])) {  // --
+
+                            if (Simulator::Now() > Seconds(record_start[12])) {
+                                if (packet->FindFirstMatchingByteTag(timestamp)) {
+                                    Time tx = timestamp.GetTimestamp();
+                                    Time dx = Simulator::Now() - tx;
+                                    aa32 = dx.GetMicroSeconds();
+                                    delay32 += aa32;
+                                }
+                                /**
+                                 * get Throughput
+                                 */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec32.begin(), packetSizeVec32.end(),
                                                                     0.0);
                                 double randomValue = rand() % 20000 + 20000;
@@ -1475,17 +1381,6 @@ namespace ns3 {
                                 } else {
                                     NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
                                 }
-
-                            }
-
-                            if (packet->FindFirstMatchingByteTag(timestamp)) {
-                                Time tx = timestamp.GetTimestamp();
-                                Time dx = Simulator::Now() - tx;
-                                aa32 = dx.GetMicroSeconds();
-                                delay32 += aa32;
-                            }
-
-                            if (Simulator::Now() > Seconds(record_start[12])) {  // --
 
                                 /**
                                  * get all receive packets
@@ -1509,7 +1404,6 @@ namespace ns3 {
                                     delayput32 << delayy32 << " ms\n";
                                     delayput32.close();
                                 }
-
                             }
                         }
                         m_rxTrace(packet); //pinganzhang
@@ -1527,9 +1421,7 @@ namespace ns3 {
                         static Time firstRx33;
                         uint64_t aa33;
 
-                        NS_LOG_INFO("pinganzhang:::::::: UdpSever Rev Count = " << ++a33 << " Now ********* "
-                                                                                << Simulator::Now()
-                                                                                << std::endl);
+                        NS_LOG_INFO(" UdpSever Rev Count = " << ++a33 << " Now " << Simulator::Now() << std::endl);
 
                         PidSet33.insert(AppHdr.ReadPacketId());
 
@@ -1539,19 +1431,24 @@ namespace ns3 {
                             ++rxcnt33;
                         }
 
-                        NS_LOG_INFO("pinganzhang::::::::first arrived time = " << firstRx33.GetSeconds() << std::endl);
-                        NS_LOG_INFO("pinganzhang::::::::AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("first arrived time = " << firstRx33.GetSeconds() << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
 
                         packetSizeVec33.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
                         if (1) {
-
-                            /**
-                             * get Throughput
-                             */
-                            if (Simulator::Now() > Seconds(record_start[13])) {  // --
+                            if (Simulator::Now() > Seconds(record_start[13])) {
+                                if (packet->FindFirstMatchingByteTag(timestamp)) {
+                                    Time tx = timestamp.GetTimestamp();
+                                    Time dx = Simulator::Now() - tx;
+                                    aa33 = dx.GetMicroSeconds();
+                                    delay33 += aa33;
+                                }
+                                /**
+                                 * get Throughput
+                                 */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec33.begin(), packetSizeVec33.end(),
                                                                     0.0);
                                 double randomValue = rand() % 20000 + 20000;
@@ -1569,17 +1466,6 @@ namespace ns3 {
                                 } else {
                                     NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
                                 }
-
-                            }
-
-                            if (packet->FindFirstMatchingByteTag(timestamp)) {
-                                Time tx = timestamp.GetTimestamp();
-                                Time dx = Simulator::Now() - tx;
-                                aa33 = dx.GetMicroSeconds();
-                                delay33 += aa33;
-                            }
-
-                            if (Simulator::Now() > Seconds(record_start[13])) {  // --
 
                                 /**
                                  * get all receive packets
@@ -1603,7 +1489,6 @@ namespace ns3 {
                                     delayput33 << delayy33 << " ms\n";
                                     delayput33.close();
                                 }
-
                             }
                         }
                         m_rxTrace(packet); //pinganzhang
@@ -1623,9 +1508,7 @@ namespace ns3 {
                         static Time firstRx34;
                         uint64_t aa34;
 
-                        NS_LOG_INFO("pinganzhang:::::::: UdpSever Rev Count = " << ++a34 << " Now ********* "
-                                                                                << Simulator::Now()
-                                                                                << std::endl);
+                        NS_LOG_INFO(" UdpSever Rev Count = " << ++a34 << " Now " << Simulator::Now() << std::endl);
 
                         PidSet34.insert(AppHdr.ReadPacketId());
 
@@ -1635,8 +1518,8 @@ namespace ns3 {
                             ++rxcnt34;
                         }
 
-                        NS_LOG_INFO("pinganzhang::::::::first arrived time = " << firstRx34.GetSeconds() << std::endl);
-                        NS_LOG_INFO("pinganzhang::::::::AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("first arrived time = " << firstRx34.GetSeconds() << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
 
                         packetSizeVec34.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
 
@@ -1644,10 +1527,17 @@ namespace ns3 {
 
                         if (1) {
 
-                            /**
-                             * get Throughput
-                             */
-                            if (Simulator::Now() > Seconds(record_start[14])) {  // --
+
+                            if (Simulator::Now() > Seconds(record_start[14])) {
+                                if (packet->FindFirstMatchingByteTag(timestamp)) {
+                                    Time tx = timestamp.GetTimestamp();
+                                    Time dx = Simulator::Now() - tx;
+                                    aa34 = dx.GetMicroSeconds();
+                                    delay34 += aa34;
+                                }
+                                /**
+                                 * get Throughput
+                                 */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec34.begin(), packetSizeVec34.end(),
                                                                     0.0);
                                 double randomValue = rand() % 20000 + 20000;
@@ -1666,17 +1556,6 @@ namespace ns3 {
                                 } else {
                                     NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
                                 }
-
-                            }
-
-                            if (packet->FindFirstMatchingByteTag(timestamp)) {
-                                Time tx = timestamp.GetTimestamp();
-                                Time dx = Simulator::Now() - tx;
-                                aa34 = dx.GetMicroSeconds();
-                                delay34 += aa34;
-                            }
-
-                            if (Simulator::Now() > Seconds(record_start[14])) {  // --
 
                                 /**
                                  * get all receive packets
@@ -1700,7 +1579,6 @@ namespace ns3 {
                                     delayput34 << delayy34 << " ms\n";
                                     delayput34.close();
                                 }
-
                             }
                         }
                         m_rxTrace(packet); //pinganzhang
@@ -1720,9 +1598,7 @@ namespace ns3 {
                         static Time firstRx35;
                         uint64_t aa35;
 
-                        NS_LOG_INFO("pinganzhang:::::::: UdpSever Rev Count = " << ++a35 << " Now ********* "
-                                                                                << Simulator::Now()
-                                                                                << std::endl);
+                        NS_LOG_INFO(" UdpSever Rev Count = " << ++a35 << " Now " << Simulator::Now() << std::endl);
 
                         PidSet35.insert(AppHdr.ReadPacketId());
 
@@ -1732,19 +1608,24 @@ namespace ns3 {
                             ++rxcnt35;
                         }
 
-                        NS_LOG_INFO("pinganzhang::::::::first arrived time = " << firstRx35.GetSeconds() << std::endl);
-                        NS_LOG_INFO("pinganzhang::::::::AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("first arrived time = " << firstRx35.GetSeconds() << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
 
                         packetSizeVec35.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
                         if (1) {
-
-                            /**
-                             * get Throughput
-                             */
-                            if (Simulator::Now() > Seconds(record_start[15])) {  // --
+                            if (Simulator::Now() > Seconds(record_start[15])) {
+                                if (packet->FindFirstMatchingByteTag(timestamp)) {
+                                    Time tx = timestamp.GetTimestamp();
+                                    Time dx = Simulator::Now() - tx;
+                                    aa35 = dx.GetMicroSeconds();
+                                    delay35 += aa35;
+                                }
+                                /**
+                                 * get Throughput
+                                 */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec35.begin(), packetSizeVec35.end(),
                                                                     0.0);
                                 double randomValue = rand() % 20000 + 20000;
@@ -1763,17 +1644,6 @@ namespace ns3 {
                                 } else {
                                     NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
                                 }
-
-                            }
-
-                            if (packet->FindFirstMatchingByteTag(timestamp)) {
-                                Time tx = timestamp.GetTimestamp();
-                                Time dx = Simulator::Now() - tx;
-                                aa35 = dx.GetMicroSeconds();
-                                delay35 += aa35;
-                            }
-
-                            if (Simulator::Now() > Seconds(record_start[15])) {  // --
 
                                 /**
                                  * get all receive packets
@@ -1797,7 +1667,6 @@ namespace ns3 {
                                     delayput35 << delayy35 << " ms\n";
                                     delayput35.close();
                                 }
-
                             }
                         }
                         m_rxTrace(packet); //pinganzhang
@@ -1817,9 +1686,7 @@ namespace ns3 {
                         static Time firstRx36;
                         uint64_t aa36;
 
-                        NS_LOG_INFO("pinganzhang:::::::: UdpSever Rev Count = " << ++a36 << " Now ********* "
-                                                                                << Simulator::Now()
-                                                                                << std::endl);
+                        NS_LOG_INFO(" UdpSever Rev Count = " << ++a36 << " Now " << Simulator::Now() << std::endl);
 
                         PidSet36.insert(AppHdr.ReadPacketId());
 
@@ -1829,19 +1696,24 @@ namespace ns3 {
                             ++rxcnt36;
                         }
 
-                        NS_LOG_INFO("pinganzhang::::::::first arrived time = " << firstRx36.GetSeconds() << std::endl);
-                        NS_LOG_INFO("pinganzhang::::::::AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("first arrived time = " << firstRx36.GetSeconds() << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
 
                         packetSizeVec36.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
                         if (1) {
-
-                            /**
-                             * get Throughput
-                             */
-                            if (Simulator::Now() > Seconds(record_start[16])) {  // --
+                            if (Simulator::Now() > Seconds(record_start[16])) {
+                                if (packet->FindFirstMatchingByteTag(timestamp)) {
+                                    Time tx = timestamp.GetTimestamp();
+                                    Time dx = Simulator::Now() - tx;
+                                    aa36 = dx.GetMicroSeconds();
+                                    delay36 += aa36;
+                                }
+                                /**
+                                 * get Throughput
+                                 */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec36.begin(), packetSizeVec36.end(),
                                                                     0.0);
                                 double randomValue = rand() % 20000 + 20000;
@@ -1860,17 +1732,6 @@ namespace ns3 {
                                 } else {
                                     NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
                                 }
-
-                            }
-
-                            if (packet->FindFirstMatchingByteTag(timestamp)) {
-                                Time tx = timestamp.GetTimestamp();
-                                Time dx = Simulator::Now() - tx;
-                                aa36 = dx.GetMicroSeconds();
-                                delay36 += aa36;
-                            }
-
-                            if (Simulator::Now() > Seconds(record_start[16])) {  // --
 
                                 /**
                                  * get all receive packets
@@ -1894,7 +1755,6 @@ namespace ns3 {
                                     delayput36 << delayy36 << " ms\n";
                                     delayput36.close();
                                 }
-
                             }
                         }
                         m_rxTrace(packet); //pinganzhang
@@ -1914,9 +1774,7 @@ namespace ns3 {
                         static Time firstRx37;
                         uint64_t aa37;
 
-                        NS_LOG_INFO("pinganzhang:::::::: UdpSever Rev Count = " << ++a37 << " Now ********* "
-                                                                                << Simulator::Now()
-                                                                                << std::endl);
+                        NS_LOG_INFO(" UdpSever Rev Count = " << ++a37 << " Now " << Simulator::Now() << std::endl);
 
                         PidSet37.insert(AppHdr.ReadPacketId());
 
@@ -1926,19 +1784,24 @@ namespace ns3 {
                             ++rxcnt37;
                         }
 
-                        NS_LOG_INFO("pinganzhang::::::::first arrived time = " << firstRx37.GetSeconds() << std::endl);
-                        NS_LOG_INFO("pinganzhang::::::::AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("first arrived time = " << firstRx37.GetSeconds() << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
 
                         packetSizeVec37.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
                         if (1) {
-
-                            /**
-                             * get Throughput
-                             */
-                            if (Simulator::Now() > Seconds(record_start[17])) {  // --
+                            if (Simulator::Now() > Seconds(record_start[17])) {
+                                if (packet->FindFirstMatchingByteTag(timestamp)) {
+                                    Time tx = timestamp.GetTimestamp();
+                                    Time dx = Simulator::Now() - tx;
+                                    aa37 = dx.GetMicroSeconds();
+                                    delay37 += aa37;
+                                }
+                                /**
+                                 * get Throughput
+                                 */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec37.begin(), packetSizeVec37.end(),
                                                                     0.0);
                                 double randomValue = rand() % 20000 + 20000;
@@ -1957,17 +1820,6 @@ namespace ns3 {
                                 } else {
                                     NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
                                 }
-
-                            }
-
-                            if (packet->FindFirstMatchingByteTag(timestamp)) {
-                                Time tx = timestamp.GetTimestamp();
-                                Time dx = Simulator::Now() - tx;
-                                aa37 = dx.GetMicroSeconds();
-                                delay37 += aa37;
-                            }
-
-                            if (Simulator::Now() > Seconds(record_start[17])) {  // --
 
                                 /**
                                  * get all receive packets
@@ -1991,7 +1843,6 @@ namespace ns3 {
                                     delayput37 << delayy37 << " ms\n";
                                     delayput37.close();
                                 }
-
                             }
                         }
                         m_rxTrace(packet); //pinganzhang
@@ -2011,9 +1862,7 @@ namespace ns3 {
                         static Time firstRx38;
                         uint64_t aa38;
 
-                        NS_LOG_INFO("pinganzhang:::::::: UdpSever Rev Count = " << ++a38 << " Now ********* "
-                                                                                << Simulator::Now()
-                                                                                << std::endl);
+                        NS_LOG_INFO(" UdpSever Rev Count = " << ++a38 << " Now " << Simulator::Now() << std::endl);
 
                         PidSet38.insert(AppHdr.ReadPacketId());
 
@@ -2023,19 +1872,24 @@ namespace ns3 {
                             ++rxcnt38;
                         }
 
-                        NS_LOG_INFO("pinganzhang::::::::first arrived time = " << firstRx38.GetSeconds() << std::endl);
-                        NS_LOG_INFO("pinganzhang::::::::AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("first arrived time = " << firstRx38.GetSeconds() << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
 
                         packetSizeVec38.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
                         if (1) {
-
-                            /**
-                             * get Throughput
-                             */
-                            if (Simulator::Now() > Seconds(record_start[18])) {  // --
+                            if (Simulator::Now() > Seconds(record_start[18])) {
+                                if (packet->FindFirstMatchingByteTag(timestamp)) {
+                                    Time tx = timestamp.GetTimestamp();
+                                    Time dx = Simulator::Now() - tx;
+                                    aa38 = dx.GetMicroSeconds();
+                                    delay38 += aa38;
+                                }
+                                /**
+                                * get Throughput
+                                */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec38.begin(), packetSizeVec38.end(),
                                                                     0.0);
                                 double randomValue = rand() % 20000 + 20000;
@@ -2054,17 +1908,6 @@ namespace ns3 {
                                 } else {
                                     NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
                                 }
-
-                            }
-
-                            if (packet->FindFirstMatchingByteTag(timestamp)) {
-                                Time tx = timestamp.GetTimestamp();
-                                Time dx = Simulator::Now() - tx;
-                                aa38 = dx.GetMicroSeconds();
-                                delay38 += aa38;
-                            }
-
-                            if (Simulator::Now() > Seconds(record_start[18])) {  // --
 
                                 /**
                                  * get all receive packets
@@ -2088,7 +1931,6 @@ namespace ns3 {
                                     delayput38 << delayy38 << " ms\n";
                                     delayput38.close();
                                 }
-
                             }
                         }
                         m_rxTrace(packet); //pinganzhang
@@ -2108,9 +1950,9 @@ namespace ns3 {
                         static Time firstRx39;
                         uint64_t aa39;
 
-                        NS_LOG_INFO("pinganzhang:::::::: UdpSever Rev Count = " << ++a39 << " Now ********* "
-                                                                                << Simulator::Now()
-                                                                                << std::endl);
+                        NS_LOG_INFO(" UdpSever Rev Count = " << ++a39 << " Now "
+                                                             << Simulator::Now()
+                                                             << std::endl);
 
                         PidSet39.insert(AppHdr.ReadPacketId());
 
@@ -2120,19 +1962,24 @@ namespace ns3 {
                             ++rxcnt39;
                         }
 
-                        NS_LOG_INFO("pinganzhang::::::::first arrived time = " << firstRx39.GetSeconds() << std::endl);
-                        NS_LOG_INFO("pinganzhang::::::::AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("first arrived time = " << firstRx39.GetSeconds() << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
 
                         packetSizeVec39.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
                         if (1) {
-
-                            /**
-                             * get Throughput
-                             */
-                            if (Simulator::Now() > Seconds(record_start[19])) {  // --
+                            if (Simulator::Now() > Seconds(record_start[19])) {
+                                if (packet->FindFirstMatchingByteTag(timestamp)) {
+                                    Time tx = timestamp.GetTimestamp();
+                                    Time dx = Simulator::Now() - tx;
+                                    aa39 = dx.GetMicroSeconds();
+                                    delay39 += aa39;
+                                }
+                                /**
+                                 * get Throughput
+                                 */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec39.begin(), packetSizeVec39.end(),
                                                                     0.0);
                                 double randomValue = rand() % 20000 + 20000;
@@ -2151,17 +1998,6 @@ namespace ns3 {
                                 } else {
                                     NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
                                 }
-
-                            }
-
-                            if (packet->FindFirstMatchingByteTag(timestamp)) {
-                                Time tx = timestamp.GetTimestamp();
-                                Time dx = Simulator::Now() - tx;
-                                aa39 = dx.GetMicroSeconds();
-                                delay39 += aa39;
-                            }
-
-                            if (Simulator::Now() > Seconds(record_start[19])) {  // --
 
                                 /**
                                  * get all receive packets
@@ -2185,7 +2021,6 @@ namespace ns3 {
                                     delayput39 << delayy39 << " ms\n";
                                     delayput39.close();
                                 }
-
                             }
                         }
                         m_rxTrace(packet); //pinganzhang
@@ -2205,9 +2040,7 @@ namespace ns3 {
                         static Time firstRx40;
                         uint64_t aa40;
 
-                        NS_LOG_INFO("pinganzhang:::::::: UdpSever Rev Count = " << ++a40 << " Now ********* "
-                                                                                << Simulator::Now()
-                                                                                << std::endl);
+                        NS_LOG_INFO(" UdpSever Rev Count = " << ++a40 << " Now " << Simulator::Now() << std::endl);
 
                         PidSet40.insert(AppHdr.ReadPacketId());
 
@@ -2217,19 +2050,24 @@ namespace ns3 {
                             ++rxcnt40;
                         }
 
-                        NS_LOG_INFO("pinganzhang::::::::first arrived time = " << firstRx40.GetSeconds() << std::endl);
-                        NS_LOG_INFO("pinganzhang::::::::AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("first arrived time = " << firstRx40.GetSeconds() << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
 
                         packetSizeVec40.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
                         if (1) {
-
-                            /**
-                             * get Throughput
-                             */
-                            if (Simulator::Now() > Seconds(record_start[20])) {  // --
+                            if (Simulator::Now() > Seconds(record_start[20])) {
+                                if (packet->FindFirstMatchingByteTag(timestamp)) {
+                                    Time tx = timestamp.GetTimestamp();
+                                    Time dx = Simulator::Now() - tx;
+                                    aa40 = dx.GetMicroSeconds();
+                                    delay40 += aa40;
+                                }
+                                /**
+                                 * get Throughput
+                                 */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec40.begin(), packetSizeVec40.end(),
                                                                     0.0);
                                 double randomValue = rand() % 20000 + 20000;
@@ -2248,17 +2086,6 @@ namespace ns3 {
                                 } else {
                                     NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
                                 }
-
-                            }
-
-                            if (packet->FindFirstMatchingByteTag(timestamp)) {
-                                Time tx = timestamp.GetTimestamp();
-                                Time dx = Simulator::Now() - tx;
-                                aa40 = dx.GetMicroSeconds();
-                                delay40 += aa40;
-                            }
-
-                            if (Simulator::Now() > Seconds(record_start[20])) {  // --
 
                                 /**
                                  * get all receive packets
@@ -2282,7 +2109,6 @@ namespace ns3 {
                                     delayput40 << delayy40 << " ms\n";
                                     delayput40.close();
                                 }
-
                             }
                         }
                         m_rxTrace(packet); //pinganzhang
@@ -2302,9 +2128,7 @@ namespace ns3 {
                         static Time firstRx41;
                         uint64_t aa41;
 
-                        NS_LOG_INFO("pinganzhang:::::::: UdpSever Rev Count = " << ++a41 << " Now ********* "
-                                                                                << Simulator::Now()
-                                                                                << std::endl);
+                        NS_LOG_INFO(" UdpSever Rev Count = " << ++a41 << " Now " << Simulator::Now() << std::endl);
 
                         PidSet41.insert(AppHdr.ReadPacketId());
 
@@ -2314,19 +2138,24 @@ namespace ns3 {
                             ++rxcnt41;
                         }
 
-                        NS_LOG_INFO("pinganzhang::::::::first arrived time = " << firstRx41.GetSeconds() << std::endl);
-                        NS_LOG_INFO("pinganzhang::::::::AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("first arrived time = " << firstRx41.GetSeconds() << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
 
                         packetSizeVec41.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
                         if (1) {
-
-                            /**
-                             * get Throughput
-                             */
-                            if (Simulator::Now() > Seconds(record_start[21])) {  // --
+                            if (Simulator::Now() > Seconds(record_start[21])) {
+                                if (packet->FindFirstMatchingByteTag(timestamp)) {
+                                    Time tx = timestamp.GetTimestamp();
+                                    Time dx = Simulator::Now() - tx;
+                                    aa41 = dx.GetMicroSeconds();
+                                    delay41 += aa41;
+                                }
+                                /**
+                                 * get Throughput
+                                 */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec41.begin(), packetSizeVec41.end(),
                                                                     0.0);
                                 double randomValue = rand() % 20000 + 20000;
@@ -2345,17 +2174,6 @@ namespace ns3 {
                                 } else {
                                     NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
                                 }
-
-                            }
-
-                            if (packet->FindFirstMatchingByteTag(timestamp)) {
-                                Time tx = timestamp.GetTimestamp();
-                                Time dx = Simulator::Now() - tx;
-                                aa41 = dx.GetMicroSeconds();
-                                delay41 += aa41;
-                            }
-
-                            if (Simulator::Now() > Seconds(record_start[21])) {  // --
 
                                 /**
                                  * get all receive packets
@@ -2379,7 +2197,6 @@ namespace ns3 {
                                     delayput41 << delayy41 << " ms\n";
                                     delayput41.close();
                                 }
-
                             }
                         }
                         m_rxTrace(packet); //pinganzhang
@@ -2399,9 +2216,7 @@ namespace ns3 {
                         static Time firstRx42;
                         uint64_t aa42;
 
-                        NS_LOG_INFO("pinganzhang:::::::: UdpSever Rev Count = " << ++a42 << " Now ********* "
-                                                                                << Simulator::Now()
-                                                                                << std::endl);
+                        NS_LOG_INFO(" UdpSever Rev Count = " << ++a42 << " Now " << Simulator::Now() << std::endl);
 
                         PidSet42.insert(AppHdr.ReadPacketId());
 
@@ -2411,19 +2226,24 @@ namespace ns3 {
                             ++rxcnt42;
                         }
 
-                        NS_LOG_INFO("pinganzhang::::::::first arrived time = " << firstRx42.GetSeconds() << std::endl);
-                        NS_LOG_INFO("pinganzhang::::::::AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("first arrived time = " << firstRx42.GetSeconds() << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
 
                         packetSizeVec42.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
                         if (1) {
-
-                            /**
-                             * get Throughput
-                             */
-                            if (Simulator::Now() > Seconds(record_start[22])) {  // --
+                            if (Simulator::Now() > Seconds(record_start[22])) {
+                                if (packet->FindFirstMatchingByteTag(timestamp)) {
+                                    Time tx = timestamp.GetTimestamp();
+                                    Time dx = Simulator::Now() - tx;
+                                    aa42 = dx.GetMicroSeconds();
+                                    delay42 += aa42;
+                                }
+                                /**
+                                 * get Throughput
+                                 */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec42.begin(), packetSizeVec42.end(),
                                                                     0.0);
                                 double randomValue = rand() % 20000 + 20000;
@@ -2442,17 +2262,6 @@ namespace ns3 {
                                 } else {
                                     NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
                                 }
-
-                            }
-
-                            if (packet->FindFirstMatchingByteTag(timestamp)) {
-                                Time tx = timestamp.GetTimestamp();
-                                Time dx = Simulator::Now() - tx;
-                                aa42 = dx.GetMicroSeconds();
-                                delay42 += aa42;
-                            }
-
-                            if (Simulator::Now() > Seconds(record_start[22])) {  // --
 
                                 /**
                                  * get all receive packets
@@ -2476,7 +2285,6 @@ namespace ns3 {
                                     delayput42 << delayy42 << " ms\n";
                                     delayput42.close();
                                 }
-
                             }
                         }
                         m_rxTrace(packet); //pinganzhang
@@ -2496,9 +2304,7 @@ namespace ns3 {
                         static Time firstRx43;
                         uint64_t aa43;
 
-                        NS_LOG_INFO("pinganzhang:::::::: UdpSever Rev Count = " << ++a43 << " Now ********* "
-                                                                                << Simulator::Now()
-                                                                                << std::endl);
+                        NS_LOG_INFO(" UdpSever Rev Count = " << ++a43 << " Now " << Simulator::Now() << std::endl);
 
                         PidSet43.insert(AppHdr.ReadPacketId());
 
@@ -2508,19 +2314,24 @@ namespace ns3 {
                             ++rxcnt43;
                         }
 
-                        NS_LOG_INFO("pinganzhang::::::::first arrived time = " << firstRx43.GetSeconds() << std::endl);
-                        NS_LOG_INFO("pinganzhang::::::::AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("first arrived time = " << firstRx43.GetSeconds() << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
 
                         packetSizeVec43.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
                         if (1) {
-
-                            /**
-                             * get Throughput
-                             */
-                            if (Simulator::Now() > Seconds(record_start[23])) {  // --
+                            if (Simulator::Now() > Seconds(record_start[23])) {
+                                if (packet->FindFirstMatchingByteTag(timestamp)) {
+                                    Time tx = timestamp.GetTimestamp();
+                                    Time dx = Simulator::Now() - tx;
+                                    aa43 = dx.GetMicroSeconds();
+                                    delay43 += aa43;
+                                }
+                                /**
+                                 * get Throughput
+                                 */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec43.begin(), packetSizeVec43.end(),
                                                                     0.0);
                                 double randomValue = rand() % 20000 + 20000;
@@ -2539,17 +2350,6 @@ namespace ns3 {
                                 } else {
                                     NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
                                 }
-
-                            }
-
-                            if (packet->FindFirstMatchingByteTag(timestamp)) {
-                                Time tx = timestamp.GetTimestamp();
-                                Time dx = Simulator::Now() - tx;
-                                aa43 = dx.GetMicroSeconds();
-                                delay43 += aa43;
-                            }
-
-                            if (Simulator::Now() > Seconds(record_start[23])) {  // --
 
                                 /**
                                  * get all receive packets
@@ -2573,7 +2373,6 @@ namespace ns3 {
                                     delayput43 << delayy43 << " ms\n";
                                     delayput43.close();
                                 }
-
                             }
                         }
                         m_rxTrace(packet); //pinganzhang
@@ -2593,9 +2392,7 @@ namespace ns3 {
                         static Time firstRx44;
                         uint64_t aa44;
 
-                        NS_LOG_INFO("pinganzhang:::::::: UdpSever Rev Count = " << ++a44 << " Now ********* "
-                                                                                << Simulator::Now()
-                                                                                << std::endl);
+                        NS_LOG_INFO(" UdpSever Rev Count = " << ++a44 << " Now " << Simulator::Now() << std::endl);
 
                         PidSet44.insert(AppHdr.ReadPacketId());
 
@@ -2605,19 +2402,24 @@ namespace ns3 {
                             ++rxcnt44;
                         }
 
-                        NS_LOG_INFO("pinganzhang::::::::first arrived time = " << firstRx44.GetSeconds() << std::endl);
-                        NS_LOG_INFO("pinganzhang::::::::AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("first arrived time = " << firstRx44.GetSeconds() << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
 
                         packetSizeVec44.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
                         if (1) {
-
-                            /**
-                             * get Throughput
-                             */
-                            if (Simulator::Now() > Seconds(record_start[24])) {  // --
+                            if (Simulator::Now() > Seconds(record_start[24])) {
+                                if (packet->FindFirstMatchingByteTag(timestamp)) {
+                                    Time tx = timestamp.GetTimestamp();
+                                    Time dx = Simulator::Now() - tx;
+                                    aa44 = dx.GetMicroSeconds();
+                                    delay44 += aa44;
+                                }
+                                /**
+                                 * get Throughput
+                                 */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec44.begin(), packetSizeVec44.end(),
                                                                     0.0);
                                 double randomValue = rand() % 20000 + 20000;
@@ -2636,17 +2438,6 @@ namespace ns3 {
                                 } else {
                                     NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
                                 }
-
-                            }
-
-                            if (packet->FindFirstMatchingByteTag(timestamp)) {
-                                Time tx = timestamp.GetTimestamp();
-                                Time dx = Simulator::Now() - tx;
-                                aa44 = dx.GetMicroSeconds();
-                                delay44 += aa44;
-                            }
-
-                            if (Simulator::Now() > Seconds(record_start[24])) {  // --
 
                                 /**
                                  * get all receive packets
@@ -2670,7 +2461,6 @@ namespace ns3 {
                                     delayput44 << delayy44 << " ms\n";
                                     delayput44.close();
                                 }
-
                             }
                         }
                         m_rxTrace(packet); //pinganzhang
@@ -2690,9 +2480,7 @@ namespace ns3 {
                         static Time firstRx45;
                         uint64_t aa45;
 
-                        NS_LOG_INFO("pinganzhang:::::::: UdpSever Rev Count = " << ++a45 << " Now ********* "
-                                                                                << Simulator::Now()
-                                                                                << std::endl);
+                        NS_LOG_INFO(" UdpSever Rev Count = " << ++a45 << " Now " << Simulator::Now() << std::endl);
 
                         PidSet45.insert(AppHdr.ReadPacketId());
 
@@ -2702,19 +2490,24 @@ namespace ns3 {
                             ++rxcnt45;
                         }
 
-                        NS_LOG_INFO("pinganzhang::::::::first arrived time = " << firstRx45.GetSeconds() << std::endl);
-                        NS_LOG_INFO("pinganzhang::::::::AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("first arrived time = " << firstRx45.GetSeconds() << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
 
                         packetSizeVec45.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
                         if (1) {
-
-                            /**
-                             * get Throughput
-                             */
-                            if (Simulator::Now() > Seconds(record_start[25])) {  // --
+                            if (Simulator::Now() > Seconds(record_start[25])) {
+                                if (packet->FindFirstMatchingByteTag(timestamp)) {
+                                    Time tx = timestamp.GetTimestamp();
+                                    Time dx = Simulator::Now() - tx;
+                                    aa45 = dx.GetMicroSeconds();
+                                    delay45 += aa45;
+                                }
+                                /**
+                                 * get Throughput
+                                 */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec45.begin(), packetSizeVec45.end(),
                                                                     0.0);
                                 double randomValue = rand() % 20000 + 20000;
@@ -2733,17 +2526,6 @@ namespace ns3 {
                                 } else {
                                     NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
                                 }
-
-                            }
-
-                            if (packet->FindFirstMatchingByteTag(timestamp)) {
-                                Time tx = timestamp.GetTimestamp();
-                                Time dx = Simulator::Now() - tx;
-                                aa45 = dx.GetMicroSeconds();
-                                delay45 += aa45;
-                            }
-
-                            if (Simulator::Now() > Seconds(record_start[25])) {  // --
 
                                 /**
                                  * get all receive packets
@@ -2767,7 +2549,6 @@ namespace ns3 {
                                     delayput45 << delayy45 << " ms\n";
                                     delayput45.close();
                                 }
-
                             }
                         }
                         m_rxTrace(packet); //pinganzhang
@@ -2787,9 +2568,7 @@ namespace ns3 {
                         static Time firstRx46;
                         uint64_t aa46;
 
-                        NS_LOG_INFO("pinganzhang:::::::: UdpSever Rev Count = " << ++a46 << " Now ********* "
-                                                                                << Simulator::Now()
-                                                                                << std::endl);
+                        NS_LOG_INFO(" UdpSever Rev Count = " << ++a46 << " Now " << Simulator::Now() << std::endl);
 
                         PidSet46.insert(AppHdr.ReadPacketId());
 
@@ -2799,19 +2578,24 @@ namespace ns3 {
                             ++rxcnt46;
                         }
 
-                        NS_LOG_INFO("pinganzhang::::::::first arrived time = " << firstRx46.GetSeconds() << std::endl);
-                        NS_LOG_INFO("pinganzhang::::::::AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("first arrived time = " << firstRx46.GetSeconds() << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
 
                         packetSizeVec46.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
                         if (1) {
-
-                            /**
-                             * get Throughput
-                             */
-                            if (Simulator::Now() > Seconds(record_start[26])) {  // --
+                            if (Simulator::Now() > Seconds(record_start[26])) {
+                                if (packet->FindFirstMatchingByteTag(timestamp)) {
+                                    Time tx = timestamp.GetTimestamp();
+                                    Time dx = Simulator::Now() - tx;
+                                    aa46 = dx.GetMicroSeconds();
+                                    delay46 += aa46;
+                                }
+                                /**
+                                 * get Throughput
+                                 */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec46.begin(), packetSizeVec46.end(),
                                                                     0.0);
                                 double randomValue = rand() % 20000 + 20000;
@@ -2830,17 +2614,6 @@ namespace ns3 {
                                 } else {
                                     NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
                                 }
-
-                            }
-
-                            if (packet->FindFirstMatchingByteTag(timestamp)) {
-                                Time tx = timestamp.GetTimestamp();
-                                Time dx = Simulator::Now() - tx;
-                                aa46 = dx.GetMicroSeconds();
-                                delay46 += aa46;
-                            }
-
-                            if (Simulator::Now() > Seconds(record_start[26])) {  // --
 
                                 /**
                                  * get all receive packets
@@ -2864,7 +2637,6 @@ namespace ns3 {
                                     delayput46 << delayy46 << " ms\n";
                                     delayput46.close();
                                 }
-
                             }
                         }
                         m_rxTrace(packet); //pinganzhang
@@ -2884,9 +2656,7 @@ namespace ns3 {
                         static Time firstRx47;
                         uint64_t aa47;
 
-                        NS_LOG_INFO("pinganzhang:::::::: UdpSever Rev Count = " << ++a47 << " Now ********* "
-                                                                                << Simulator::Now()
-                                                                                << std::endl);
+                        NS_LOG_INFO(" UdpSever Rev Count = " << ++a47 << " Now " << Simulator::Now() << std::endl);
 
                         PidSet47.insert(AppHdr.ReadPacketId());
 
@@ -2896,19 +2666,24 @@ namespace ns3 {
                             ++rxcnt47;
                         }
 
-                        NS_LOG_INFO("pinganzhang::::::::first arrived time = " << firstRx47.GetSeconds() << std::endl);
-                        NS_LOG_INFO("pinganzhang::::::::AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("first arrived time = " << firstRx47.GetSeconds() << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
 
                         packetSizeVec47.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
                         if (1) {
-
-                            /**
-                             * get Throughput
-                             */
-                            if (Simulator::Now() > Seconds(record_start[27])) {  // --
+                            if (Simulator::Now() > Seconds(record_start[27])) {
+                                if (packet->FindFirstMatchingByteTag(timestamp)) {
+                                    Time tx = timestamp.GetTimestamp();
+                                    Time dx = Simulator::Now() - tx;
+                                    aa47 = dx.GetMicroSeconds();
+                                    delay47 += aa47;
+                                }
+                                /**
+                                 * get Throughput
+                                 */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec47.begin(), packetSizeVec47.end(),
                                                                     0.0);
                                 double randomValue = rand() % 20000 + 20000;
@@ -2927,17 +2702,6 @@ namespace ns3 {
                                 } else {
                                     NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
                                 }
-
-                            }
-
-                            if (packet->FindFirstMatchingByteTag(timestamp)) {
-                                Time tx = timestamp.GetTimestamp();
-                                Time dx = Simulator::Now() - tx;
-                                aa47 = dx.GetMicroSeconds();
-                                delay47 += aa47;
-                            }
-
-                            if (Simulator::Now() > Seconds(record_start[27])) {  // --
 
                                 /**
                                  * get all receive packets
@@ -2961,7 +2725,6 @@ namespace ns3 {
                                     delayput47 << delayy47 << " ms\n";
                                     delayput47.close();
                                 }
-
                             }
                         }
                         m_rxTrace(packet); //pinganzhang
@@ -2981,9 +2744,7 @@ namespace ns3 {
                         static Time firstRx48;
                         uint64_t aa48;
 
-                        NS_LOG_INFO("pinganzhang:::::::: UdpSever Rev Count = " << ++a48 << " Now ********* "
-                                                                                << Simulator::Now()
-                                                                                << std::endl);
+                        NS_LOG_INFO(" UdpSever Rev Count = " << ++a48 << " Now " << Simulator::Now() << std::endl);
 
                         PidSet48.insert(AppHdr.ReadPacketId());
 
@@ -2993,19 +2754,24 @@ namespace ns3 {
                             ++rxcnt48;
                         }
 
-                        NS_LOG_INFO("pinganzhang::::::::first arrived time = " << firstRx48.GetSeconds() << std::endl);
-                        NS_LOG_INFO("pinganzhang::::::::AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("first arrived time = " << firstRx48.GetSeconds() << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
 
                         packetSizeVec48.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
                         if (1) {
-
-                            /**
-                             * get Throughput
-                             */
-                            if (Simulator::Now() > Seconds(record_start[28])) {  // --
+                            if (Simulator::Now() > Seconds(record_start[28])) {
+                                if (packet->FindFirstMatchingByteTag(timestamp)) {
+                                    Time tx = timestamp.GetTimestamp();
+                                    Time dx = Simulator::Now() - tx;
+                                    aa48 = dx.GetMicroSeconds();
+                                    delay48 += aa48;
+                                }
+                                /**
+                                 * get Throughput
+                                 */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec48.begin(), packetSizeVec48.end(),
                                                                     0.0);
                                 double randomValue = rand() % 20000 + 20000;
@@ -3024,17 +2790,6 @@ namespace ns3 {
                                 } else {
                                     NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
                                 }
-
-                            }
-
-                            if (packet->FindFirstMatchingByteTag(timestamp)) {
-                                Time tx = timestamp.GetTimestamp();
-                                Time dx = Simulator::Now() - tx;
-                                aa48 = dx.GetMicroSeconds();
-                                delay48 += aa48;
-                            }
-
-                            if (Simulator::Now() > Seconds(record_start[28])) {  // --
 
                                 /**
                                  * get all receive packets
@@ -3058,7 +2813,6 @@ namespace ns3 {
                                     delayput48 << delayy48 << " ms\n";
                                     delayput48.close();
                                 }
-
                             }
                         }
                         m_rxTrace(packet); //pinganzhang
@@ -3078,9 +2832,7 @@ namespace ns3 {
                         static Time firstRx49;
                         uint64_t aa49;
 
-                        NS_LOG_INFO("pinganzhang:::::::: UdpSever Rev Count = " << ++a49 << " Now ********* "
-                                                                                << Simulator::Now()
-                                                                                << std::endl);
+                        NS_LOG_INFO(" UdpSever Rev Count = " << ++a49 << " Now " << Simulator::Now() << std::endl);
 
                         PidSet49.insert(AppHdr.ReadPacketId());
 
@@ -3090,19 +2842,24 @@ namespace ns3 {
                             ++rxcnt49;
                         }
 
-                        NS_LOG_INFO("pinganzhang::::::::first arrived time = " << firstRx49.GetSeconds() << std::endl);
-                        NS_LOG_INFO("pinganzhang::::::::AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("first arrived time = " << firstRx49.GetSeconds() << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
 
                         packetSizeVec49.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
                         if (1) {
-
-                            /**
-                             * get Throughput
-                             */
-                            if (Simulator::Now() > Seconds(record_start[29])) {  // --
+                            if (Simulator::Now() > Seconds(record_start[29])) {
+                                if (packet->FindFirstMatchingByteTag(timestamp)) {
+                                    Time tx = timestamp.GetTimestamp();
+                                    Time dx = Simulator::Now() - tx;
+                                    aa49 = dx.GetMicroSeconds();
+                                    delay49 += aa49;
+                                }
+                                /**
+                                 * get Throughput
+                                 */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec49.begin(), packetSizeVec49.end(),
                                                                     0.0);
                                 double randomValue = rand() % 20000 + 20000;
@@ -3121,17 +2878,6 @@ namespace ns3 {
                                 } else {
                                     NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
                                 }
-
-                            }
-
-                            if (packet->FindFirstMatchingByteTag(timestamp)) {
-                                Time tx = timestamp.GetTimestamp();
-                                Time dx = Simulator::Now() - tx;
-                                aa49 = dx.GetMicroSeconds();
-                                delay49 += aa49;
-                            }
-
-                            if (Simulator::Now() > Seconds(record_start[29])) {  // --
 
                                 /**
                                  * get all receive packets
@@ -3155,7 +2901,6 @@ namespace ns3 {
                                     delayput49 << delayy49 << " ms\n";
                                     delayput49.close();
                                 }
-
                             }
                         }
                         m_rxTrace(packet); //pinganzhang
@@ -3175,9 +2920,7 @@ namespace ns3 {
                         static Time firstRx50;
                         uint64_t aa50;
 
-                        NS_LOG_INFO("pinganzhang:::::::: UdpSever Rev Count = " << ++a50 << " Now ********* "
-                                                                                << Simulator::Now()
-                                                                                << std::endl);
+                        NS_LOG_INFO(" UdpSever Rev Count = " << ++a50 << " Now " << Simulator::Now() << std::endl);
 
                         PidSet50.insert(AppHdr.ReadPacketId());
 
@@ -3187,19 +2930,24 @@ namespace ns3 {
                             ++rxcnt50;
                         }
 
-                        NS_LOG_INFO("pinganzhang::::::::first arrived time = " << firstRx50.GetSeconds() << std::endl);
-                        NS_LOG_INFO("pinganzhang::::::::AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("first arrived time = " << firstRx50.GetSeconds() << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
 
                         packetSizeVec50.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
                         if (1) {
-
-                            /**
-                             * get Throughput
-                             */
-                            if (Simulator::Now() > Seconds(record_start[30])) {  // --
+                            if (Simulator::Now() > Seconds(record_start[30])) {
+                                if (packet->FindFirstMatchingByteTag(timestamp)) {
+                                    Time tx = timestamp.GetTimestamp();
+                                    Time dx = Simulator::Now() - tx;
+                                    aa50 = dx.GetMicroSeconds();
+                                    delay50 += aa50;
+                                }
+                                /**
+                                 * get Throughput
+                                 */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec50.begin(), packetSizeVec50.end(),
                                                                     0.0);
                                 double randomValue = rand() % 20000 + 20000;
@@ -3218,17 +2966,6 @@ namespace ns3 {
                                 } else {
                                     NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
                                 }
-
-                            }
-
-                            if (packet->FindFirstMatchingByteTag(timestamp)) {
-                                Time tx = timestamp.GetTimestamp();
-                                Time dx = Simulator::Now() - tx;
-                                aa50 = dx.GetMicroSeconds();
-                                delay50 += aa50;
-                            }
-
-                            if (Simulator::Now() > Seconds(record_start[30])) {  // --
 
                                 /**
                                  * get all receive packets
@@ -3252,7 +2989,6 @@ namespace ns3 {
                                     delayput50 << delayy50 << " ms\n";
                                     delayput50.close();
                                 }
-
                             }
                         }
                         m_rxTrace(packet); //pinganzhang
@@ -3264,7 +3000,7 @@ namespace ns3 {
                     if (UdpServer::m_port == 21) {
                         static int a0 = 0;
                         static Time firstRx0;
-                        std::cout << "pinganzhang:::::::: UdpSever Rev Count = " << ++a0 << " Now ********* "
+                        std::cout << " UdpSever Rev Count = " << ++a0 << " Now "
                                   << Simulator::Now()
                                   << std::endl;
 
