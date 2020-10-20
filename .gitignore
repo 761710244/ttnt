@@ -1,2 +1,8 @@
-/ns-3.26/src/wifi-ttnt/model/xnp-rep-header.h~1f5f02396ce135fa2f9f15193d51568194cc739f
-/ns-3.26/src/wifi-ttnt/model/xnp-rep-header.h~HEAD
+netanim-3.107/*
+ns-3.26/.lock-waf_linux2_build
+ns-3.26/.waf-1.8.19-b1fc8f7baef51bd2db4c2971909a568d/
+ns-3.26/waf-tools/*.pyc
+ns-3.26/build/
+ns-3.26/*.txt
+ns-3.26/*.pyc
+ns-3.26/*.xml
