@@ -321,7 +321,6 @@ namespace ns3 {
                         size -= 40;
                     }
                     top_tps = get_tps(top_tps, ttnt, packet_size, data_rate);
-                    ofstream yuzhidile("yuzhi.txt");
                     if (yuzhidile.good()) {
                         for (uint8_t i = 0; i < top_tps.size(); i++) {
                             yuzhidile << top_tps[i] << " Kbps\n";

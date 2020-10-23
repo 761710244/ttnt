@@ -3856,7 +3856,6 @@ namespace ns3 {
                 if ((isMalicious == 2) && (Simulator::Now() >=
                                            Seconds(60.0))) // /* Drop Condition */Simulator::Now()>Seconds(80.0)&&Simulator::Now()<Seconds(90.0)))
                 {
-                    std::cout << "恶意节点的IP地址： " << m_ipv4->GetAddress(1, 0).GetLocal() << std::endl;
                     std::map <Ipv4Address, Ipv4Address> kk;
                     kk[sourceId] = dstId;
                     if (packetCntMap.find(kk) == packetCntMap.end()) {
@@ -3936,11 +3935,7 @@ namespace ns3 {
 
                 }
 
-
-                ///////////////////////////Odie, 当恶意节点找到去Target的路径后，将路径取出来
                 std::vector <Ipv4Address> m_routePath;
-
-                ///////////////////////////Odie, 当恶意节点找到去Target的路径后，将路径取出来
 
                 Ptr <Packet> p2 = p->Copy();
                 Ptr <Packet> p3 = p->Copy();
