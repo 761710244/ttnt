@@ -2,7 +2,9 @@
 rm udp*
 rm Pid*
 rm yuzhi.txt
-rm delay*
 rm *pcap
 rm *xml
+rm delay*
+rm throu*
+rm pid*
 ./waf --run scratch/NodeNumAB

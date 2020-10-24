@@ -1,4 +1,4 @@
 #!/bin/bash
-cat udp*
+cat throu*
 cat PidS*
-cat delay*
+cat delayFile*

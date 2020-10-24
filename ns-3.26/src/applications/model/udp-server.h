@@ -209,7 +209,15 @@ private:
   PacketLossCounter m_lossCounter; //!< Lost packet counter
   TracedCallback<Ptr<const Packet> > m_rxTrace;
   TracedCallback<uint64_t> m_delay;
-
+    vector<uint16_t> initPacket(uint16_t kind, uint16_t business);
+    vector<double> getStandardThroughPut(vector<uint16_t> pktSize, uint16_t rate);
+    vector<uint16_t> initWhich(uint16_t business, uint16_t neeToChange);
+    vector<double> solveThroughput(vector<double> throughput, uint16_t business);
+    vector<double> getStandardDelay(vector<uint16_t> pktSize);
+    uint16_t getTopValue(vector<double> throughPut, uint16_t kind, uint16_t business);
+    double getDelayGate(vector<double> delay, uint16_t top);
+    vector<double> solveDelay(vector<double> delay, uint16_t business, uint16_t top);
+    vector<uint16_t> getReceivePackets(vector<double> standardTh, vector<double> solvedTh);
 };
 
 } // namespace ns3

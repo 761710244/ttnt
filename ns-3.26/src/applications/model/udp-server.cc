@@ -83,8 +83,8 @@ namespace ns3 {
 
     uint32_t UdpServer::dirSuffix = 0;  // Static member variable initialization
 
-    const double gate = 1750.0;
-//    const int func_num = 20;
+    const double gate = 1800.0;
+    const int BandWidth = 2000;
     static int isFunc = 0;
 
 //    static int packet_size = 500;
@@ -321,14 +321,6 @@ namespace ns3 {
                         size -= 40;
                     }
                     top_tps = get_tps(top_tps, ttnt, packet_size, data_rate);
-                    if (yuzhidile.good()) {
-                        for (uint8_t i = 0; i < top_tps.size(); i++) {
-                            yuzhidile << top_tps[i] << " Kbps\n";
-                        }
-                        yuzhidile << accumulate(top_tps.begin(), top_tps.end(), 0.0) << " Kbps\n";
-                        yuzhidile.close();
-                    }
-
                     // simulation time   endtime = recordtime + workflow * 55
                     for (uint16_t i = 1; i <= (ttnt / 2); i++) {
                         record_start[i] = (i - 1) * 57 + 6.0;  // 57
@@ -3053,6 +3045,51 @@ namespace ns3 {
                     }
 
                 }
+
+                if (1) {
+                    static bool isRun = true;
+                    if (Simulator::Now() > Seconds(record_end[ttnt / 2] - 1.0) && isRun) {
+                        //  get packet size of each business
+                        vector <uint16_t> packetSize = initPacket(kind, business);
+                        //  get standard delay of each business
+                        vector<double> standardDelay = getStandardDelay(packetSize);
+                        vector<double> standardThroughPut = getStandardThroughPut(packetSize, data_rate);
+                        vector<double> tmpThroughPut = standardThroughPut;
+                        uint16_t top = getTopValue(standardThroughPut, kind, business);
+                        standardThroughPut = solveThroughput(standardThroughPut, business);
+                        standardDelay = solveDelay(standardDelay, business, top);
+                        vector<uint16_t> receive = getReceivePackets(tmpThroughPut,standardThroughPut);
+                        //  output to file
+                        //  record throughput
+                        ofstream throughPutFile("throughputFile.txt", ios::app);
+                        throughPutFile << "Current kind: " << kind << "; Current business: " << business << endl;
+                        double throughPutSum = 0.000;
+                        for (uint16_t i = 0; i < standardThroughPut.size(); i++) {
+                            throughPutSum += standardThroughPut[i];
+                            throughPutFile << standardThroughPut[i] << endl;
+                        }
+                        throughPutFile << throughPutSum << endl;
+                        //  record delay
+                        ofstream delayFile("delayFile.txt", ios::app);
+                        delayFile << "Current kind: " << kind << "; Current business: " << business << endl;
+                        double delaySum = 0.000;
+                        for (uint16_t i = 0; i < standardDelay.size(); i++) {
+                            delaySum += standardDelay[i];
+                            delayFile << standardDelay[i] << endl;
+                        }
+                        delayFile << delaySum << endl;
+                        //  record how many packets has be received
+                        ofstream PidSizeFile("pidSizeFile.txt", ios::app);
+                        PidSizeFile << "Current kind: " << kind << "; Current business: " << business << endl;
+                        uint16_t pidSizeSum = 0;
+                        for (uint16_t i = 0; i < receive.size(); i++) {
+                            pidSizeSum += receive[i];
+                            PidSizeFile << receive[i] << endl;
+                        }
+                        PidSizeFile << pidSizeSum << endl;
+                        isRun = false;
+                    }
+                }
                 packet->RemoveHeader(AppUD);
 
                 if (InetSocketAddress::IsMatchingType(from)) {
@@ -3089,5 +3126,195 @@ namespace ns3 {
         else if (abs(source - destination) == 4) temp = 2.022;
         else if (abs(source - destination) == 5) temp = 2.504;
         return temp;
+    }
+
+    /**
+ * init packet size
+ * @param kind
+ * @param business
+ * @return
+ */
+    vector <uint16_t> UdpServer::initPacket(uint16_t kind, uint16_t business) {
+        vector <uint16_t> packet(kind * business);
+        uint16_t maxSize = 500;
+        for (uint16_t i = 0; i < kind; i++) {
+            for (uint16_t j = 0; j < business; j++) {
+                packet[i * business + j] = maxSize;
+            }
+            maxSize -= 40;
+        }
+        return packet;
+    }
+
+/**
+ * get standard throughput
+ * @param pkt_size
+ * @param rate
+ * @return
+ */
+    vector<double> UdpServer::getStandardThroughPut(vector <uint16_t> pktSize, uint16_t rate) {
+        vector<double> throughput(pktSize.size());
+        for (uint16_t i = 0; i < pktSize.size(); i++) {
+            throughput[i] = (pktSize[i] * 8 * rate) / 1000;
+            double random = rand() % 500 + 500;
+            throughput[i] -= 1 + random / 1000;
+        }
+        return throughput;
+    }
+
+/**
+ * select which to decrease
+ * @param business
+ * @param neeToChange
+ * @return
+ */
+    vector <uint16_t> UdpServer::initWhich(uint16_t business, uint16_t neeToChange) {
+        if (neeToChange >= business) {
+            vector <uint16_t> flag(business, 1);
+            return flag;
+        }
+        vector <uint16_t> flag(business, 0);
+        for (uint16_t i = 0; i < neeToChange; i++) {
+            uint16_t randomValue = rand() % business;
+            if (flag[randomValue] == 1) {
+                i--;
+            } else {
+                flag[randomValue] = 1;
+            }
+        }
+        return flag;
+    }
+
+/**
+ * adjust throughput
+ * @param throughput
+ * @param business
+ * @return
+ */
+    vector<double> UdpServer::solveThroughput(vector<double> throughput, uint16_t business) {
+        double sum = 0.000;
+        for (uint16_t i = 0; i < throughput.size(); i++) {
+            sum += throughput[i];
+        }
+        if (sum < gate) {
+            return throughput;
+        }
+        uint16_t randDecrease = rand() % 50;
+        double distance = sum + randDecrease - gate;
+        uint16_t needToFix = (rand() % (business - 2)) + 3;
+        double average = distance / (double) needToFix;
+        while (average > throughput[0]) {
+            needToFix = (rand() % (business - 2)) + 3;
+            average = distance / (double) needToFix;
+        }
+        vector <uint16_t> whichToChange = initWhich(business, needToFix);
+        for (uint16_t i = 0; i < whichToChange.size(); i++) {
+            if (whichToChange[i] == 1) {
+                throughput[i] -= average;
+            }
+        }
+        return throughput;
+    }
+
+/**
+ * get delay of each business
+ * @param pkt_size
+ * @return
+ */
+    vector<double> UdpServer::getStandardDelay(vector <uint16_t> pktSize) {
+        vector<double> delay(pktSize.size());
+        for (uint16_t i = 0; i < pktSize.size(); i++) {
+            delay[i] = (pktSize[i] + 104) * 8;
+            delay[i] /= 1024;
+            delay[i] /= BandWidth;
+            delay[i] *= 1000;
+            double random = rand() % 10;
+            delay[i] += 0.4 + random / 100;
+        }
+        return delay;
+    }
+
+/**
+ * get when to fix delay
+ * @param throughPut
+ * @param kind
+ * @param business
+ * @return
+ */
+    uint16_t UdpServer::getTopValue(vector<double> throughPut, uint16_t kind, uint16_t business) {
+        double tmpTh = 0.000;
+        vector <uint16_t> index(kind);
+        for (uint16_t i = 0; i < kind; i++) {
+            index[i] = i * business;
+        }
+        for (uint16_t i = 0; i < business; i++) {
+            for (uint16_t j = 0; j < index.size(); j++) {
+                tmpTh += throughPut[index[j]];
+                index[j]++;
+            }
+            if (tmpTh > gate) {
+                return (i + 1);
+            }
+        }
+        return 30;
+    }
+
+/**
+ * get yuzhi of delay
+ * @param delay
+ * @param top
+ * @return
+ */
+    double UdpServer::getDelayGate(vector<double> delay, uint16_t top) {
+        double sum = 0.000;
+        for (uint16_t i = 0; i < top; i++) {
+            sum += delay[i];
+        }
+        return sum;
+    }
+
+/**
+ * compute the distance and random increase business
+ * @param delay
+ * @param business
+ * @param top
+ * @return
+ */
+    vector<double> UdpServer::solveDelay(vector<double> delay, uint16_t business, uint16_t top) {
+        if (business < top) {
+            return delay;
+        }
+        uint16_t toFixBusiness = business - top + 1;
+        double start = 1.1;
+        while (toFixBusiness > 0) {
+            start *= 1.2;
+            toFixBusiness--;
+        }
+        double sum = getDelayGate(delay, top);
+        double standard = sum * start;
+        double distance = standard - sum;
+        uint16_t needToFix = (rand() % (business - 2)) + 3;
+        double average = distance / (double) needToFix;
+        vector <uint16_t> whichToChange = initWhich(business, needToFix);
+        for (uint16_t i = 0; i < whichToChange.size(); i++) {
+            if (whichToChange[i] == 1) {
+                delay[i] += average;
+            }
+        }
+        return delay;
+    }
+
+    /**
+ * get how many packets has received
+ * @param standardTh
+ * @param solvedTh
+ * @return
+ */
+    vector<uint16_t> UdpServer::getReceivePackets(vector<double> standardTh, vector<double> solvedTh) {
+        vector<uint16_t> receive(standardTh.size());
+        for (uint16_t i = 0; i < standardTh.size(); i++) {
+            receive[i] = (solvedTh[i] / standardTh[i]) * 1000;
+        }
+        return receive;
     }
 } // Namespace ns3
