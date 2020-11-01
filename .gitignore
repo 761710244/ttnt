@@ -6,3 +6,4 @@ ns-3.26/build/
 ns-3.26/*.txt
 ns-3.26/*.pyc
 ns-3.26/*.xml
+.idea/*
