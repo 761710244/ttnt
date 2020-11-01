@@ -3139,7 +3139,7 @@ namespace ns3 {
         uint16_t maxSize = 500;
         for (uint16_t i = 0; i < kind; i++) {
             for (uint16_t j = 0; j < business; j++) {
-                packet[i * business + j] = maxSize;
+                packet[i * business + j] = maxSize - 44;
             }
             maxSize -= 40;
         }
