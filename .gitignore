@@ -7,3 +7,4 @@ ns-3.26/*.txt
 ns-3.26/*.pyc
 ns-3.26/*.xml
 .idea/*
+ns-3.26/.data.sh.swp

@@ -212,6 +212,7 @@ private:
     vector<uint16_t> initPacket(uint16_t kind, uint16_t business);
     vector<double> getStandardThroughPut(vector<uint16_t> pktSize, uint16_t rate);
     vector<uint16_t> initWhich(uint16_t business, uint16_t neeToChange);
+    double getKindBusinessTh(vector<double> throughput, uint16_t kind, uint16_t business);
     vector<double> solveThroughput(vector<double> throughput, uint16_t business);
     vector<double> getStandardDelay(vector<uint16_t> pktSize);
     uint16_t getTopValue(vector<double> throughPut, uint16_t kind, uint16_t business);

@@ -37,8 +37,8 @@ void TxCallback(Ptr <CounterCalculator<uint32_t>> datac, std::string path, Ptr<c
 
 int main(int argc, char *argv[]) {
 
-    uint8_t kind = 1;
-    uint32_t business = 2;  // hack: Add 1 per test. Range: [1, 15]
+    uint8_t kind = 3;
+    uint32_t business = 1;  // hack: Add 1 per test. Range: [1, 15]
     uint32_t ttnt;
     bool verbose = true;
     uint32_t dir = 0;  // Output file path suffix
@@ -173,7 +173,7 @@ int main(int argc, char *argv[]) {
         for (uint8_t j = 1; j <= business; j++) {
             packet_size[(i - 1) * business + j] = size;
         }
-        size -= 20;
+        size -= 40;
     }
 
     /**

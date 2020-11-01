@@ -1,4 +1,4 @@
 #!/bin/bash
 cat throu*
-cat PidS*
+cat pidS*
 cat delayFile*

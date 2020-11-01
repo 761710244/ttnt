@@ -83,7 +83,7 @@ namespace ns3 {
 
     uint32_t UdpServer::dirSuffix = 0;  // Static member variable initialization
 
-    const double gate = 1800.0;
+    const double gate = 1600.0;
     const int BandWidth = 2000;
     static int isFunc = 0;
 
@@ -3058,7 +3058,7 @@ namespace ns3 {
                         uint16_t top = getTopValue(standardThroughPut, kind, business);
                         standardThroughPut = solveThroughput(standardThroughPut, business);
                         standardDelay = solveDelay(standardDelay, business, top);
-                        vector<uint16_t> receive = getReceivePackets(tmpThroughPut,standardThroughPut);
+                        vector <uint16_t> receive = getReceivePackets(tmpThroughPut, standardThroughPut);
                         //  output to file
                         //  record throughput
                         ofstream throughPutFile("throughputFile.txt", ios::app);
@@ -3186,6 +3186,22 @@ namespace ns3 {
     }
 
 /**
+ * get which kind business all throughput
+ * @param throughput
+ * @param index
+ * @param business
+ * @return
+ */
+    double UdpServer::getKindBusinessTh(vector<double> throughput, uint16_t kind, uint16_t business) {
+        double sum = 0.000;
+        uint16_t start = (kind - 1) * business;
+        for (uint16_t i = start; i < start + business; i++) {
+            sum += throughput[i];
+        }
+        return sum;
+    }
+
+/**
  * adjust throughput
  * @param throughput
  * @param business
@@ -3202,14 +3218,25 @@ namespace ns3 {
         uint16_t randDecrease = rand() % 50;
         double distance = sum + randDecrease - gate;
         uint16_t needToFix = (rand() % (business - 2)) + 3;
+        uint16_t start = 1;
+        double kindOne = getKindBusinessTh(throughput, start, business);
+        //  keep high priority business to send
+        while (kindOne < distance) {
+            distance -= kindOne;
+            start++;
+            kindOne = getKindBusinessTh(throughput, start, business);
+        }
         double average = distance / (double) needToFix;
-        while (average > throughput[0]) {
+        while (average > throughput[(start - 1) * business]) {
             needToFix = (rand() % (business - 2)) + 3;
             average = distance / (double) needToFix;
         }
-        vector <uint16_t> whichToChange = initWhich(business, needToFix);
-        for (uint16_t i = 0; i < whichToChange.size(); i++) {
-            if (whichToChange[i] == 1) {
+        vector<uint16_t> whichToChange = initWhich(business, needToFix);
+        for (uint16_t i = 0; i < (start - 1) * business; i++) {
+            throughput[i] = 0;
+        }
+        for (uint16_t i = (start - 1) * business; i < (start - 1) * business + business; i++) {
+            if (whichToChange[i - ((start - 1) * business)] == 1) {
                 throughput[i] -= average;
             }
         }
@@ -3310,8 +3337,8 @@ namespace ns3 {
  * @param solvedTh
  * @return
  */
-    vector<uint16_t> UdpServer::getReceivePackets(vector<double> standardTh, vector<double> solvedTh) {
-        vector<uint16_t> receive(standardTh.size());
+    vector <uint16_t> UdpServer::getReceivePackets(vector<double> standardTh, vector<double> solvedTh) {
+        vector <uint16_t> receive(standardTh.size());
         for (uint16_t i = 0; i < standardTh.size(); i++) {
             receive[i] = (solvedTh[i] / standardTh[i]) * 1000;
         }
