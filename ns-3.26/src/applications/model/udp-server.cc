@@ -92,22 +92,13 @@ namespace ns3 {
     static int data_rate = 20;  // send rate (packets/s)
     static int business = 1;  // hack: Equal to the value of the variable [business] in the script
     static int ttnt = kind * business * 2;
-
+    static uint8_t Hop = 1;
     double record_start[31] = {0.0};
     double record_end[31] = {0.0};
 
     static vector<double> pre_tps(ttnt / 2, 0.0);
     static vector<double> top_tps(ttnt / 2);
     static vector<int> packet_size(ttnt / 2 + 1);
-
-    void UdpServer::reInit(int typeNum, int busiNum) {
-        kind = typeNum;
-        business = busiNum;
-        ttnt = kind * business * 2;
-        pre_tps.resize(ttnt / 2, 0.0);
-        top_tps.resize(ttnt / 2);
-        packet_size.resize(ttnt / 2 + 1);
-    }
 
     TypeId UdpServer::GetTypeId(void) {
         static TypeId tid = TypeId("ns3::UdpServer")
@@ -213,7 +204,6 @@ namespace ns3 {
             m_socket->SetRecvCallback(MakeNullCallback < void, Ptr < Socket > > ());
         }
     }
-
 
     vector<double> solve(vector<double> &res) {
         double sum = accumulate(res.begin(), res.end(), 0.0);
@@ -3049,44 +3039,7 @@ namespace ns3 {
                 if (1) {
                     static bool isRun = true;
                     if (Simulator::Now() > Seconds(record_end[ttnt / 2] - 1.0) && isRun) {
-                        //  get packet size of each business
-                        vector <uint16_t> packetSize = initPacket(kind, business);
-                        //  get standard delay of each business
-                        vector<double> standardDelay = getStandardDelay(packetSize);
-                        vector<double> standardThroughPut = getStandardThroughPut(packetSize, data_rate);
-                        vector<double> tmpThroughPut = standardThroughPut;
-                        uint16_t top = getTopValue(standardThroughPut, kind, business);
-                        standardThroughPut = solveThroughput(standardThroughPut, business);
-                        standardDelay = solveDelay(standardDelay, business, top);
-                        vector <uint16_t> receive = getReceivePackets(tmpThroughPut, standardThroughPut);
-                        //  output to file
-                        //  record throughput
-                        ofstream throughPutFile("throughputFile.txt", ios::app);
-                        throughPutFile << "Current kind: " << kind << "; Current business: " << business << endl;
-                        double throughPutSum = 0.000;
-                        for (uint16_t i = 0; i < standardThroughPut.size(); i++) {
-                            throughPutSum += standardThroughPut[i];
-                            throughPutFile << standardThroughPut[i] << endl;
-                        }
-                        throughPutFile << throughPutSum << endl;
-                        //  record delay
-                        ofstream delayFile("delayFile.txt", ios::app);
-                        delayFile << "Current kind: " << kind << "; Current business: " << business << endl;
-                        double delaySum = 0.000;
-                        for (uint16_t i = 0; i < standardDelay.size(); i++) {
-                            delaySum += standardDelay[i];
-                            delayFile << standardDelay[i] << endl;
-                        }
-                        delayFile << delaySum << endl;
-                        //  record how many packets has be received
-                        ofstream PidSizeFile("pidSizeFile.txt", ios::app);
-                        PidSizeFile << "Current kind: " << kind << "; Current business: " << business << endl;
-                        uint16_t pidSizeSum = 0;
-                        for (uint16_t i = 0; i < receive.size(); i++) {
-                            pidSizeSum += receive[i];
-                            PidSizeFile << receive[i] << endl;
-                        }
-                        PidSizeFile << pidSizeSum << endl;
+                        SinglePerformance(1);
                         isRun = false;
                     }
                 }
@@ -3128,6 +3081,57 @@ namespace ns3 {
         return temp;
     }
 
+    void UdpServer::reInit(uint8_t typeNum, uint8_t busiNum, uint8_t hop) {
+        kind = typeNum;
+        business = busiNum;
+        Hop = hop;
+        ttnt = kind * business * 2;
+        pre_tps.resize(ttnt / 2, 0.0);
+        top_tps.resize(ttnt / 2);
+        packet_size.resize(ttnt / 2 + 1);
+    }
+    void UdpServer::SinglePerformance(uint16_t hop) {
+
+        //  get packet size of each business
+        vector <uint16_t> packetSize = initPacket(kind, business);
+        //  get standard delay of each business
+        vector<double> standardDelay = getStandardDelay(packetSize);
+        vector<double> standardThroughPut = getStandardThroughPut(packetSize, data_rate);
+        vector<double> tmpThroughPut = standardThroughPut;
+        uint16_t top = getTopValue(standardThroughPut, kind, business);
+        standardThroughPut = solveThroughput(standardThroughPut, business);
+        standardDelay = solveDelay(standardDelay, business, top);
+        vector <uint16_t> receive = getReceivePackets(tmpThroughPut, standardThroughPut);
+        //  output to file
+        //  record throughput
+        ofstream throughPutFile("throughputFile.txt", ios::app);
+        throughPutFile << "Current kind: " << kind << "; Current business: " << business << endl;
+        double throughPutSum = 0.000;
+        for (uint16_t i = 0; i < standardThroughPut.size(); i++) {
+            throughPutSum += standardThroughPut[i];
+            throughPutFile << standardThroughPut[i] << endl;
+        }
+        throughPutFile << throughPutSum << endl;
+        //  record delay
+        ofstream delayFile("delayFile.txt", ios::app);
+        delayFile << "Current kind: " << kind << "; Current business: " << business << endl;
+        double delaySum = 0.000;
+        for (uint16_t i = 0; i < standardDelay.size(); i++) {
+            delaySum += standardDelay[i];
+            delayFile << standardDelay[i] << endl;
+        }
+        delayFile << delaySum << endl;
+        //  record how many packets has be received
+        ofstream PidSizeFile("pidSizeFile.txt", ios::app);
+        PidSizeFile << "Current kind: " << kind << "; Current business: " << business << endl;
+        uint16_t pidSizeSum = 0;
+        for (uint16_t i = 0; i < receive.size(); i++) {
+            pidSizeSum += receive[i];
+            PidSizeFile << receive[i] << endl;
+        }
+        PidSizeFile << pidSizeSum << endl;
+    }
+
     /**
  * init packet size
  * @param kind
@@ -3139,7 +3143,7 @@ namespace ns3 {
         uint16_t maxSize = 500;
         for (uint16_t i = 0; i < kind; i++) {
             for (uint16_t j = 0; j < business; j++) {
-                packet[i * business + j] = maxSize - 44;
+                packet[i * business + j] = maxSize - 48;
             }
             maxSize -= 40;
         }
@@ -3231,7 +3235,7 @@ namespace ns3 {
             needToFix = (rand() % (business - 2)) + 3;
             average = distance / (double) needToFix;
         }
-        vector<uint16_t> whichToChange = initWhich(business, needToFix);
+        vector <uint16_t> whichToChange = initWhich(business, needToFix);
         for (uint16_t i = 0; i < (start - 1) * business; i++) {
             throughput[i] = 0;
         }

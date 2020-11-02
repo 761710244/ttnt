@@ -38,10 +38,11 @@ void TxCallback(Ptr <CounterCalculator<uint32_t>> datac, std::string path, Ptr<c
 int main(int argc, char *argv[]) {
 
     uint8_t kind = 3;
-    uint32_t business = 1;  // hack: Add 1 per test. Range: [1, 15]
-    uint32_t ttnt;
+    uint8_t business = 1;  // hack: Add 1 per test. Range: [1, 15]
+    uint8_t ttnt;
+    uint8_t hop = 1;
     bool verbose = true;
-    uint32_t dir = 0;  // Output file path suffix
+    uint8_t dir = 0;  // Output file path suffix
 
     Time::SetResolution(Time::NS);  // 最小时间单元：ns
 
@@ -54,7 +55,7 @@ int main(int argc, char *argv[]) {
 
     ttnt = kind * business * 2;
     ns3::UdpServer::dirSuffix = dir;
-    UdpServer::reInit(kind, business);
+    UdpServer::reInit(kind, business, hop);
     dsr::DsrOptions::partitionWindow("Normal");
 
 //    ofstream paraFile("paraFile.txt");

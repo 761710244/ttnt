@@ -53,7 +53,7 @@ int main(int argc, char *argv[]) {
 
     ttnt = kind * business * 2;
     ns3::UdpServer::dirSuffix = dir;
-    UdpServer::reInit(kind, business);
+//    UdpServer::reInit(kind, business);
 
     ofstream paraFile("paraFile.txt");
     paraFile << "kind: " << to_string(kind) << endl;

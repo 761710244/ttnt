@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
     ttnt = kind * business * 2;
     ttntTotal = ((kind * business - 1) / 3 + 1) * 6;
     ns3::UdpServer::dirSuffix = dir;
-    UdpServer::reInit(kind, business);
+//    UdpServer::reInit(kind, business);
     dsr::DsrOptions::partitionWindow("Optimize");
 
     if (verbose) {

@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
 
     ttnt = kind * business * 2;
     ns3::UdpServer::dirSuffix = dir;
-    UdpServer::reInit(kind, business);
+//    UdpServer::reInit(kind, business);
     dsr::DsrOptions::partitionWindow("Normal");
 
 //    ofstream paraFile("paraFile.txt");

@@ -172,18 +172,8 @@ public:
   static vector<uint32_t> packetSizeVec50;
   static vector<uint32_t> packetSizeVec20000;
   static vector<uint32_t> packetSizeVec20001;
-
   static uint32_t dirSuffix;  // Output file path suffix
-
-  /**
-   * \brief Reinitialize related parameters: number of business per type, number of business nodes, etc.
-   * \param typeNum Number of business type
-   * \param busiNum Number of business per type
-   */
-  static void reInit(int typeNum,int busiNum);
-
-
-
+  static void reInit(uint8_t typeNum, uint8_t busiNum, uint8_t hop);
 protected:
   virtual void DoDispose (void);
 
@@ -209,6 +199,7 @@ private:
   PacketLossCounter m_lossCounter; //!< Lost packet counter
   TracedCallback<Ptr<const Packet> > m_rxTrace;
   TracedCallback<uint64_t> m_delay;
+    void SinglePerformance(uint16_t hop);
     vector<uint16_t> initPacket(uint16_t kind, uint16_t business);
     vector<double> getStandardThroughPut(vector<uint16_t> pktSize, uint16_t rate);
     vector<uint16_t> initWhich(uint16_t business, uint16_t neeToChange);
