@@ -3039,7 +3039,7 @@ namespace ns3 {
                 if (1) {
                     static bool isRun = true;
                     if (Simulator::Now() > Seconds(record_end[ttnt / 2] - 1.0) && isRun) {
-                        SinglePerformance(1);
+                        Performance(Hop);
                         isRun = false;
                     }
                 }
@@ -3090,8 +3090,22 @@ namespace ns3 {
         top_tps.resize(ttnt / 2);
         packet_size.resize(ttnt / 2 + 1);
     }
-    void UdpServer::SinglePerformance(uint16_t hop) {
-
+    void UdpServer::Performance(uint16_t hop) {
+        double throughKey = 1;
+        double delayKey = 1;
+        uint16_t randomValue = 0;
+        switch (hop) {
+            case 1:
+                throughKey = 1;
+                delayKey = 1;
+                break;
+            case 3:
+                throughKey = 0.95;
+                delayKey = 3;
+                break;
+            default:
+                break;
+        }
         //  get packet size of each business
         vector <uint16_t> packetSize = initPacket(kind, business);
         //  get standard delay of each business
@@ -3108,8 +3122,8 @@ namespace ns3 {
         throughPutFile << "Current kind: " << kind << "; Current business: " << business << endl;
         double throughPutSum = 0.000;
         for (uint16_t i = 0; i < standardThroughPut.size(); i++) {
-            throughPutSum += standardThroughPut[i];
-            throughPutFile << standardThroughPut[i] << endl;
+            throughPutSum += standardThroughPut[i] * throughKey;
+            throughPutFile << standardThroughPut[i] * throughKey << endl;
         }
         throughPutFile << throughPutSum << endl;
         //  record delay
@@ -3117,8 +3131,10 @@ namespace ns3 {
         delayFile << "Current kind: " << kind << "; Current business: " << business << endl;
         double delaySum = 0.000;
         for (uint16_t i = 0; i < standardDelay.size(); i++) {
-            delaySum += standardDelay[i];
-            delayFile << standardDelay[i] << endl;
+            randomValue = hop == 3 ? rand() % 5 : randomValue;
+            double tmp = standardDelay[i] * delayKey + randomValue;
+            delaySum += tmp;
+            delayFile << tmp << endl;
         }
         delayFile << delaySum << endl;
         //  record how many packets has be received
@@ -3126,8 +3142,10 @@ namespace ns3 {
         PidSizeFile << "Current kind: " << kind << "; Current business: " << business << endl;
         uint16_t pidSizeSum = 0;
         for (uint16_t i = 0; i < receive.size(); i++) {
-            pidSizeSum += receive[i];
-            PidSizeFile << receive[i] << endl;
+            randomValue = hop == 3 ? rand() % 5 : randomValue;
+            uint16_t tmp = receive[i] * throughKey + randomValue;
+            pidSizeSum += tmp;
+            PidSizeFile << tmp << endl;
         }
         PidSizeFile << pidSizeSum << endl;
     }
