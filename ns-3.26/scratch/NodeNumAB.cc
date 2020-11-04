@@ -41,6 +41,7 @@ int main(int argc, char *argv[]) {
     uint32_t business = 1;  // hack: Add 1 per test. Range: [1, 15]
     uint32_t ttnt;
     uint8_t hop = 1;
+    bool opti = false;
     bool verbose = true;
     uint8_t dir = 0;  // Output file path suffix
 
@@ -56,7 +57,7 @@ int main(int argc, char *argv[]) {
 
     ttnt = kind * business * 2;
     ns3::UdpServer::dirSuffix = dir;
-    UdpServer::reInit(kind, business, hop);
+    UdpServer::reInit(kind, business, hop, opti);
     dsr::DsrOptions::partitionWindow("Normal");
 
 //    ofstream paraFile("paraFile.txt");

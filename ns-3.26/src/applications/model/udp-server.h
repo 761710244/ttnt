@@ -173,7 +173,7 @@ public:
   static vector<uint32_t> packetSizeVec20000;
   static vector<uint32_t> packetSizeVec20001;
   static uint32_t dirSuffix;  // Output file path suffix
-  static void reInit(uint8_t typeNum, uint8_t busiNum, uint8_t hop);
+  static void reInit(uint8_t typeNum, uint8_t busiNum, uint8_t hop, bool opti);
 protected:
   virtual void DoDispose (void);
 

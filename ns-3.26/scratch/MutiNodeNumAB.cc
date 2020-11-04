@@ -39,6 +39,7 @@ int main(int argc, char *argv[]) {
     uint32_t business = 3;  // hack: Add 1 per test. Range: [1, 15]
     uint32_t ttnt;
     uint8_t hop = 3;
+    bool opti = false;
     uint8_t dir = 0;  // Output file path suffix
 
     Time::SetResolution(Time::NS);  // 最小时间单元：ns
@@ -54,7 +55,7 @@ int main(int argc, char *argv[]) {
     ttnt = kind * business * 2;
     ttntTotal = ((kind * business - 1) / 3 + 1) * 6;
     ns3::UdpServer::dirSuffix = dir;
-    UdpServer::reInit(kind, business, hop);
+    UdpServer::reInit(kind, business, hop, opti);
     dsr::DsrOptions::partitionWindow("Optimize");
 
     if (verbose) {

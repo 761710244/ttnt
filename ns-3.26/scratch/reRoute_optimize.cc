@@ -35,15 +35,19 @@ int main(int argc, char *argv[]) {
     uint32_t ttntTotal = 60; // -------
     bool verbose = true;
 
-    uint8_t kind = 1;  // Number of business type
-    uint8_t business = 1;  // hack: Add 1 per test. Range: [1, 30]
-    uint8_t ttnt;
+    uint32_t kind = 3;
+    uint32_t business = 3;  // hack: Add 1 per test. Range: [1, 15]
+    uint32_t ttnt;
+    uint8_t hop = 3;
+    bool opti = false;
     uint8_t dir = 0;  // Output file path suffix
 
     Time::SetResolution(Time::NS);  // 最小时间单元：ns
 
     CommandLine cmd;
     cmd.AddValue("ttntTotal", "Number of \"extra\" CSMA nodes/devices", ttntTotal);
+    cmd.AddValue("kind", "the kind of business", kind);
+    cmd.AddValue("opti", "optimitation", opti);
     cmd.AddValue("verbose", "Tell echo applications to log if true", verbose);
     cmd.AddValue("dir", "Specify the output file path suffix", dir);
     cmd.AddValue("business", "Number of traffic flows of a single type", business);
@@ -52,7 +56,7 @@ int main(int argc, char *argv[]) {
     ttnt = kind * business * 2;
     ttntTotal = ((kind * business - 1) / 3 + 1) * 6;
     ns3::UdpServer::dirSuffix = dir;
-//    UdpServer::reInit(kind, business);
+    UdpServer::reInit(kind, business, hop, opti);
     dsr::DsrOptions::partitionWindow("Optimize");
 
     if (verbose) {

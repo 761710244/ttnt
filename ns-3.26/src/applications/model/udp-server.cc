@@ -93,6 +93,7 @@ namespace ns3 {
     static int business = 1;  // hack: Equal to the value of the variable [business] in the script
     static int ttnt = kind * business * 2;
     static uint8_t Hop = 1;
+    static bool Opti = false;
     double record_start[31] = {0.0};
     double record_end[31] = {0.0};
 
@@ -3039,7 +3040,11 @@ namespace ns3 {
                 if (1) {
                     static bool isRun = true;
                     if (Simulator::Now() > Seconds(record_end[ttnt / 2] - 1.0) && isRun) {
-                        Performance(Hop);
+                        if (Opti == false) {
+                            Performance(Hop);
+                        } else {
+                            Routing(Opti);
+                        }
                         isRun = false;
                     }
                 }
@@ -3081,10 +3086,11 @@ namespace ns3 {
         return temp;
     }
 
-    void UdpServer::reInit(uint8_t typeNum, uint8_t busiNum, uint8_t hop) {
+    void UdpServer::reInit(uint8_t typeNum, uint8_t busiNum, uint8_t hop, bool opti) {
         kind = typeNum;
         business = busiNum;
         Hop = hop;
+        Opti = opti;
         ttnt = kind * business * 2;
         pre_tps.resize(ttnt / 2, 0.0);
         top_tps.resize(ttnt / 2);
