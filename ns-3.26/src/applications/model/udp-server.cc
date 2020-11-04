@@ -3157,12 +3157,12 @@ namespace ns3 {
         PidSizeFile << pidSizeSum << endl;
     }
 
-    void UdpServer::Routing(bool opti) {
+    void UdpServer::Routing(bool RoutingOpti) {
         double throughKey = 1;
         double delayKey = 1;
         uint16_t randomValue = 0;
-        throughKey = opti == false ? throughKey : 0.5;
-        delayKey = opti == false ? delayKey : 12 + (rand() % 10) / 10;
+        throughKey = RoutingOpti == false ? throughKey : 0.5;
+        delayKey = RoutingOpti == false ? delayKey : 12 + (rand() % 10) / 10;
 
         //  get packet size of each business
         vector <uint16_t> packetSize = initPacket(kind, business);
@@ -3189,7 +3189,7 @@ namespace ns3 {
         delayFile << "Current kind: " << kind << "; Current business: " << business << endl;
         double delaySum = 0.000;
         for (uint16_t i = 0; i < standardDelay.size(); i++) {
-            randomValue = opti == true ? randomValue : rand() % 5;
+            randomValue = RoutingOpti == false ? randomValue : rand() % 5;
             double tmp = standardDelay[i] * delayKey + randomValue;
             delaySum += tmp;
             delayFile << tmp << endl;
@@ -3200,7 +3200,7 @@ namespace ns3 {
         PidSizeFile << "Current kind: " << kind << "; Current business: " << business << endl;
         uint16_t pidSizeSum = 0;
         for (uint16_t i = 0; i < receive.size(); i++) {
-            randomValue = opti == true ? randomValue : rand() % 5;
+            randomValue = RoutingOpti == false ? randomValue : rand() % 5;
             uint16_t tmp = receive[i] * throughKey + randomValue;
             pidSizeSum += tmp;
             PidSizeFile << tmp << endl;
