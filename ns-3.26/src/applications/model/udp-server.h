@@ -200,6 +200,7 @@ private:
   TracedCallback<Ptr<const Packet> > m_rxTrace;
   TracedCallback<uint64_t> m_delay;
     void Performance(uint16_t hop);
+    void Routing(bool opti);
     vector<uint16_t> initPacket(uint16_t kind, uint16_t business);
     vector<double> getStandardThroughPut(vector<uint16_t> pktSize, uint16_t rate);
     vector<uint16_t> initWhich(uint16_t business, uint16_t neeToChange);

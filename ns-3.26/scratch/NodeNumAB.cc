@@ -37,9 +37,9 @@ void TxCallback(Ptr <CounterCalculator<uint32_t>> datac, std::string path, Ptr<c
 
 int main(int argc, char *argv[]) {
 
-    uint8_t kind = 3;
-    uint8_t business = 1;  // hack: Add 1 per test. Range: [1, 15]
-    uint8_t ttnt;
+    uint32_t kind = 3;
+    uint32_t business = 1;  // hack: Add 1 per test. Range: [1, 15]
+    uint32_t ttnt;
     uint8_t hop = 1;
     bool verbose = true;
     uint8_t dir = 0;  // Output file path suffix
@@ -51,6 +51,7 @@ int main(int argc, char *argv[]) {
     cmd.AddValue("verbose", "Tell echo applications to log if true", verbose);
     cmd.AddValue("dir", "Specify the output file path suffix", dir);
     cmd.AddValue("business", "Number of traffic flows of a single type", business);
+    cmd.AddValue("kind", "the kind of business", kind);
     cmd.Parse(argc, argv);
 
     ttnt = kind * business * 2;

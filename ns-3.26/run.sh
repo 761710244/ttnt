@@ -6,4 +6,4 @@ rm *xml
 rm delay*
 rm throu*
 rm pid*
-./waf --run scratch/MutiNodeNumAB
+./waf --run "scratch/NodeNumAB --kind=1 --business=3"

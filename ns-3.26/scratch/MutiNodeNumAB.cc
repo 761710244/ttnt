@@ -35,9 +35,9 @@ int main(int argc, char *argv[]) {
     uint32_t ttntTotal = 60; // -------
     bool verbose = true;
 
-    uint8_t kind = 3;
-    uint8_t business = 3;  // hack: Add 1 per test. Range: [1, 15]
-    uint8_t ttnt;
+    uint32_t kind = 3;
+    uint32_t business = 3;  // hack: Add 1 per test. Range: [1, 15]
+    uint32_t ttnt;
     uint8_t hop = 3;
     uint8_t dir = 0;  // Output file path suffix
 
@@ -45,6 +45,7 @@ int main(int argc, char *argv[]) {
 
     CommandLine cmd;
     cmd.AddValue("ttntTotal", "Number of \"extra\" CSMA nodes/devices", ttntTotal);
+    cmd.AddValue("kind", "the kind of business", kind);
     cmd.AddValue("verbose", "Tell echo applications to log if true", verbose);
     cmd.AddValue("dir", "Specify the output file path suffix", dir);
     cmd.AddValue("business", "Number of traffic flows of a single type", business);

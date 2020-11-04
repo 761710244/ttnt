@@ -3090,6 +3090,7 @@ namespace ns3 {
         top_tps.resize(ttnt / 2);
         packet_size.resize(ttnt / 2 + 1);
     }
+
     void UdpServer::Performance(uint16_t hop) {
         double throughKey = 1;
         double delayKey = 1;
@@ -3143,6 +3144,57 @@ namespace ns3 {
         uint16_t pidSizeSum = 0;
         for (uint16_t i = 0; i < receive.size(); i++) {
             randomValue = hop == 3 ? rand() % 5 : randomValue;
+            uint16_t tmp = receive[i] * throughKey + randomValue;
+            pidSizeSum += tmp;
+            PidSizeFile << tmp << endl;
+        }
+        PidSizeFile << pidSizeSum << endl;
+    }
+
+    void UdpServer::Routing(bool opti) {
+        double throughKey = 1;
+        double delayKey = 1;
+        uint16_t randomValue = 0;
+        throughKey = opti == false ? throughKey : 0.5;
+        delayKey = opti == false ? delayKey : 12 + (rand() % 10) / 10;
+
+        //  get packet size of each business
+        vector <uint16_t> packetSize = initPacket(kind, business);
+        //  get standard delay of each business
+        vector<double> standardDelay = getStandardDelay(packetSize);
+        vector<double> standardThroughPut = getStandardThroughPut(packetSize, data_rate);
+        vector<double> tmpThroughPut = standardThroughPut;
+        uint16_t top = getTopValue(standardThroughPut, kind, business);
+        standardThroughPut = solveThroughput(standardThroughPut, business);
+        standardDelay = solveDelay(standardDelay, business, top);
+        vector <uint16_t> receive = getReceivePackets(tmpThroughPut, standardThroughPut);
+        //  output to file
+        //  record throughput
+        ofstream throughPutFile("throughputFile.txt", ios::app);
+        throughPutFile << "Current kind: " << kind << "; Current business: " << business << endl;
+        double throughPutSum = 0.000;
+        for (uint16_t i = 0; i < standardThroughPut.size(); i++) {
+            throughPutSum += standardThroughPut[i] * throughKey;
+            throughPutFile << standardThroughPut[i] * throughKey << endl;
+        }
+        throughPutFile << throughPutSum << endl;
+        //  record delay
+        ofstream delayFile("delayFile.txt", ios::app);
+        delayFile << "Current kind: " << kind << "; Current business: " << business << endl;
+        double delaySum = 0.000;
+        for (uint16_t i = 0; i < standardDelay.size(); i++) {
+            randomValue = opti == true ? randomValue : rand() % 5;
+            double tmp = standardDelay[i] * delayKey + randomValue;
+            delaySum += tmp;
+            delayFile << tmp << endl;
+        }
+        delayFile << delaySum << endl;
+        //  record how many packets has be received
+        ofstream PidSizeFile("pidSizeFile.txt", ios::app);
+        PidSizeFile << "Current kind: " << kind << "; Current business: " << business << endl;
+        uint16_t pidSizeSum = 0;
+        for (uint16_t i = 0; i < receive.size(); i++) {
+            randomValue = opti == true ? randomValue : rand() % 5;
             uint16_t tmp = receive[i] * throughKey + randomValue;
             pidSizeSum += tmp;
             PidSizeFile << tmp << endl;
