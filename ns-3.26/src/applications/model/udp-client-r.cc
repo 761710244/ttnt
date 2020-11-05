@@ -187,8 +187,7 @@ UdpClientR::Send (void)//这里是最最重要的部分了，数据包的产生�
       ++m_sent;
       NS_LOG_INFO ("TraceDelay TX " << m_size << " bytes to "
                                     << peerAddressStringStream.str () << " Uid: "
-                                    << p->GetUid () << " Time: "
-                                    << (Simulator::Now ()).GetSeconds ());
+                                    << p->GetUid ());
 
     }
   else

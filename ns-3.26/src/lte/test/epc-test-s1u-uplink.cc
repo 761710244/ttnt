@@ -221,8 +221,7 @@ EpsBearerTagUdpClient::Send (void)
     {
       ++m_sent;
       NS_LOG_INFO ("TraceDelay TX " << m_size << " bytes to "
-                                    << m_peerAddress << " Uid: " << p->GetUid ()
-                                    << " Time: " << (Simulator::Now ()).GetSeconds ());
+                                    << m_peerAddress << " Uid: " << p->GetUid ());
 
     }
   else

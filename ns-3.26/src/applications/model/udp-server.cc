@@ -94,6 +94,9 @@ namespace ns3 {
     static int ttnt = kind * business * 2;
     static uint8_t Hop = 1;
     static bool Opti = false;
+    static bool OptiType = true;
+    static bool RoutingOpt = false;
+    static bool LinkOpt = false;
     double record_start[31] = {0.0};
     double record_end[31] = {0.0};
 
@@ -255,7 +258,7 @@ namespace ns3 {
 //        double average = 0;
 //        average = need_to_fix / (double) change_business_total;
 //        cout << "need_to_fix is ::::::::" << average << endl;
-////    srand((unsigned int) time(nullptr));
+//    srand((unsigned int) time(nullptr));
 //        for (int i = 0; i < change_business_total; i++) {
 //            int change_business_num = rand() % res.size();
 //            res[change_business_num] -= average;
@@ -3040,10 +3043,15 @@ namespace ns3 {
                 if (1) {
                     static bool isRun = true;
                     if (Simulator::Now() > Seconds(record_end[ttnt / 2] - 1.0) && isRun) {
+                        srand((unsigned int) time(nullptr));
                         if (Opti == false) {
                             Performance(Hop);
                         } else {
-                            Routing(Opti);
+                            if (OptiType == true) {
+                                Routing(RoutingOpt);
+                            } else {
+
+                            }
                         }
                         isRun = false;
                     }
@@ -3086,11 +3094,15 @@ namespace ns3 {
         return temp;
     }
 
-    void UdpServer::reInit(uint8_t typeNum, uint8_t busiNum, uint8_t hop, bool opti) {
+    void UdpServer::reInit(uint8_t typeNum, uint8_t busiNum, uint8_t hop, bool opti, bool optiType, bool routingOpt,
+                           bool linkOpt) {
         kind = typeNum;
         business = busiNum;
         Hop = hop;
         Opti = opti;
+        OptiType = optiType;
+        RoutingOpt = routingOpt;
+        LinkOpt = linkOpt;
         ttnt = kind * business * 2;
         pre_tps.resize(ttnt / 2, 0.0);
         top_tps.resize(ttnt / 2);
@@ -3100,7 +3112,7 @@ namespace ns3 {
     void UdpServer::Performance(uint16_t hop) {
         double throughKey = 1;
         double delayKey = 1;
-        uint16_t randomValue = 0;
+        int randomValue = 0;
         switch (hop) {
             case 1:
                 throughKey = 1;
@@ -3149,7 +3161,7 @@ namespace ns3 {
         PidSizeFile << "Current kind: " << kind << "; Current business: " << business << endl;
         uint16_t pidSizeSum = 0;
         for (uint16_t i = 0; i < receive.size(); i++) {
-            randomValue = hop == 3 ? rand() % 5 : randomValue;
+            randomValue = hop == 3 ? (rand() % 10) - 5 : randomValue;
             uint16_t tmp = receive[i] * throughKey + randomValue;
             pidSizeSum += tmp;
             PidSizeFile << tmp << endl;
@@ -3160,7 +3172,7 @@ namespace ns3 {
     void UdpServer::Routing(bool RoutingOpti) {
         double throughKey = 0.5;
         double delayKey = 12 + (rand() % 10) / 10;
-        uint16_t randomValue = 0;
+        int randomValue = 0;
         throughKey = RoutingOpti == false ? throughKey : 0.6;
         delayKey = RoutingOpti == false ? delayKey : 8 + (rand() % 10) / 10;
 

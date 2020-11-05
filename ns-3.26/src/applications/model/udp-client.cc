@@ -338,8 +338,7 @@ namespace ns3 {
             ++m_sent;
             NS_LOG_INFO("TraceDelay TX " << m_size << " bytes to "
                                          << peerAddressStringStream.str() << " Uid: "
-                                         << p->GetUid() << " Time: "
-                                         << (Simulator::Now()).GetSeconds());
+                                         << p->GetUid());
 
         } else {
             NS_LOG_INFO("Error while sending " << m_size << " bytes to "
