@@ -32,9 +32,14 @@ void TxCallback(Ptr <CounterCalculator<uint32_t>> datac, std::string path, Ptr<c
 
 int main(int argc, char *argv[]) {
 
-    uint8_t kind = 1;
+    uint32_t kind = 1;
     uint32_t business = 1;  // hack: Add 1 per test. Range: [1, 15]
     uint32_t ttnt;
+    uint8_t hop = 3;
+    bool opti = true;
+    bool optiType = false;
+    bool routingOpt = false;
+    bool linkOpt = false;
     bool verbose = true;
     uint32_t dir = 0;  // Output file path suffix
 
@@ -42,6 +47,8 @@ int main(int argc, char *argv[]) {
 
     CommandLine cmd;
     cmd.AddValue("ttnt", "Number of \"extra\" CSMA nodes/devices", ttnt);
+    cmd.AddValue("kind", "the kind of business", kind);
+    cmd.AddValue("linkOpt", "if to start link error rate reconstruction", linkOpt);
     cmd.AddValue("verbose", "Tell echo applications to log if true", verbose);
     cmd.AddValue("dir", "Specify the output file path suffix", dir);
     cmd.AddValue("business", "Number of traffic flows of a single type", business);
@@ -49,7 +56,7 @@ int main(int argc, char *argv[]) {
 
     ttnt = kind * business * 2;
     ns3::UdpServer::dirSuffix = dir;
-//    UdpServer::reInit(kind, business);
+    UdpServer::reInit(kind, business, hop, opti, optiType, routingOpt, linkOpt);
     dsr::DsrOptions::partitionWindow("Normal");
 
 //    ofstream paraFile("paraFile.txt");
@@ -78,11 +85,12 @@ int main(int argc, char *argv[]) {
      * 创建物理层：Yans
      */
     ttnt::WifiHelper wifiTTNT;
+    wifiTTNT.SetStandard(ttnt::WIFI_PHY_STANDARD_80211b);  // 设置wifi标准
+
     ttnt::YansWifiChannelHelper channelTTNT = ttnt::YansWifiChannelHelper::Default(); //使用默认的信道模型
     ttnt::YansWifiPhyHelper phyTTNT = ttnt::YansWifiPhyHelper::Default();      //使用默认的PHY模型
-
     phyTTNT.SetChannel(channelTTNT.Create()); //创建通道对象并把他关联到物理层对象管理器
-    wifiTTNT.SetStandard(ttnt::WIFI_PHY_STANDARD_80211b);  // 设置wifi标准
+//    phyTTNT.SetErrorRateModel ("ns3::YansErrorRateModel");
 
 
     /**
@@ -109,8 +117,8 @@ int main(int argc, char *argv[]) {
     mobility.SetPositionAllocator("ns3::GridPositionAllocator",//按照设置好的行列参数把节点等间距放置在一个二维笛卡尔坐标系中
                                   "MinX", DoubleValue(0.0),   // 起始坐标 (0, 0)
                                   "MinY", DoubleValue(0.0),
-                                  "DeltaX", DoubleValue(2), // X轴节点间距：0.01m
-                                  "DeltaY", DoubleValue(2), // y轴节点间距：0.01m
+                                  "DeltaX", DoubleValue(140), // X轴节点间距：0.01m
+                                  "DeltaY", DoubleValue(140), // y轴节点间距：0.01m
                                   "GridWidth", UintegerValue(6),  // 每行最大节点数
                                   "LayoutType", StringValue("RowFirst"));  // 行优先放
     mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");

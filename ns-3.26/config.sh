@@ -11,4 +11,6 @@ routing reconstruction:
 
 
 linkError:
+./waf --run "scratch/LinkErrorRate --kind=3 --business=1 --linkOpt=false"
+
 
