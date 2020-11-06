@@ -489,7 +489,7 @@ namespace ns3 {
             NS_LOG_DEBUG("The number of Ip addresses " << (uint32_t) numberAddress);
 
             if (Kind == "None") {
-                if (numberAddress >= 0) {
+                if (numberAddress >= 3) {
                     NS_LOG_DEBUG("Discard the packet, malformed header since two many ip addresses in route");
                     m_dropTrace(packet); // call the drop trace to show in the tracing
                     return 0;
