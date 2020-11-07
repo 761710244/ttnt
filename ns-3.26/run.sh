@@ -6,4 +6,4 @@ rm *xml
 rm delay*
 rm throu*
 rm pid*
-./waf --run "scratch/LinkErrorRate --kind=3 --business=1 --linkOpt=false"
+./waf --run "scratch/LinkErrorRate --kind=1 --business=3 --linkOpt=true"
