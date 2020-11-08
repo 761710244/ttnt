@@ -1,4 +1,4 @@
 #!/bin/bash
-cat throu*
-cat pidS*
-cat delayFile*
+cat throughputFile.txt
+cat delayFile.txt
+cat pidSizeFile.txt

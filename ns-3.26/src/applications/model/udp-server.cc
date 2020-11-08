@@ -393,20 +393,20 @@ namespace ns3 {
                                  */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec21.begin(), packetSizeVec21.end(),
                                                                     0.0);
-                                double randomValue = rand() % 20000 + 20000;
-                                NS_LOG_INFO("random value is :" << randomValue << endl);
+//                                double randomValue = rand() % 20000 + 20000;
+//                                NS_LOG_INFO("random value is :" << randomValue << endl);
                                 double packetThroughput = /* (sumPacketSize - randomValue) */
                                         sumPacketSize / (Seconds(record_end[1]).GetSeconds() -
                                                          firstRx21.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput21: " << packetThroughput * 1000 << " Kbps\n");
                                 pre_tps[0] = packetThroughput * 1000;
-                                ofstream udpThoughputFile21(dir + "udpThroughput21.txt");
+                                ofstream udpThoughputFile21(dir + "throughput21.txt");
                                 if (udpThoughputFile21.good()) {
-                                    NS_LOG_INFO("udpThroughput is OK!\n" << endl);
+                                    NS_LOG_INFO("throughput is OK!\n" << endl);
                                     udpThoughputFile21 << packetThroughput * 1000 << " Kbps\n";
                                     udpThoughputFile21.close();
                                 } else {
-                                    NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
+                                    NS_LOG_INFO("Cannot create throughput.txt !\n");
                                 }
 
 
@@ -482,20 +482,20 @@ namespace ns3 {
                                  */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec22.begin(), packetSizeVec22.end(),
                                                                     0.0);
-                                double randomValue = random() % 20000 + 20000;
-                                NS_LOG_INFO("random value is :" << randomValue << endl);
+//                                double randomValue = random() % 20000 + 20000;
+//                                NS_LOG_INFO("random value is :" << randomValue << endl);
                                 double packetThroughput = /* (sumPacketSize - randomValue) */
                                         sumPacketSize / (Seconds(record_end[2]).GetSeconds() -
                                                          firstRx22.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
                                 pre_tps[1] = packetThroughput * 1000;
-                                ofstream udpThoughputFile22(dir + "udpThroughput22.txt");
+                                ofstream udpThoughputFile22(dir + "throughput22.txt");
                                 if (udpThoughputFile22.good()) {
-                                    NS_LOG_INFO("udpThroughput22 is OK!\n" << endl);
+                                    NS_LOG_INFO("throughput22 is OK!\n" << endl);
                                     udpThoughputFile22 << packetThroughput * 1000 << " Kbps\n";
                                     udpThoughputFile22.close();
                                 } else {
-                                    NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
+                                    NS_LOG_INFO("Cannot create throughput.txt !\n");
                                 }
 
                                 /**
@@ -570,20 +570,20 @@ namespace ns3 {
                                  */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec23.begin(), packetSizeVec23.end(),
                                                                     0.0);
-                                double randomValue = rand() % 20000 + 20000;
-                                NS_LOG_INFO("random value is :" << randomValue << endl);
+//                                double randomValue = rand() % 20000 + 20000;
+//                                NS_LOG_INFO("random value is :" << randomValue << endl);
                                 double packetThroughput = /*(sumPacketSize - randomValue)*/
                                         sumPacketSize / (Seconds(record_end[3]).GetSeconds() -
                                                          firstRx23.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
                                 pre_tps[2] = packetThroughput * 1000;
-                                ofstream udpThoughputFile23(dir + "udpThroughput23.txt");
+                                ofstream udpThoughputFile23(dir + "throughput23.txt");
                                 if (udpThoughputFile23.good()) {
-                                    NS_LOG_INFO("udpThroughput is OK!\n" << endl);
+                                    NS_LOG_INFO("throughput is OK!\n" << endl);
                                     udpThoughputFile23 << packetThroughput * 1000 << " Kbps\n";
                                     udpThoughputFile23.close();
                                 } else {
-                                    NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
+                                    NS_LOG_INFO("Cannot create throughput.txt !\n");
                                 }
 
                                 /**
@@ -656,20 +656,20 @@ namespace ns3 {
                                  */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec24.begin(), packetSizeVec24.end(),
                                                                     0.0);
-                                double randomValue = rand() % 20000 + 20000;
-                                NS_LOG_INFO("random value is :" << randomValue << endl);
+//                                double randomValue = rand() % 20000 + 20000;
+//                                NS_LOG_INFO("random value is :" << randomValue << endl);
                                 double packetThroughput = /*(sumPacketSize - randomValue)*/
                                         sumPacketSize / (Seconds(record_end[4]).GetSeconds() -
                                                          firstRx24.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
                                 pre_tps[3] = packetThroughput * 1000;
-                                ofstream udpThoughputFile24(dir + "udpThroughput24.txt");
+                                ofstream udpThoughputFile24(dir + "throughput24.txt");
                                 if (udpThoughputFile24.good()) {
-                                    NS_LOG_INFO("udpThroughput is OK!\n" << endl);
+                                    NS_LOG_INFO("throughput is OK!\n" << endl);
                                     udpThoughputFile24 << packetThroughput * 1000 << " Kbps\n";
                                     udpThoughputFile24.close();
                                 } else {
-                                    NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
+                                    NS_LOG_INFO("Cannot create throughput.txt !\n");
                                 }
 
                                 /**
@@ -741,20 +741,20 @@ namespace ns3 {
                                  */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec25.begin(), packetSizeVec25.end(),
                                                                     0.0);
-                                double randomValue = rand() % 20000 + 20000;
-                                NS_LOG_INFO("random value is :" << randomValue << endl);
+//                                double randomValue = rand() % 20000 + 20000;
+//                                NS_LOG_INFO("random value is :" << randomValue << endl);
                                 double packetThroughput = /*(sumPacketSize - randomValue)*/
                                         sumPacketSize / (Seconds(record_end[5]).GetSeconds() -
                                                          firstRx25.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
                                 pre_tps[4] = packetThroughput * 1000;
-                                ofstream udpThoughputFile25(dir + "udpThroughput25.txt");
+                                ofstream udpThoughputFile25(dir + "throughput25.txt");
                                 if (udpThoughputFile25.good()) {
-                                    NS_LOG_INFO("udpThroughput is OK!\n" << endl);
+                                    NS_LOG_INFO("throughput is OK!\n" << endl);
                                     udpThoughputFile25 << packetThroughput * 1000 << " Kbps\n";
                                     udpThoughputFile25.close();
                                 } else {
-                                    NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
+                                    NS_LOG_INFO("Cannot create throughput.txt !\n");
                                 }
 
                                 /**
@@ -828,20 +828,20 @@ namespace ns3 {
                                  */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec26.begin(), packetSizeVec26.end(),
                                                                     0.0);
-                                double randomValue = rand() % 20000 + 20000;
-                                NS_LOG_INFO("random value is :" << randomValue << endl);
+//                                double randomValue = rand() % 20000 + 20000;
+//                                NS_LOG_INFO("random value is :" << randomValue << endl);
                                 double packetThroughput = /*(sumPacketSize - randomValue)*/
                                         sumPacketSize / (Seconds(record_end[6]).GetSeconds() -
                                                          firstRx26.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
                                 pre_tps[5] = packetThroughput * 1000;
-                                ofstream udpThoughputFile26(dir + "udpThroughput26.txt");
+                                ofstream udpThoughputFile26(dir + "throughput26.txt");
                                 if (udpThoughputFile26.good()) {
-                                    NS_LOG_INFO("udpThroughput is OK!\n" << endl);
+                                    NS_LOG_INFO("throughput is OK!\n" << endl);
                                     udpThoughputFile26 << packetThroughput * 1000 << " Kbps\n";
                                     udpThoughputFile26.close();
                                 } else {
-                                    NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
+                                    NS_LOG_INFO("Cannot create throughput.txt !\n");
                                 }
 
                                 /**
@@ -915,20 +915,20 @@ namespace ns3 {
                                  */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec27.begin(), packetSizeVec27.end(),
                                                                     0.0);
-                                double randomValue = rand() % 20000 + 20000;
-                                NS_LOG_INFO("random value is :" << randomValue << endl);
+//                                double randomValue = rand() % 20000 + 20000;
+//                                NS_LOG_INFO("random value is :" << randomValue << endl);
                                 double packetThroughput = /*(sumPacketSize - randomValue)*/
                                         sumPacketSize / (Seconds(record_end[7]).GetSeconds() -
                                                          firstRx27.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
                                 pre_tps[6] = packetThroughput * 1000;
-                                ofstream udpThoughputFile27(dir + "udpThroughput27.txt");
+                                ofstream udpThoughputFile27(dir + "throughput27.txt");
                                 if (udpThoughputFile27.good()) {
-                                    NS_LOG_INFO("udpThroughput is OK!\n" << endl);
+                                    NS_LOG_INFO("throughput is OK!\n" << endl);
                                     udpThoughputFile27 << packetThroughput * 1000 << " Kbps\n";
                                     udpThoughputFile27.close();
                                 } else {
-                                    NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
+                                    NS_LOG_INFO("Cannot create throughput.txt !\n");
                                 }
 
                                 /**
@@ -1002,20 +1002,20 @@ namespace ns3 {
                                  */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec28.begin(), packetSizeVec28.end(),
                                                                     0.0);
-                                double randomValue = rand() % 20000 + 20000;
-                                NS_LOG_INFO("random value is :" << randomValue << endl);
+//                                double randomValue = rand() % 20000 + 20000;
+//                                NS_LOG_INFO("random value is :" << randomValue << endl);
                                 double packetThroughput = /*(sumPacketSize - randomValue)*/
                                         sumPacketSize / (Seconds(record_end[8]).GetSeconds() -
                                                          firstRx28.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
                                 pre_tps[7] = packetThroughput * 1000;
-                                ofstream udpThoughputFile28(dir + "udpThroughput28.txt");
+                                ofstream udpThoughputFile28(dir + "throughput28.txt");
                                 if (udpThoughputFile28.good()) {
-                                    NS_LOG_INFO("udpThroughput is OK!\n" << endl);
+                                    NS_LOG_INFO("throughput is OK!\n" << endl);
                                     udpThoughputFile28 << packetThroughput * 1000 << " Kbps\n";
                                     udpThoughputFile28.close();
                                 } else {
-                                    NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
+                                    NS_LOG_INFO("Cannot create throughput.txt !\n");
                                 }
 
                                 /**
@@ -1089,20 +1089,20 @@ namespace ns3 {
                                  */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec29.begin(), packetSizeVec29.end(),
                                                                     0.0);
-                                double randomValue = rand() % 20000 + 20000;
-                                NS_LOG_INFO("random value is :" << randomValue << endl);
+//                                double randomValue = rand() % 20000 + 20000;
+//                                NS_LOG_INFO("random value is :" << randomValue << endl);
                                 double packetThroughput = /*(sumPacketSize - randomValue)*/
                                         sumPacketSize / (Seconds(record_end[9]).GetSeconds() -
                                                          firstRx29.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
                                 pre_tps[8] = packetThroughput * 1000;
-                                ofstream udpThoughputFile29(dir + "udpThroughput29.txt");
+                                ofstream udpThoughputFile29(dir + "throughput29.txt");
                                 if (udpThoughputFile29.good()) {
-                                    NS_LOG_INFO("udpThroughput is OK!\n" << endl);
+                                    NS_LOG_INFO("throughput is OK!\n" << endl);
                                     udpThoughputFile29 << packetThroughput * 1000 << " Kbps\n";
                                     udpThoughputFile29.close();
                                 } else {
-                                    NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
+                                    NS_LOG_INFO("Cannot create throughput.txt !\n");
                                 }
 
                                 /**
@@ -1176,20 +1176,20 @@ namespace ns3 {
                                  */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec30.begin(), packetSizeVec30.end(),
                                                                     0.0);
-                                double randomValue = rand() % 20000 + 20000;
-                                NS_LOG_INFO("random value is :" << randomValue << endl);
+//                                double randomValue = rand() % 20000 + 20000;
+//                                NS_LOG_INFO("random value is :" << randomValue << endl);
                                 double packetThroughput = /*(sumPacketSize - randomValue)*/
                                         sumPacketSize / (Seconds(record_end[10]).GetSeconds() -
                                                          firstRx30.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
                                 pre_tps[9] = packetThroughput * 1000;
-                                ofstream udpThoughputFile30(dir + "udpThroughput30.txt");
+                                ofstream udpThoughputFile30(dir + "throughput30.txt");
                                 if (udpThoughputFile30.good()) {
-                                    NS_LOG_INFO("udpThroughput is OK!\n" << endl);
+                                    NS_LOG_INFO("throughput is OK!\n" << endl);
                                     udpThoughputFile30 << packetThroughput * 1000 << " Kbps\n";
                                     udpThoughputFile30.close();
                                 } else {
-                                    NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
+                                    NS_LOG_INFO("Cannot create throughput.txt !\n");
                                 }
 
                                 /**
@@ -1263,20 +1263,20 @@ namespace ns3 {
                                  */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec31.begin(), packetSizeVec31.end(),
                                                                     0.0);
-                                double randomValue = rand() % 20000 + 20000;
-                                NS_LOG_INFO("random value is :" << randomValue << endl);
+//                                double randomValue = rand() % 20000 + 20000;
+//                                NS_LOG_INFO("random value is :" << randomValue << endl);
                                 double packetThroughput = /*(sumPacketSize - randomValue)*/
                                         sumPacketSize / (Seconds(record_end[11]).GetSeconds() -
                                                          firstRx31.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
                                 pre_tps[10] = packetThroughput * 1000;
-                                ofstream udpThoughputFile31(dir + "udpThroughput31.txt");
+                                ofstream udpThoughputFile31(dir + "throughput31.txt");
                                 if (udpThoughputFile31.good()) {
-                                    NS_LOG_INFO("udpThroughput is OK!\n" << endl);
+                                    NS_LOG_INFO("throughput is OK!\n" << endl);
                                     udpThoughputFile31 << packetThroughput * 1000 << " Kbps\n";
                                     udpThoughputFile31.close();
                                 } else {
-                                    NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
+                                    NS_LOG_INFO("Cannot create throughput.txt !\n");
                                 }
 
                                 /**
@@ -1351,20 +1351,20 @@ namespace ns3 {
                                  */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec32.begin(), packetSizeVec32.end(),
                                                                     0.0);
-                                double randomValue = rand() % 20000 + 20000;
-                                NS_LOG_INFO("random value is :" << randomValue << endl);
+//                                double randomValue = rand() % 20000 + 20000;
+//                                NS_LOG_INFO("random value is :" << randomValue << endl);
                                 double packetThroughput = /*(sumPacketSize - randomValue)*/
                                         sumPacketSize / (Seconds(record_end[12]).GetSeconds() -
                                                          firstRx32.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
                                 pre_tps[11] = packetThroughput * 1000;
-                                ofstream udpThoughputFile32(dir + "udpThroughput32.txt");
+                                ofstream udpThoughputFile32(dir + "throughput32.txt");
                                 if (udpThoughputFile32.good()) {
-                                    NS_LOG_INFO("udpThroughput is OK!\n" << endl);
+                                    NS_LOG_INFO("throughput is OK!\n" << endl);
                                     udpThoughputFile32 << packetThroughput * 1000 << " Kbps\n";
                                     udpThoughputFile32.close();
                                 } else {
-                                    NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
+                                    NS_LOG_INFO("Cannot create throughput.txt !\n");
                                 }
 
                                 /**
@@ -1436,20 +1436,20 @@ namespace ns3 {
                                  */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec33.begin(), packetSizeVec33.end(),
                                                                     0.0);
-                                double randomValue = rand() % 20000 + 20000;
-                                NS_LOG_INFO("random value is :" << randomValue << endl);
+//                                double randomValue = rand() % 20000 + 20000;
+//                                NS_LOG_INFO("random value is :" << randomValue << endl);
                                 double packetThroughput = /*(sumPacketSize - randomValue)*/
                                         sumPacketSize / (Seconds(record_end[13]).GetSeconds() -
                                                          firstRx33.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
                                 pre_tps[12] = packetThroughput * 1000;
-                                ofstream udpThoughputFile33(dir + "udpThroughput33.txt");
+                                ofstream udpThoughputFile33(dir + "throughput33.txt");
                                 if (udpThoughputFile33.good()) {
-                                    NS_LOG_INFO("udpThroughput is OK!\n" << endl);
+                                    NS_LOG_INFO("throughput is OK!\n" << endl);
                                     udpThoughputFile33 << packetThroughput * 1000 << " Kbps\n";
                                     udpThoughputFile33.close();
                                 } else {
-                                    NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
+                                    NS_LOG_INFO("Cannot create throughput.txt !\n");
                                 }
 
                                 /**
@@ -1525,21 +1525,21 @@ namespace ns3 {
                                  */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec34.begin(), packetSizeVec34.end(),
                                                                     0.0);
-                                double randomValue = rand() % 20000 + 20000;
-                                NS_LOG_INFO("random value is :" << randomValue << endl);
+//                                double randomValue = rand() % 20000 + 20000;
+//                                NS_LOG_INFO("random value is :" << randomValue << endl);
                                 double packetThroughput = /*(sumPacketSize - randomValue)*/
                                         sumPacketSize /
                                         (Seconds(record_end[14]).GetSeconds() -
                                          firstRx34.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
                                 pre_tps[13] = packetThroughput * 1000;
-                                ofstream udpThoughputFile34(dir + "udpThroughput34.txt");
+                                ofstream udpThoughputFile34(dir + "throughput34.txt");
                                 if (udpThoughputFile34.good()) {
-                                    NS_LOG_INFO("udpThroughput is OK!\n" << endl);
+                                    NS_LOG_INFO("throughput is OK!\n" << endl);
                                     udpThoughputFile34 << packetThroughput * 1000 << " Kbps\n";
                                     udpThoughputFile34.close();
                                 } else {
-                                    NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
+                                    NS_LOG_INFO("Cannot create throughput.txt !\n");
                                 }
 
                                 /**
@@ -1613,21 +1613,21 @@ namespace ns3 {
                                  */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec35.begin(), packetSizeVec35.end(),
                                                                     0.0);
-                                double randomValue = rand() % 20000 + 20000;
-                                NS_LOG_INFO("random value is :" << randomValue << endl);
+//                                double randomValue = rand() % 20000 + 20000;
+//                                NS_LOG_INFO("random value is :" << randomValue << endl);
                                 double packetThroughput = /*(sumPacketSize - randomValue)*/
                                         sumPacketSize /
                                         (Seconds(record_end[15]).GetSeconds() -
                                          firstRx35.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
                                 pre_tps[14] = packetThroughput * 1000;
-                                ofstream udpThoughputFile35(dir + "udpThroughput35.txt");
+                                ofstream udpThoughputFile35(dir + "throughput35.txt");
                                 if (udpThoughputFile35.good()) {
-                                    NS_LOG_INFO("udpThroughput is OK!\n" << endl);
+                                    NS_LOG_INFO("throughput is OK!\n" << endl);
                                     udpThoughputFile35 << packetThroughput * 1000 << " Kbps\n";
                                     udpThoughputFile35.close();
                                 } else {
-                                    NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
+                                    NS_LOG_INFO("Cannot create throughput.txt !\n");
                                 }
 
                                 /**
@@ -1701,21 +1701,21 @@ namespace ns3 {
                                  */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec36.begin(), packetSizeVec36.end(),
                                                                     0.0);
-                                double randomValue = rand() % 20000 + 20000;
-                                NS_LOG_INFO("random value is :" << randomValue << endl);
+//                                double randomValue = rand() % 20000 + 20000;
+//                                NS_LOG_INFO("random value is :" << randomValue << endl);
                                 double packetThroughput = /*(sumPacketSize - randomValue)*/
                                         sumPacketSize /
                                         (Seconds(record_end[16]).GetSeconds() -
                                          firstRx36.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
                                 pre_tps[15] = packetThroughput * 1000;
-                                ofstream udpThoughputFile36(dir + "udpThroughput36.txt");
+                                ofstream udpThoughputFile36(dir + "throughput36.txt");
                                 if (udpThoughputFile36.good()) {
-                                    NS_LOG_INFO("udpThroughput is OK!\n" << endl);
+                                    NS_LOG_INFO("throughput is OK!\n" << endl);
                                     udpThoughputFile36 << packetThroughput * 1000 << " Kbps\n";
                                     udpThoughputFile36.close();
                                 } else {
-                                    NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
+                                    NS_LOG_INFO("Cannot create throughput.txt !\n");
                                 }
 
                                 /**
@@ -1789,21 +1789,21 @@ namespace ns3 {
                                  */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec37.begin(), packetSizeVec37.end(),
                                                                     0.0);
-                                double randomValue = rand() % 20000 + 20000;
-                                NS_LOG_INFO("random value is :" << randomValue << endl);
+//                                double randomValue = rand() % 20000 + 20000;
+//                                NS_LOG_INFO("random value is :" << randomValue << endl);
                                 double packetThroughput = /*(sumPacketSize - randomValue)*/
                                         sumPacketSize /
                                         (Seconds(record_end[17]).GetSeconds() -
                                          firstRx37.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
                                 pre_tps[16] = packetThroughput * 1000;
-                                ofstream udpThoughputFile37(dir + "udpThroughput37.txt");
+                                ofstream udpThoughputFile37(dir + "throughput37.txt");
                                 if (udpThoughputFile37.good()) {
-                                    NS_LOG_INFO("udpThroughput is OK!\n" << endl);
+                                    NS_LOG_INFO("throughput is OK!\n" << endl);
                                     udpThoughputFile37 << packetThroughput * 1000 << " Kbps\n";
                                     udpThoughputFile37.close();
                                 } else {
-                                    NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
+                                    NS_LOG_INFO("Cannot create throughput.txt !\n");
                                 }
 
                                 /**
@@ -1877,21 +1877,21 @@ namespace ns3 {
                                 */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec38.begin(), packetSizeVec38.end(),
                                                                     0.0);
-                                double randomValue = rand() % 20000 + 20000;
-                                NS_LOG_INFO("random value is :" << randomValue << endl);
+//                                double randomValue = rand() % 20000 + 20000;
+//                                NS_LOG_INFO("random value is :" << randomValue << endl);
                                 double packetThroughput = /*(sumPacketSize - randomValue)*/
                                         sumPacketSize /
                                         (Seconds(record_end[18]).GetSeconds() -
                                          firstRx38.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
                                 pre_tps[17] = packetThroughput * 1000;
-                                ofstream udpThoughputFile38(dir + "udpThroughput38.txt");
+                                ofstream udpThoughputFile38(dir + "throughput38.txt");
                                 if (udpThoughputFile38.good()) {
-                                    NS_LOG_INFO("udpThroughput is OK!\n" << endl);
+                                    NS_LOG_INFO("throughput is OK!\n" << endl);
                                     udpThoughputFile38 << packetThroughput * 1000 << " Kbps\n";
                                     udpThoughputFile38.close();
                                 } else {
-                                    NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
+                                    NS_LOG_INFO("Cannot create throughput.txt !\n");
                                 }
 
                                 /**
@@ -1967,21 +1967,21 @@ namespace ns3 {
                                  */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec39.begin(), packetSizeVec39.end(),
                                                                     0.0);
-                                double randomValue = rand() % 20000 + 20000;
-                                NS_LOG_INFO("random value is :" << randomValue << endl);
+//                                double randomValue = rand() % 20000 + 20000;
+//                                NS_LOG_INFO("random value is :" << randomValue << endl);
                                 double packetThroughput = /*(sumPacketSize - randomValue)*/
                                         sumPacketSize /
                                         (Seconds(record_end[19]).GetSeconds() -
                                          firstRx39.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
                                 pre_tps[18] = packetThroughput * 1000;
-                                ofstream udpThoughputFile39(dir + "udpThroughput39.txt");
+                                ofstream udpThoughputFile39(dir + "throughput39.txt");
                                 if (udpThoughputFile39.good()) {
-                                    NS_LOG_INFO("udpThroughput is OK!\n" << endl);
+                                    NS_LOG_INFO("throughput is OK!\n" << endl);
                                     udpThoughputFile39 << packetThroughput * 1000 << " Kbps\n";
                                     udpThoughputFile39.close();
                                 } else {
-                                    NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
+                                    NS_LOG_INFO("Cannot create throughput.txt !\n");
                                 }
 
                                 /**
@@ -2055,21 +2055,21 @@ namespace ns3 {
                                  */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec40.begin(), packetSizeVec40.end(),
                                                                     0.0);
-                                double randomValue = rand() % 20000 + 20000;
-                                NS_LOG_INFO("random value is :" << randomValue << endl);
+//                                double randomValue = rand() % 20000 + 20000;
+//                                NS_LOG_INFO("random value is :" << randomValue << endl);
                                 double packetThroughput = /*(sumPacketSize - randomValue)*/
                                         sumPacketSize /
                                         (Seconds(record_end[20]).GetSeconds() -
                                          firstRx40.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
                                 pre_tps[19] = packetThroughput * 1000;
-                                ofstream udpThoughputFile40(dir + "udpThroughput40.txt");
+                                ofstream udpThoughputFile40(dir + "throughput40.txt");
                                 if (udpThoughputFile40.good()) {
-                                    NS_LOG_INFO("udpThroughput is OK!\n" << endl);
+                                    NS_LOG_INFO("throughput is OK!\n" << endl);
                                     udpThoughputFile40 << packetThroughput * 1000 << " Kbps\n";
                                     udpThoughputFile40.close();
                                 } else {
-                                    NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
+                                    NS_LOG_INFO("Cannot create throughput.txt !\n");
                                 }
 
                                 /**
@@ -2143,21 +2143,21 @@ namespace ns3 {
                                  */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec41.begin(), packetSizeVec41.end(),
                                                                     0.0);
-                                double randomValue = rand() % 20000 + 20000;
-                                NS_LOG_INFO("random value is :" << randomValue << endl);
+//                                double randomValue = rand() % 20000 + 20000;
+//                                NS_LOG_INFO("random value is :" << randomValue << endl);
                                 double packetThroughput = /*(sumPacketSize - randomValue)*/
                                         sumPacketSize /
                                         (Seconds(record_end[21]).GetSeconds() -
                                          firstRx41.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
                                 pre_tps[20] = packetThroughput * 1000;
-                                ofstream udpThoughputFile41(dir + "udpThroughput41.txt");
+                                ofstream udpThoughputFile41(dir + "throughput41.txt");
                                 if (udpThoughputFile41.good()) {
-                                    NS_LOG_INFO("udpThroughput is OK!\n" << endl);
+                                    NS_LOG_INFO("throughput is OK!\n" << endl);
                                     udpThoughputFile41 << packetThroughput * 1000 << " Kbps\n";
                                     udpThoughputFile41.close();
                                 } else {
-                                    NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
+                                    NS_LOG_INFO("Cannot create throughput.txt !\n");
                                 }
 
                                 /**
@@ -2231,21 +2231,21 @@ namespace ns3 {
                                  */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec42.begin(), packetSizeVec42.end(),
                                                                     0.0);
-                                double randomValue = rand() % 20000 + 20000;
-                                NS_LOG_INFO("random value is :" << randomValue << endl);
+//                                double randomValue = rand() % 20000 + 20000;
+//                                NS_LOG_INFO("random value is :" << randomValue << endl);
                                 double packetThroughput = /*(sumPacketSize - randomValue)*/
                                         sumPacketSize /
                                         (Seconds(record_end[22]).GetSeconds() -
                                          firstRx42.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
                                 pre_tps[21] = packetThroughput * 1000;
-                                ofstream udpThoughputFile42(dir + "udpThroughput42.txt");
+                                ofstream udpThoughputFile42(dir + "throughput42.txt");
                                 if (udpThoughputFile42.good()) {
-                                    NS_LOG_INFO("udpThroughput is OK!\n" << endl);
+                                    NS_LOG_INFO("throughput is OK!\n" << endl);
                                     udpThoughputFile42 << packetThroughput * 1000 << " Kbps\n";
                                     udpThoughputFile42.close();
                                 } else {
-                                    NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
+                                    NS_LOG_INFO("Cannot create throughput.txt !\n");
                                 }
 
                                 /**
@@ -2319,21 +2319,21 @@ namespace ns3 {
                                  */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec43.begin(), packetSizeVec43.end(),
                                                                     0.0);
-                                double randomValue = rand() % 20000 + 20000;
-                                NS_LOG_INFO("random value is :" << randomValue << endl);
+//                                double randomValue = rand() % 20000 + 20000;
+//                                NS_LOG_INFO("random value is :" << randomValue << endl);
                                 double packetThroughput = /*(sumPacketSize - randomValue)*/
                                         sumPacketSize /
                                         (Seconds(record_end[23]).GetSeconds() -
                                          firstRx43.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
                                 pre_tps[22] = packetThroughput * 1000;
-                                ofstream udpThoughputFile43(dir + "udpThroughput43.txt");
+                                ofstream udpThoughputFile43(dir + "throughput43.txt");
                                 if (udpThoughputFile43.good()) {
-                                    NS_LOG_INFO("udpThroughput is OK!\n" << endl);
+                                    NS_LOG_INFO("throughput is OK!\n" << endl);
                                     udpThoughputFile43 << packetThroughput * 1000 << " Kbps\n";
                                     udpThoughputFile43.close();
                                 } else {
-                                    NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
+                                    NS_LOG_INFO("Cannot create throughput.txt !\n");
                                 }
 
                                 /**
@@ -2407,21 +2407,21 @@ namespace ns3 {
                                  */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec44.begin(), packetSizeVec44.end(),
                                                                     0.0);
-                                double randomValue = rand() % 20000 + 20000;
-                                NS_LOG_INFO("random value is :" << randomValue << endl);
+//                                double randomValue = rand() % 20000 + 20000;
+//                                NS_LOG_INFO("random value is :" << randomValue << endl);
                                 double packetThroughput = /*(sumPacketSize - randomValue)*/
                                         sumPacketSize /
                                         (Seconds(record_end[24]).GetSeconds() -
                                          firstRx44.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
                                 pre_tps[23] = packetThroughput * 1000;
-                                ofstream udpThoughputFile44(dir + "udpThroughput44.txt");
+                                ofstream udpThoughputFile44(dir + "throughput44.txt");
                                 if (udpThoughputFile44.good()) {
-                                    NS_LOG_INFO("udpThroughput is OK!\n" << endl);
+                                    NS_LOG_INFO("throughput is OK!\n" << endl);
                                     udpThoughputFile44 << packetThroughput * 1000 << " Kbps\n";
                                     udpThoughputFile44.close();
                                 } else {
-                                    NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
+                                    NS_LOG_INFO("Cannot create throughput.txt !\n");
                                 }
 
                                 /**
@@ -2495,21 +2495,21 @@ namespace ns3 {
                                  */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec45.begin(), packetSizeVec45.end(),
                                                                     0.0);
-                                double randomValue = rand() % 20000 + 20000;
-                                NS_LOG_INFO("random value is :" << randomValue << endl);
+//                                double randomValue = rand() % 20000 + 20000;
+//                                NS_LOG_INFO("random value is :" << randomValue << endl);
                                 double packetThroughput = /*(sumPacketSize - randomValue)*/
                                         sumPacketSize /
                                         (Seconds(record_end[25]).GetSeconds() -
                                          firstRx45.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
                                 pre_tps[24] = packetThroughput * 1000;
-                                ofstream udpThoughputFile45(dir + "udpThroughput45.txt");
+                                ofstream udpThoughputFile45(dir + "throughput45.txt");
                                 if (udpThoughputFile45.good()) {
-                                    NS_LOG_INFO("udpThroughput is OK!\n" << endl);
+                                    NS_LOG_INFO("throughput is OK!\n" << endl);
                                     udpThoughputFile45 << packetThroughput * 1000 << " Kbps\n";
                                     udpThoughputFile45.close();
                                 } else {
-                                    NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
+                                    NS_LOG_INFO("Cannot create throughput.txt !\n");
                                 }
 
                                 /**
@@ -2583,21 +2583,21 @@ namespace ns3 {
                                  */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec46.begin(), packetSizeVec46.end(),
                                                                     0.0);
-                                double randomValue = rand() % 20000 + 20000;
-                                NS_LOG_INFO("random value is :" << randomValue << endl);
+//                                double randomValue = rand() % 20000 + 20000;
+//                                NS_LOG_INFO("random value is :" << randomValue << endl);
                                 double packetThroughput = /*(sumPacketSize - randomValue)*/
                                         sumPacketSize /
                                         (Seconds(record_end[26]).GetSeconds() -
                                          firstRx46.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
                                 pre_tps[25] = packetThroughput * 1000;
-                                ofstream udpThoughputFile46(dir + "udpThroughput46.txt");
+                                ofstream udpThoughputFile46(dir + "throughput46.txt");
                                 if (udpThoughputFile46.good()) {
-                                    NS_LOG_INFO("udpThroughput is OK!\n" << endl);
+                                    NS_LOG_INFO("throughput is OK!\n" << endl);
                                     udpThoughputFile46 << packetThroughput * 1000 << " Kbps\n";
                                     udpThoughputFile46.close();
                                 } else {
-                                    NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
+                                    NS_LOG_INFO("Cannot create throughput.txt !\n");
                                 }
 
                                 /**
@@ -2671,21 +2671,21 @@ namespace ns3 {
                                  */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec47.begin(), packetSizeVec47.end(),
                                                                     0.0);
-                                double randomValue = rand() % 20000 + 20000;
-                                NS_LOG_INFO("random value is :" << randomValue << endl);
+//                                double randomValue = rand() % 20000 + 20000;
+//                                NS_LOG_INFO("random value is :" << randomValue << endl);
                                 double packetThroughput = /*(sumPacketSize - randomValue)*/
                                         sumPacketSize /
                                         (Seconds(record_end[27]).GetSeconds() -
                                          firstRx47.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
                                 pre_tps[26] = packetThroughput * 1000;
-                                ofstream udpThoughputFile47(dir + "udpThroughput47.txt");
+                                ofstream udpThoughputFile47(dir + "throughput47.txt");
                                 if (udpThoughputFile47.good()) {
-                                    NS_LOG_INFO("udpThroughput is OK!\n" << endl);
+                                    NS_LOG_INFO("throughput is OK!\n" << endl);
                                     udpThoughputFile47 << packetThroughput * 1000 << " Kbps\n";
                                     udpThoughputFile47.close();
                                 } else {
-                                    NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
+                                    NS_LOG_INFO("Cannot create throughput.txt !\n");
                                 }
 
                                 /**
@@ -2759,21 +2759,21 @@ namespace ns3 {
                                  */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec48.begin(), packetSizeVec48.end(),
                                                                     0.0);
-                                double randomValue = rand() % 20000 + 20000;
-                                NS_LOG_INFO("random value is :" << randomValue << endl);
+//                                double randomValue = rand() % 20000 + 20000;
+//                                NS_LOG_INFO("random value is :" << randomValue << endl);
                                 double packetThroughput = /*(sumPacketSize - randomValue)*/
                                         sumPacketSize /
                                         (Seconds(record_end[28]).GetSeconds() -
                                          firstRx48.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
                                 pre_tps[27] = packetThroughput * 1000;
-                                ofstream udpThoughputFile48(dir + "udpThroughput48.txt");
+                                ofstream udpThoughputFile48(dir + "throughput48.txt");
                                 if (udpThoughputFile48.good()) {
-                                    NS_LOG_INFO("udpThroughput is OK!\n" << endl);
+                                    NS_LOG_INFO("throughput is OK!\n" << endl);
                                     udpThoughputFile48 << packetThroughput * 1000 << " Kbps\n";
                                     udpThoughputFile48.close();
                                 } else {
-                                    NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
+                                    NS_LOG_INFO("Cannot create throughput.txt !\n");
                                 }
 
                                 /**
@@ -2847,21 +2847,21 @@ namespace ns3 {
                                  */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec49.begin(), packetSizeVec49.end(),
                                                                     0.0);
-                                double randomValue = rand() % 20000 + 20000;
-                                NS_LOG_INFO("random value is :" << randomValue << endl);
+//                                double randomValue = rand() % 20000 + 20000;
+//                                NS_LOG_INFO("random value is :" << randomValue << endl);
                                 double packetThroughput = /*(sumPacketSize - randomValue)*/
                                         sumPacketSize /
                                         (Seconds(record_end[29]).GetSeconds() -
                                          firstRx49.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
                                 pre_tps[28] = packetThroughput * 1000;
-                                ofstream udpThoughputFile49(dir + "udpThroughput49.txt");
+                                ofstream udpThoughputFile49(dir + "throughput49.txt");
                                 if (udpThoughputFile49.good()) {
-                                    NS_LOG_INFO("udpThroughput is OK!\n" << endl);
+                                    NS_LOG_INFO("throughput is OK!\n" << endl);
                                     udpThoughputFile49 << packetThroughput * 1000 << " Kbps\n";
                                     udpThoughputFile49.close();
                                 } else {
-                                    NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
+                                    NS_LOG_INFO("Cannot create throughput.txt !\n");
                                 }
 
                                 /**
@@ -2935,21 +2935,21 @@ namespace ns3 {
                                  */
                                 uint32_t sumPacketSize = accumulate(packetSizeVec50.begin(), packetSizeVec50.end(),
                                                                     0.0);
-                                double randomValue = rand() % 20000 + 20000;
-                                NS_LOG_INFO("random value is :" << randomValue << endl);
+//                                double randomValue = rand() % 20000 + 20000;
+//                                NS_LOG_INFO("random value is :" << randomValue << endl);
                                 double packetThroughput = /*(sumPacketSize - randomValue)*/
                                         sumPacketSize /
                                         (Seconds(record_end[30]).GetSeconds() -
                                          firstRx50.GetSeconds()) / 1024 / 1024;
                                 NS_LOG_INFO("Throughput: " << packetThroughput * 1000 << " Kbps\n");
                                 pre_tps[29] = packetThroughput * 1000;
-                                ofstream udpThoughputFile50(dir + "udpThroughput50.txt");
+                                ofstream udpThoughputFile50(dir + "throughput50.txt");
                                 if (udpThoughputFile50.good()) {
-                                    NS_LOG_INFO("udpThroughput is OK!\n" << endl);
+                                    NS_LOG_INFO("throughput is OK!\n" << endl);
                                     udpThoughputFile50 << packetThroughput * 1000 << " Kbps\n";
                                     udpThoughputFile50.close();
                                 } else {
-                                    NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
+                                    NS_LOG_INFO("Cannot create throughput.txt !\n");
                                 }
 
                                 /**
@@ -3010,14 +3010,14 @@ namespace ns3 {
                             double packetThroughput =
                                     sumPacketSize / (Seconds(40.0).GetSeconds() - firstRx0.GetSeconds()) / 1024 /
                                     1024;
-                            cout << "Throughput: " << packetThroughput << " Mbps\n";
-                            ofstream udpThoughputFile0(dir + "udpThroughput0.txt");
+                            cout << "Throughput: " << packetThroughput << " Kbps\n";
+                            ofstream udpThoughputFile0(dir + "throughput0.txt");
                             if (udpThoughputFile0.good()) {
-                                NS_LOG_INFO("udpThroughput is OK!\n" << endl);
+                                NS_LOG_INFO("throughput is OK!\n" << endl);
                                 udpThoughputFile0 << packetThroughput << " Mbps\n";
                                 udpThoughputFile0.close();
                             } else {
-                                NS_LOG_INFO("Cannot create udpThroughput.txt !\n");
+                                NS_LOG_INFO("Cannot create throughput.txt !\n");
                             }
                         }
 
