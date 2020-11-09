@@ -5,4 +5,4 @@ rm *xml
 rm delay*
 rm throu*
 rm pid*
-./waf --run "scratch/reRoute_optimize --kind=3 --business=1 --routingOpt=false"
+./waf --run "scratch/NodeNumAB --kind=4 --business=2"

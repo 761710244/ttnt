@@ -372,9 +372,9 @@ namespace ns3 {
                         }
 
                         NS_LOG_INFO("first arrived time = " << firstRx21.GetSeconds() << std::endl);
-                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 87 << std::endl);
 
-                        packetSizeVec21.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
+                        packetSizeVec21.push_back((packetOdcp->GetSize() - 87) * 8);//应用层负载
 
                         //pinganzhang get throughput
                         if (1) {
@@ -425,8 +425,8 @@ namespace ns3 {
                                 /**
                                  * Compute average delay
                                  */
-                                double delayy21 = PidSet21.size() * 0.0763;
-//                                double delayy21 = (double) delay21 / PidSet21.size() / 1000;
+//                                double delayy21 = PidSet21.size() * 0.0763;
+                                double delayy21 = (double) delay21 / PidSet21.size() / 1000;
 
                                 ofstream delayput21(dir + "delayput21.txt");
                                 if (delayput21.good()) {
@@ -463,9 +463,9 @@ namespace ns3 {
                         }
 
                         NS_LOG_INFO("first arrived time = " << firstRx22.GetSeconds() << std::endl);
-                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 87 << std::endl);
 
-                        packetSizeVec22.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
+                        packetSizeVec22.push_back((packetOdcp->GetSize() - 87) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
@@ -551,9 +551,9 @@ namespace ns3 {
                         }
 
                         NS_LOG_INFO("first arrived time = " << firstRx23.GetSeconds() << std::endl);
-                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 87 << std::endl);
 
-                        packetSizeVec23.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
+                        packetSizeVec23.push_back((packetOdcp->GetSize() - 87) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
@@ -637,9 +637,9 @@ namespace ns3 {
                         }
 
                         NS_LOG_INFO("first arrived time = " << firstRx24.GetSeconds() << std::endl);
-                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 87 << std::endl);
 
-                        packetSizeVec24.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
+                        packetSizeVec24.push_back((packetOdcp->GetSize() - 87) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
@@ -722,9 +722,9 @@ namespace ns3 {
                         }
 
                         NS_LOG_INFO("first arrived time = " << firstRx25.GetSeconds() << std::endl);
-                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 87 << std::endl);
 
-                        packetSizeVec25.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
+                        packetSizeVec25.push_back((packetOdcp->GetSize() - 87) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
@@ -809,9 +809,9 @@ namespace ns3 {
                         }
 
                         NS_LOG_INFO("first arrived time = " << firstRx26.GetSeconds() << std::endl);
-                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 87 << std::endl);
 
-                        packetSizeVec26.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
+                        packetSizeVec26.push_back((packetOdcp->GetSize() - 87) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
@@ -896,9 +896,9 @@ namespace ns3 {
                         }
 
                         NS_LOG_INFO("first arrived time = " << firstRx27.GetSeconds() << std::endl);
-                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 87 << std::endl);
 
-                        packetSizeVec27.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
+                        packetSizeVec27.push_back((packetOdcp->GetSize() - 87) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
@@ -983,9 +983,9 @@ namespace ns3 {
                         }
 
                         NS_LOG_INFO("first arrived time = " << firstRx28.GetSeconds() << std::endl);
-                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 87 << std::endl);
 
-                        packetSizeVec28.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
+                        packetSizeVec28.push_back((packetOdcp->GetSize() - 87) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
@@ -1070,9 +1070,9 @@ namespace ns3 {
                         }
 
                         NS_LOG_INFO("first arrived time = " << firstRx29.GetSeconds() << std::endl);
-                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 87 << std::endl);
 
-                        packetSizeVec29.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
+                        packetSizeVec29.push_back((packetOdcp->GetSize() - 87) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
@@ -1157,9 +1157,9 @@ namespace ns3 {
                         }
 
                         NS_LOG_INFO("first arrived time = " << firstRx30.GetSeconds() << std::endl);
-                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 87 << std::endl);
 
-                        packetSizeVec30.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
+                        packetSizeVec30.push_back((packetOdcp->GetSize() - 87) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
@@ -1244,9 +1244,9 @@ namespace ns3 {
                         }
 
                         NS_LOG_INFO("first arrived time = " << firstRx31.GetSeconds() << std::endl);
-                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 87 << std::endl);
 
-                        packetSizeVec31.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
+                        packetSizeVec31.push_back((packetOdcp->GetSize() - 87) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
@@ -1330,9 +1330,9 @@ namespace ns3 {
                         }
 
                         NS_LOG_INFO("first arrived time = " << firstRx32.GetSeconds() << std::endl);
-                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 87 << std::endl);
 
-                        packetSizeVec32.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
+                        packetSizeVec32.push_back((packetOdcp->GetSize() - 87) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
@@ -1417,9 +1417,9 @@ namespace ns3 {
                         }
 
                         NS_LOG_INFO("first arrived time = " << firstRx33.GetSeconds() << std::endl);
-                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 87 << std::endl);
 
-                        packetSizeVec33.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
+                        packetSizeVec33.push_back((packetOdcp->GetSize() - 87) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
@@ -1504,9 +1504,9 @@ namespace ns3 {
                         }
 
                         NS_LOG_INFO("first arrived time = " << firstRx34.GetSeconds() << std::endl);
-                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 87 << std::endl);
 
-                        packetSizeVec34.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
+                        packetSizeVec34.push_back((packetOdcp->GetSize() - 87) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
@@ -1594,9 +1594,9 @@ namespace ns3 {
                         }
 
                         NS_LOG_INFO("first arrived time = " << firstRx35.GetSeconds() << std::endl);
-                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 87 << std::endl);
 
-                        packetSizeVec35.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
+                        packetSizeVec35.push_back((packetOdcp->GetSize() - 87) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
@@ -1682,9 +1682,9 @@ namespace ns3 {
                         }
 
                         NS_LOG_INFO("first arrived time = " << firstRx36.GetSeconds() << std::endl);
-                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 87 << std::endl);
 
-                        packetSizeVec36.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
+                        packetSizeVec36.push_back((packetOdcp->GetSize() - 87) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
@@ -1770,9 +1770,9 @@ namespace ns3 {
                         }
 
                         NS_LOG_INFO("first arrived time = " << firstRx37.GetSeconds() << std::endl);
-                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 87 << std::endl);
 
-                        packetSizeVec37.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
+                        packetSizeVec37.push_back((packetOdcp->GetSize() - 87) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
@@ -1858,9 +1858,9 @@ namespace ns3 {
                         }
 
                         NS_LOG_INFO("first arrived time = " << firstRx38.GetSeconds() << std::endl);
-                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 87 << std::endl);
 
-                        packetSizeVec38.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
+                        packetSizeVec38.push_back((packetOdcp->GetSize() - 87) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
@@ -1948,9 +1948,9 @@ namespace ns3 {
                         }
 
                         NS_LOG_INFO("first arrived time = " << firstRx39.GetSeconds() << std::endl);
-                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 87 << std::endl);
 
-                        packetSizeVec39.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
+                        packetSizeVec39.push_back((packetOdcp->GetSize() - 87) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
@@ -2036,9 +2036,9 @@ namespace ns3 {
                         }
 
                         NS_LOG_INFO("first arrived time = " << firstRx40.GetSeconds() << std::endl);
-                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 87 << std::endl);
 
-                        packetSizeVec40.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
+                        packetSizeVec40.push_back((packetOdcp->GetSize() - 87) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
@@ -2124,9 +2124,9 @@ namespace ns3 {
                         }
 
                         NS_LOG_INFO("first arrived time = " << firstRx41.GetSeconds() << std::endl);
-                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 87 << std::endl);
 
-                        packetSizeVec41.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
+                        packetSizeVec41.push_back((packetOdcp->GetSize() - 87) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
@@ -2212,9 +2212,9 @@ namespace ns3 {
                         }
 
                         NS_LOG_INFO("first arrived time = " << firstRx42.GetSeconds() << std::endl);
-                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 87 << std::endl);
 
-                        packetSizeVec42.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
+                        packetSizeVec42.push_back((packetOdcp->GetSize() - 87) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
@@ -2300,9 +2300,9 @@ namespace ns3 {
                         }
 
                         NS_LOG_INFO("first arrived time = " << firstRx43.GetSeconds() << std::endl);
-                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 87 << std::endl);
 
-                        packetSizeVec43.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
+                        packetSizeVec43.push_back((packetOdcp->GetSize() - 87) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
@@ -2388,9 +2388,9 @@ namespace ns3 {
                         }
 
                         NS_LOG_INFO("first arrived time = " << firstRx44.GetSeconds() << std::endl);
-                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 87 << std::endl);
 
-                        packetSizeVec44.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
+                        packetSizeVec44.push_back((packetOdcp->GetSize() - 87) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
@@ -2476,9 +2476,9 @@ namespace ns3 {
                         }
 
                         NS_LOG_INFO("first arrived time = " << firstRx45.GetSeconds() << std::endl);
-                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 87 << std::endl);
 
-                        packetSizeVec45.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
+                        packetSizeVec45.push_back((packetOdcp->GetSize() - 87) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
@@ -2564,9 +2564,9 @@ namespace ns3 {
                         }
 
                         NS_LOG_INFO("first arrived time = " << firstRx46.GetSeconds() << std::endl);
-                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 87 << std::endl);
 
-                        packetSizeVec46.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
+                        packetSizeVec46.push_back((packetOdcp->GetSize() - 87) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
@@ -2652,9 +2652,9 @@ namespace ns3 {
                         }
 
                         NS_LOG_INFO("first arrived time = " << firstRx47.GetSeconds() << std::endl);
-                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 87 << std::endl);
 
-                        packetSizeVec47.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
+                        packetSizeVec47.push_back((packetOdcp->GetSize() - 87) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
@@ -2740,9 +2740,9 @@ namespace ns3 {
                         }
 
                         NS_LOG_INFO("first arrived time = " << firstRx48.GetSeconds() << std::endl);
-                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 87 << std::endl);
 
-                        packetSizeVec48.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
+                        packetSizeVec48.push_back((packetOdcp->GetSize() - 87) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
@@ -2828,9 +2828,9 @@ namespace ns3 {
                         }
 
                         NS_LOG_INFO("first arrived time = " << firstRx49.GetSeconds() << std::endl);
-                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 87 << std::endl);
 
-                        packetSizeVec49.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
+                        packetSizeVec49.push_back((packetOdcp->GetSize() - 87) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
@@ -2916,9 +2916,9 @@ namespace ns3 {
                         }
 
                         NS_LOG_INFO("first arrived time = " << firstRx50.GetSeconds() << std::endl);
-                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 39 << std::endl);
+                        NS_LOG_INFO("AppPayLoadSize = " << packetOdcp->GetSize() - 87 << std::endl);
 
-                        packetSizeVec50.push_back((packetOdcp->GetSize() - 39) * 8);//应用层负载
+                        packetSizeVec50.push_back((packetOdcp->GetSize() - 87) * 8);//应用层负载
 
                         //pinganzhang get throughput
 
@@ -3000,9 +3000,9 @@ namespace ns3 {
                         std::cout << "first arrived time = "
                                   << firstRx0.GetSeconds() << std::endl;
                         std::cout << "pureAppPayLoadSize = "
-                                  << packetOdcp->GetSize() - 39 << std::endl;
+                                  << packetOdcp->GetSize() - 87 << std::endl;
                         packetSizeVec0.push_back(
-                                (packetOdcp->GetSize() - 39)/*purePacketSize*/* 8); //应用层负载
+                                (packetOdcp->GetSize() - 87)/*purePacketSize*/* 8); //应用层负载
 
                         //pinganzhang get throughput
                         if (Simulator::Now() > Seconds(0.0)) {
