@@ -179,7 +179,7 @@ int main(int argc, char *argv[]) {
         for (uint8_t j = 1; j <= business; j++) {
             packet_size[(i - 1) * business + j] = size;
         }
-        size -= 40;
+        size -= 10;
     }
 
     /**
