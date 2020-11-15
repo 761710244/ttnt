@@ -5,4 +5,4 @@ rm *xml
 rm delay*
 rm throu*
 rm pid*
-./waf --run "scratch/NodeNumAB --kind=4 --business=2"
+./waf --run "scratch/NodeNumAB --kind=4 --business=1"
