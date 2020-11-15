@@ -3202,7 +3202,7 @@ namespace ns3 {
         delayFile << "Current kind: " << kind << "; Current business: " << business << endl;
         double delaySum = 0.000;
         for (uint16_t i = 0; i < standardDelay.size(); i++) {
-            randomValue = RoutingOpti == false ? rand() % 5 : (rand() % 10) - 5;
+            randomValue = RoutingOpti == false ? (rand() % 5) / 10 : ((rand() % 10) - 5) / 10;
             double tmp = standardDelay[i] * delayKey + randomValue;
             delaySum += tmp;
             delayFile << tmp << " ms" << endl;
@@ -3253,7 +3253,7 @@ namespace ns3 {
         delayFile << "Current kind: " << kind << "; Current business: " << business << endl;
         double delaySum = 0.000;
         for (uint16_t i = 0; i < standardDelay.size(); i++) {
-            randomValue = LinkOpti == false ? rand() % 5 : (rand() % 10) - 5;
+            randomValue = LinkOpti == false ? (rand() % 5) / 10 : ((rand() % 10) - 5) / 10;
             double tmp = standardDelay[i] * delayKey + randomValue;
             delaySum += tmp;
             delayFile << tmp << " ms" << endl;
