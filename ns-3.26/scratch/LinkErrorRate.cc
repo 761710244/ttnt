@@ -117,8 +117,8 @@ int main(int argc, char *argv[]) {
     mobility.SetPositionAllocator("ns3::GridPositionAllocator",//按照设置好的行列参数把节点等间距放置在一个二维笛卡尔坐标系中
                                   "MinX", DoubleValue(0.0),   // 起始坐标 (0, 0)
                                   "MinY", DoubleValue(0.0),
-                                  "DeltaX", DoubleValue(75), // X轴节点间距：0.01m
-                                  "DeltaY", DoubleValue(75), // y轴节点间距：0.01m
+                                  "DeltaX", DoubleValue(100), // X轴节点间距：0.01m
+                                  "DeltaY", DoubleValue(100), // y轴节点间距：0.01m
                                   "GridWidth", UintegerValue(6),  // 每行最大节点数
                                   "LayoutType", StringValue("RowFirst"));  // 行优先放
     mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
