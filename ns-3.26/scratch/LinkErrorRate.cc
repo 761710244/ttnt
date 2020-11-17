@@ -33,6 +33,7 @@ void TxCallback(Ptr <CounterCalculator<uint32_t>> datac, std::string path, Ptr<c
 int main(int argc, char *argv[]) {
 
     uint32_t kind = 1;
+    uint32_t ttntTotal = 60;
     uint32_t business = 1;  // hack: Add 1 per test. Range: [1, 15]
     uint32_t ttnt;
     uint8_t hop = 3;
@@ -55,6 +56,7 @@ int main(int argc, char *argv[]) {
     cmd.Parse(argc, argv);
 
     ttnt = kind * business * 2;
+    ttntTotal = ((kind * business - 1) / 3 + 1) * 6;
     ns3::UdpServer::dirSuffix = dir;
     UdpServer::reInit(kind, business, hop, opti, optiType, routingOpt, linkOpt);
     dsr::DsrOptions::partitionWindow("None");
@@ -79,7 +81,7 @@ int main(int argc, char *argv[]) {
      * 创建节点
      */
     NodeContainer TTNTNode;
-    TTNTNode.Create(ttnt);
+    TTNTNode.Create(ttntTotal);
 
     /**
      * 创建物理层：Yans
@@ -117,8 +119,8 @@ int main(int argc, char *argv[]) {
     mobility.SetPositionAllocator("ns3::GridPositionAllocator",//按照设置好的行列参数把节点等间距放置在一个二维笛卡尔坐标系中
                                   "MinX", DoubleValue(0.0),   // 起始坐标 (0, 0)
                                   "MinY", DoubleValue(0.0),
-                                  "DeltaX", DoubleValue(100), // X轴节点间距：0.01m
-                                  "DeltaY", DoubleValue(100), // y轴节点间距：0.01m
+                                  "DeltaX", DoubleValue(75), // X轴节点间距：0.01m
+                                  "DeltaY", DoubleValue(75), // y轴节点间距：0.01m
                                   "GridWidth", UintegerValue(6),  // 每行最大节点数
                                   "LayoutType", StringValue("RowFirst"));  // 行优先放
     mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel");
