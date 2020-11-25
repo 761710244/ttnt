@@ -1,9 +1,9 @@
 single hop:
-./waf --run "scratch/NodeNumAB --kind=3 --business=1"
+./waf --run "scratch/NodeNum --kind=3 --business=1"
 
 
 muti hop:
-./waf --run "scratch/MutiNodeNumAB --kind=3 --business=1"
+./waf --run "scratch/MutiNodeNum --kind=3 --business=1"
 
 
 routing reconstruction:
@@ -13,4 +13,5 @@ routing reconstruction:
 linkError:
 ./waf --run "scratch/LinkErrorRate --kind=3 --business=1 --linkOpt=false"
 
-
+partitionBer:
+./waf --run "scratch/partitionBitErrorRate --kind=4 --business=1 --partitionBitErrorRate=3 --partitionOpti=false"
