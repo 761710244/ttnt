@@ -5,4 +5,4 @@ rm *xml
 rm delay*
 rm throu*
 rm pid*
-./waf --run "scratch/NodeNumAB --kind=4 --business=1"
+./waf --run "scratch/partitionBitErrorRate --kind=4 --business=1 --partitionBitErrorRate=3 --partitionOpti=false"

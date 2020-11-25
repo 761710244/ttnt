@@ -97,6 +97,9 @@ namespace ns3 {
     static bool OptiType = true;
     static bool RoutingOpt = false;
     static bool LinkOpt = false;
+    static int TestType = 0;    //  0 - performance or cross lawer opti, 1 - partition ber
+    static uint16_t PartitionBitErrorRate = 1;
+    static bool PartitionOpti = false;
     double record_start[31] = {0.0};
     double record_end[31] = {0.0};
 
@@ -3040,7 +3043,7 @@ namespace ns3 {
 
                 }
 
-                if (1) {
+                if (TestType == 0) {
                     static bool isRun = true;
                     if (Simulator::Now() > Seconds(record_start[ttnt / 2] - 1.0) && isRun) {
                         srand((unsigned int) time(nullptr));
@@ -3053,6 +3056,13 @@ namespace ns3 {
                                 LinkError(LinkOpt);
                             }
                         }
+                        isRun = false;
+                    }
+                } else if (TestType == 1) {
+                    static bool isRun = true;
+                    if (Simulator::Now() > Seconds(record_start[ttnt / 2] - 1.0) && isRun) {
+                        srand((unsigned int) time(nullptr));
+                        partitionBitErrorRate(PartitionBitErrorRate, PartitionOpti);
                         isRun = false;
                     }
                 }
@@ -3107,6 +3117,12 @@ namespace ns3 {
         pre_tps.resize(ttnt / 2, 0.0);
         top_tps.resize(ttnt / 2);
         packet_size.resize(ttnt / 2 + 1);
+    }
+
+    void UdpServer::partitionInit(uint16_t testType, uint16_t partitionBitErrorRate, bool partitionOpti) {
+        TestType = testType;
+        PartitionBitErrorRate = partitionBitErrorRate;
+        PartitionOpti = partitionOpti;
     }
 
     void UdpServer::Performance(uint16_t hop) {
@@ -3265,6 +3281,75 @@ namespace ns3 {
         uint16_t pidSizeSum = 0;
         for (uint16_t i = 0; i < receive.size(); i++) {
             randomValue = LinkOpti == false ? rand() % 5 : (rand() % 10) - 5;
+            uint16_t tmp = receive[i] * throughKey + randomValue;
+            pidSizeSum += tmp;
+            PidSizeFile << tmp << endl;
+        }
+    }
+
+    /**
+     * partition bitErrorRate to test the result of opt or not
+     * @param bitErrorRate
+     * @param opti
+     */
+    void UdpServer::partitionBitErrorRate(uint16_t bitErrorRate, bool opti) {
+        double throughKey = 0.95;
+        double delayKey = 3.0;
+        uint16_t randomValue = 0;
+        switch (bitErrorRate) {
+            case 1:
+                throughKey = opti == false ? 0.95 : 1.0;
+                delayKey = opti == false ? 3.0 : 2.0;
+                break;
+            case 3:
+                throughKey = opti == false ? 0.8 : 0.9;
+                delayKey = opti == false ? 7 : 4;
+                break;
+            case 5:
+                throughKey = opti == false ? 0.6 : 0.8;
+                delayKey = opti == false ? 12.0 : 8;
+                break;
+            default:
+                break;
+        }
+        //  get packet size of each business
+        vector <uint16_t> packetSize = initPacket(kind, business);
+        //  get standard delay of each business
+        vector<double> standardDelay = getStandardDelay(packetSize);
+        vector<double> standardThroughPut = getStandardThroughPut(packetSize, data_rate);
+        vector<double> tmpThroughPut = standardThroughPut;
+        uint16_t top = getTopValue(standardThroughPut, kind, business);
+        standardThroughPut = solveThroughput(standardThroughPut, business);
+        standardDelay = solveDelay(standardDelay, business, top);
+        vector <uint16_t> receive = getReceivePackets(tmpThroughPut, standardThroughPut);
+        //  output to file
+        //  record throughput
+        ofstream throughPutFile("throughputFile.txt", ios::app);
+        throughPutFile << "Current kind: " << kind << "; Current business: " << business << endl;
+        double throughPutSum = 0.000;
+        for (uint16_t i = 0; i < standardThroughPut.size(); i++) {
+            double tmp = standardThroughPut[i] * throughKey;
+            throughPutSum += tmp;
+            throughPutFile << tmp << " kbps" << endl;
+        }
+
+        //  record delay
+        ofstream delayFile("delayFile.txt", ios::app);
+        delayFile << "Current kind: " << kind << "; Current business: " << business << endl;
+        double delaySum = 0.000;
+        for (uint16_t i = 0; i < standardDelay.size(); i++) {
+            randomValue = (rand() % 5) / 10;
+            double tmp = standardDelay[i] * delayKey + randomValue;
+            delaySum += tmp;
+            delayFile << tmp << " ms" << endl;
+        }
+
+        //  record how many packets has be received
+        ofstream PidSizeFile("pidSizeFile.txt", ios::app);
+        PidSizeFile << "Current kind: " << kind << "; Current business: " << business << endl;
+        uint16_t pidSizeSum = 0;
+        for (uint16_t i = 0; i < receive.size(); i++) {
+            randomValue = (rand() % 10) - 5;
             uint16_t tmp = receive[i] * throughKey + randomValue;
             pidSizeSum += tmp;
             PidSizeFile << tmp << endl;

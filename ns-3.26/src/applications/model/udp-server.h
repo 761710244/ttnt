@@ -179,6 +179,8 @@ namespace ns3 {
         static void reInit(uint8_t typeNum, uint8_t busiNum, uint8_t hop, bool opti, bool optiType, bool routingOpt,
                            bool linkOpt);
 
+        static void partitionInit(uint16_t testType, uint16_t partitionBitErrorRate, bool partitionOpti);
+
     protected:
         virtual void DoDispose(void);
 
@@ -213,6 +215,8 @@ namespace ns3 {
         void Routing(bool RoutingOpti);
 
         void LinkError(bool LinkOpti);
+
+        void partitionBitErrorRate(uint16_t bitErrorRate, bool opti);
 
         vector <uint16_t> initPacket(uint16_t kind, uint16_t business);
 
