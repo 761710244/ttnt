@@ -69,6 +69,7 @@ using namespace std;
 #define NORMAL_WINDOW 12
 #define RE_ROUTING_WINDOW 6
 #define RE_ROUTING_OPTIMA_WINDOW 22
+#define MOBILITY_PREDICT 4
 
 string Kind;
 
@@ -335,7 +336,7 @@ namespace ns3 {
         }
 
         void DsrOptions::partitionWindow(string kind) {
-            if (kind == "Normal" || kind == "ReRouting" || kind == "Optimize") {
+            if (kind == "Normal" || kind == "ReRouting" || kind == "Optimize" || kind == "Mobility") {
                 Kind = kind;
             } else {
                 Kind = "None";
@@ -506,6 +507,11 @@ namespace ns3 {
                 }
             } else if (Kind == "Optimize") {
                 if (numberAddress >= RE_ROUTING_OPTIMA_WINDOW) {
+                    m_dropTrace(packet);
+                    return 0;
+                }
+            } else if (Kind == "Mobility") {
+                if (numberAddress >= MOBILITY_PREDICT) {
                     m_dropTrace(packet);
                     return 0;
                 }

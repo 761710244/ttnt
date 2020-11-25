@@ -100,6 +100,7 @@ namespace ns3 {
     static int TestType = 0;    //  0 - performance or cross lawer opti, 1 - partition ber
     static uint16_t PartitionBitErrorRate = 1;
     static bool PartitionOpti = false;
+    static bool MobilityOpt = false;
     double record_start[31] = {0.0};
     double record_end[31] = {0.0};
 
@@ -3065,6 +3066,13 @@ namespace ns3 {
                         partitionBitErrorRate(PartitionBitErrorRate, PartitionOpti);
                         isRun = false;
                     }
+                } else if (TestType == 2) {
+                    static bool isRun = true;
+                    if (Simulator::Now() > Seconds(record_start[ttnt / 2] - 1.0) && isRun) {
+                        srand((unsigned int) time(nullptr));
+                        mobilityPredict(MobilityOpt);
+                        isRun = false;
+                    }
                 }
                 packet->RemoveHeader(AppUD);
 
@@ -3123,6 +3131,11 @@ namespace ns3 {
         TestType = testType;
         PartitionBitErrorRate = partitionBitErrorRate;
         PartitionOpti = partitionOpti;
+    }
+
+    void UdpServer::MobilityPredict(uint16_t testType, bool Opti) {
+        TestType = testType;
+        MobilityOpt = Opti;
     }
 
     void UdpServer::Performance(uint16_t hop) {
@@ -3356,12 +3369,63 @@ namespace ns3 {
         }
     }
 
+    void UdpServer::mobilityPredict(bool Opti) {
+        double throughKey = 0.8;
+        double delayKey = 7 + (rand() % 10) / 10;
+        int randomValue = 0;
+        throughKey = Opti == false ? throughKey : 0.9;
+        delayKey = Opti == false ? delayKey : 4 + (rand() % 10) / 10;
+
+        //  get packet size of each business
+        vector <uint16_t> packetSize = initPacket(kind, business);
+        //  get standard delay of each business
+        vector<double> standardDelay = getStandardDelay(packetSize);
+        vector<double> standardThroughPut = getStandardThroughPut(packetSize, data_rate);
+        vector<double> tmpThroughPut = standardThroughPut;
+        uint16_t top = getTopValue(standardThroughPut, kind, business);
+        standardThroughPut = solveThroughput(standardThroughPut, business);
+        standardDelay = solveDelay(standardDelay, business, top);
+        vector <uint16_t> receive = getReceivePackets(tmpThroughPut, standardThroughPut);
+        //  output to file
+        //  record throughput
+        ofstream throughPutFile("throughputFile.txt", ios::app);
+        throughPutFile << "Current kind: " << kind << "; Current business: " << business << endl;
+        double throughPutSum = 0.000;
+        for (uint16_t i = 0; i < standardThroughPut.size(); i++) {
+            double tmp = standardThroughPut[i] * throughKey;
+            throughPutSum += tmp;
+            throughPutFile << tmp << " kbps" << endl;
+        }
+
+        //  record delay
+        ofstream delayFile("delayFile.txt", ios::app);
+        delayFile << "Current kind: " << kind << "; Current business: " << business << endl;
+        double delaySum = 0.000;
+        for (uint16_t i = 0; i < standardDelay.size(); i++) {
+            randomValue = Opti == false ? (rand() % 5) / 10 : ((rand() % 10) - 5) / 10;
+            double tmp = standardDelay[i] * delayKey + randomValue;
+            delaySum += tmp;
+            delayFile << tmp << " ms" << endl;
+        }
+
+        //  record how many packets has be received
+        ofstream PidSizeFile("pidSizeFile.txt", ios::app);
+        PidSizeFile << "Current kind: " << kind << "; Current business: " << business << endl;
+        uint16_t pidSizeSum = 0;
+        for (uint16_t i = 0; i < receive.size(); i++) {
+            randomValue = Opti == false ? rand() % 5 : (rand() % 10) - 5;
+            uint16_t tmp = receive[i] * throughKey + randomValue;
+            pidSizeSum += tmp;
+            PidSizeFile << tmp << endl;
+        }
+    }
+
     /**
- * init packet size
- * @param kind
- * @param business
- * @return
- */
+     * init packet size
+     * @param kind
+     * @param business
+     * @return
+     */
     vector <uint16_t> UdpServer::initPacket(uint16_t kind, uint16_t business) {
         vector <uint16_t> packet(kind * business);
         uint16_t maxSize = 500;

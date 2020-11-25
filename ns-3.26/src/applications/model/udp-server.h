@@ -181,6 +181,8 @@ namespace ns3 {
 
         static void partitionInit(uint16_t testType, uint16_t partitionBitErrorRate, bool partitionOpti);
 
+        static void MobilityPredict(uint16_t testType, bool Opti);
+
     protected:
         virtual void DoDispose(void);
 
@@ -217,6 +219,8 @@ namespace ns3 {
         void LinkError(bool LinkOpti);
 
         void partitionBitErrorRate(uint16_t bitErrorRate, bool opti);
+
+        void mobilityPredict(bool Opti);
 
         vector <uint16_t> initPacket(uint16_t kind, uint16_t business);
 

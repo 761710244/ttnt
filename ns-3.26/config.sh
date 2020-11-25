@@ -15,3 +15,6 @@ linkError:
 
 partitionBer:
 ./waf --run "scratch/partitionBitErrorRate --kind=4 --business=1 --partitionBitErrorRate=3 --partitionOpti=false"
+
+mobilityPredict:
+./waf --run "scratch/MobilityPredict --kind=4 --business=1 --mobilityOpt=true"
