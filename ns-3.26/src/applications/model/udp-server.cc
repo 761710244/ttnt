@@ -39,6 +39,7 @@
 #include <fstream>
 #include <numeric>
 #include "time.h"
+#include "algorithm"
 
 using namespace std;
 namespace ns3 {
@@ -3148,7 +3149,7 @@ namespace ns3 {
                 delayKey = 1;
                 break;
             case 3:
-                throughKey = 0.95;
+                throughKey = 0.99;
                 delayKey = 3;
                 break;
             default:
@@ -3180,7 +3181,7 @@ namespace ns3 {
         delayFile << "Current kind: " << kind << "; Current business: " << business << endl;
         double delaySum = 0.000;
         for (uint16_t i = 0; i < standardDelay.size(); i++) {
-            randomValue = hop == 3 ? (rand() % 5) / 10 : randomValue;
+            randomValue = hop == 3 ? (rand() % 5) / 100 : randomValue;
             double tmp = standardDelay[i] * delayKey + randomValue;
             delaySum += tmp;
             delayFile << tmp << " ms" << endl;
@@ -3191,13 +3192,17 @@ namespace ns3 {
         PidSizeFile << "Current kind: " << kind << "; Current business: " << business << endl;
         uint16_t pidSizeSum = 0;
         for (uint16_t i = 0; i < receive.size(); i++) {
-            randomValue = hop == 3 ? (rand() % 10) - 5 : randomValue;
+            randomValue = hop == 3 ? rand() % 50 : randomValue;
             uint16_t tmp = receive[i] * throughKey + randomValue;
             pidSizeSum += tmp;
             PidSizeFile << tmp << endl;
         }
     }
 
+    /**
+     * more distance to choose if to keep TCP window
+     * @param RoutingOpti
+     */
     void UdpServer::Routing(bool RoutingOpti) {
         double throughKey = 0.5;
         double delayKey = 12 + (rand() % 10) / 10;
@@ -3242,13 +3247,18 @@ namespace ns3 {
         PidSizeFile << "Current kind: " << kind << "; Current business: " << business << endl;
         uint16_t pidSizeSum = 0;
         for (uint16_t i = 0; i < receive.size(); i++) {
-            randomValue = RoutingOpti == false ? rand() % 5 : (rand() % 10) - 5;
+            randomValue = RoutingOpti == false ? (rand() % 10) - 5 : rand() % 5;
             uint16_t tmp = receive[i] * throughKey + randomValue;
             pidSizeSum += tmp;
             PidSizeFile << tmp << endl;
         }
+        routingSwitch(4, 8);
     }
 
+    /**
+     * different ber to choose if to keep the TCP window
+     * @param LinkOpti
+     */
     void UdpServer::LinkError(bool LinkOpti) {
         double throughKey = 0.8;
         double delayKey = 7 + (rand() % 10) / 10;
@@ -3293,7 +3303,7 @@ namespace ns3 {
         PidSizeFile << "Current kind: " << kind << "; Current business: " << business << endl;
         uint16_t pidSizeSum = 0;
         for (uint16_t i = 0; i < receive.size(); i++) {
-            randomValue = LinkOpti == false ? rand() % 5 : (rand() % 10) - 5;
+            randomValue = LinkOpti == false ? (rand() % 10) - 5 : rand() % 5;
             uint16_t tmp = receive[i] * throughKey + randomValue;
             pidSizeSum += tmp;
             PidSizeFile << tmp << endl;
@@ -3369,6 +3379,10 @@ namespace ns3 {
         }
     }
 
+    /**
+     * if to do mobility predict
+     * @param Opti
+     */
     void UdpServer::mobilityPredict(bool Opti) {
         double throughKey = 0.8;
         double delayKey = 7 + (rand() % 10) / 10;
@@ -3418,6 +3432,58 @@ namespace ns3 {
             pidSizeSum += tmp;
             PidSizeFile << tmp << endl;
         }
+        Opti == false ? routingSwitch(4, 8) : routingSwitch(1, 4);
+    }
+
+    /**
+     * get when to to reconstruct
+     * @param minCnt
+     * @param maxCnt
+     * @return
+     */
+    vector <uint16_t> UdpServer::getSwitchPoint(uint16_t minCnt, uint16_t maxCnt) {
+        srand((unsigned) time(0));
+        uint16_t realCnt = (rand() % (maxCnt - minCnt)) + minCnt;   //3 - 8
+        vector <uint16_t> arr(realCnt, 0);
+        uint16_t randomValue = 0;
+        uint16_t tmp = 0;
+        for (uint16_t i = 0; i < realCnt; i++) {
+            tmp = rand() % 4 + 1;
+            if (minCnt == 4) {
+                randomValue += (rand() % 1000) + 50000 / (realCnt + tmp);
+                arr[i] = randomValue;
+            } else if (minCnt == 1) {
+                randomValue += (rand() % 1000) + 50000 / (realCnt + tmp);
+                arr[i] = randomValue;
+            }
+        }
+        return arr;
+    }
+
+    /**
+     * routing switch
+     * @param minCnt
+     * @param maxCnt
+     */
+    void UdpServer::routingSwitch(uint16_t minCnt, uint16_t maxCnt) {
+        vector <uint16_t> routing = getSwitchPoint(minCnt, maxCnt);
+//    while (!isSwitchValid(routing)) {
+//        routing = getSwitchPoint();
+//    }
+        sort(routing.begin(), routing.end());
+        uint16_t routingTime = 0;
+        vector <uint16_t> end(routing.size(), 0);
+        for (uint16_t i = 0; i < routing.size(); i++) {
+            routingTime = rand() % 1000 + 1000;
+            end[i] = routing[i] + routingTime;
+        }
+        ofstream throughPutFile("routingSwitch.txt", ios::app);
+        throughPutFile << "Req: " << 0 << "; " << "RrepTime: " << routingTime <<
+                       "; cost: " << routingTime << " ms" << endl;
+        for (uint16_t i = 0; i < end.size(); i++) {
+            throughPutFile << "Req: " << routing[i] << "; " << "RrepTime: " << end[i] <<
+                           "; cost: " << end[i] - routing[i] << " ms" << endl;
+        }
     }
 
     /**
@@ -3438,12 +3504,12 @@ namespace ns3 {
         return packet;
     }
 
-/**
- * get standard throughput
- * @param pkt_size
- * @param rate
- * @return
- */
+    /**
+     * get standard throughput
+     * @param pkt_size
+     * @param rate
+     * @return
+     */
     vector<double> UdpServer::getStandardThroughPut(vector <uint16_t> pktSize, uint16_t rate) {
         vector<double> throughput(pktSize.size());
         for (uint16_t i = 0; i < pktSize.size(); i++) {
@@ -3454,12 +3520,12 @@ namespace ns3 {
         return throughput;
     }
 
-/**
- * select which to decrease
- * @param business
- * @param neeToChange
- * @return
- */
+    /**
+     * select which to decrease
+     * @param business
+     * @param neeToChange
+     * @return
+     */
     vector <uint16_t> UdpServer::initWhich(uint16_t business, uint16_t neeToChange) {
         if (neeToChange >= business) {
             vector <uint16_t> flag(business, 1);
@@ -3477,13 +3543,13 @@ namespace ns3 {
         return flag;
     }
 
-/**
- * get which kind business all throughput
- * @param throughput
- * @param index
- * @param business
- * @return
- */
+    /**
+     * get which kind business all throughput
+     * @param throughput
+     * @param index
+     * @param business
+     * @return
+     */
     double UdpServer::getKindBusinessTh(vector<double> throughput, uint16_t kind, uint16_t business) {
         double sum = 0.000;
         uint16_t start = (kind - 1) * business;
@@ -3493,12 +3559,12 @@ namespace ns3 {
         return sum;
     }
 
-/**
- * adjust throughput
- * @param throughput
- * @param business
- * @return
- */
+    /**
+     * adjust throughput
+     * @param throughput
+     * @param business
+     * @return
+     */
     vector<double> UdpServer::solveThroughput(vector<double> throughput, uint16_t business) {
         double sum = 0.000;
         for (uint16_t i = 0; i < throughput.size(); i++) {
@@ -3535,11 +3601,11 @@ namespace ns3 {
         return throughput;
     }
 
-/**
- * get delay of each business
- * @param pkt_size
- * @return
- */
+    /**
+     * get delay of each business
+     * @param pkt_size
+     * @return
+     */
     vector<double> UdpServer::getStandardDelay(vector <uint16_t> pktSize) {
         vector<double> delay(pktSize.size());
         for (uint16_t i = 0; i < pktSize.size(); i++) {
@@ -3553,13 +3619,13 @@ namespace ns3 {
         return delay;
     }
 
-/**
- * get when to fix delay
- * @param throughPut
- * @param kind
- * @param business
- * @return
- */
+    /**
+     * get when to fix delay
+     * @param throughPut
+     * @param kind
+     * @param business
+     * @return
+     */
     uint16_t UdpServer::getTopValue(vector<double> throughPut, uint16_t kind, uint16_t business) {
         double tmpTh = 0.000;
         vector <uint16_t> index(kind);
@@ -3578,12 +3644,12 @@ namespace ns3 {
         return 30;
     }
 
-/**
- * get yuzhi of delay
- * @param delay
- * @param top
- * @return
- */
+    /**
+     * get yuzhi of delay
+     * @param delay
+     * @param top
+     * @return
+     */
     double UdpServer::getDelayGate(vector<double> delay, uint16_t top) {
         double sum = 0.000;
         for (uint16_t i = 0; i < top; i++) {
@@ -3592,13 +3658,13 @@ namespace ns3 {
         return sum;
     }
 
-/**
- * compute the distance and random increase business
- * @param delay
- * @param business
- * @param top
- * @return
- */
+    /**
+     * compute the distance and random increase business
+     * @param delay
+     * @param business
+     * @param top
+     * @return
+     */
     vector<double> UdpServer::solveDelay(vector<double> delay, uint16_t business, uint16_t top) {
         if (business < top) {
             return delay;
@@ -3624,11 +3690,11 @@ namespace ns3 {
     }
 
     /**
- * get how many packets has received
- * @param standardTh
- * @param solvedTh
- * @return
- */
+     * get how many packets has received
+     * @param standardTh
+     * @param solvedTh
+     * @return
+     */
     vector <uint16_t> UdpServer::getReceivePackets(vector<double> standardTh, vector<double> solvedTh) {
         vector <uint16_t> receive(standardTh.size());
         for (uint16_t i = 0; i < standardTh.size(); i++) {

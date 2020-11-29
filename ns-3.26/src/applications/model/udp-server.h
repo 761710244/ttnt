@@ -222,6 +222,10 @@ namespace ns3 {
 
         void mobilityPredict(bool Opti);
 
+        vector<uint16_t> getSwitchPoint(uint16_t minCnt, uint16_t maxCnt);
+
+        void routingSwitch(uint16_t minCnt, uint16_t maxCnt);
+
         vector <uint16_t> initPacket(uint16_t kind, uint16_t business);
 
         vector<double> getStandardThroughPut(vector <uint16_t> pktSize, uint16_t rate);
