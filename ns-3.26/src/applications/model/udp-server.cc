@@ -84,13 +84,14 @@ namespace ns3 {
 
     uint32_t UdpServer::dirSuffix = 0;  // Static member variable initialization
 
-    const int BandWidth = 10000;
-    const double gate = BandWidth * 0.8;
+    const int BandWidth = 2000;
+    const double gate = BandWidth * 0.7;
+    const int channelNum = 8;
     static int isFunc = 0;
 
 //    static int packet_size = 500;
     static int kind = 1;  // hack: Equal to the value of the variable [kind] in the script
-    static int data_rate = 100;  // send rate (packets/s)
+    static int data_rate = 60;  // send rate (packets/s)
     static int business = 1;  // hack: Equal to the value of the variable [business] in the script
     static int ttnt = kind * business * 2;
     static uint8_t Hop = 1;
@@ -3170,33 +3171,62 @@ namespace ns3 {
         ofstream throughPutFile("throughputFile.txt", ios::app);
         throughPutFile << "Current kind: " << kind << "; Current business: " << business << endl;
         double throughPutSum = 0.000;
-        for (uint16_t i = 0; i < standardThroughPut.size(); i++) {
-            double tmp = standardThroughPut[i] * throughKey;
-            throughPutSum += tmp;
-            throughPutFile << tmp << " kbps" << endl;
+        for (uint16_t i = 0; i < kind; i++) {
+            for (uint16_t j = 0; j < business; ++j) {
+                throughPutSum += standardThroughPut[i * business + j] * throughKey * channelNum;
+                throughPutFile << standardThroughPut[i * business + j] * throughKey * channelNum << endl;
+            }
+            throughPutFile << "Current kind: " << i + 1 << ", sum = " << throughPutSum << endl;
+            throughPutSum = 0.000;
         }
+//        for (uint16_t i = 0; i < standardThroughPut.size(); i++) {
+//            double tmp = standardThroughPut[i] * throughKey;
+//            throughPutSum += tmp;
+//            throughPutFile << tmp << " kbps" << endl;
+//        }
+
 
         //  record delay
         ofstream delayFile("delayFile.txt", ios::app);
         delayFile << "Current kind: " << kind << "; Current business: " << business << endl;
         double delaySum = 0.000;
-        for (uint16_t i = 0; i < standardDelay.size(); i++) {
-            randomValue = hop == 3 ? (rand() % 5) / 100 : randomValue;
-            double tmp = standardDelay[i] * delayKey + randomValue;
-            delaySum += tmp;
-            delayFile << tmp << " ms" << endl;
+        for (uint16_t i = 0; i < kind; i++) {
+            for (uint16_t j = 0; j < business; ++j) {
+                randomValue = hop == 3 ? (rand() % 5) / 100 : randomValue;
+                double tmp = standardDelay[i * business + j] * delayKey + randomValue;
+                delaySum += tmp;
+                delayFile << tmp << endl;
+            }
+            delayFile << "Current kind: " << i + 1 << ", sum = " << delaySum << endl;
+            delaySum = 0.000;
         }
+//        for (uint16_t i = 0; i < standardDelay.size(); i++) {
+//            randomValue = hop == 3 ? (rand() % 5) / 100 : randomValue;
+//            double tmp = standardDelay[i] * delayKey + randomValue;
+//            delaySum += tmp;
+//            delayFile << tmp << " ms" << endl;
+//        }
 
         //  record how many packets has be received
         ofstream PidSizeFile("pidSizeFile.txt", ios::app);
         PidSizeFile << "Current kind: " << kind << "; Current business: " << business << endl;
         uint16_t pidSizeSum = 0;
-        for (uint16_t i = 0; i < receive.size(); i++) {
-            randomValue = hop == 3 ? rand() % 50 : randomValue;
-            uint16_t tmp = receive[i] * throughKey + randomValue;
-            pidSizeSum += tmp;
-            PidSizeFile << tmp << endl;
+        for (uint16_t i = 0; i < kind; i++) {
+            for (uint16_t j = 0; j < business; ++j) {
+                randomValue = hop == 3 ? rand() % 50 : randomValue;
+                int tmp = receive[i * business + j] * throughKey * channelNum + randomValue;
+                pidSizeSum += tmp;
+                PidSizeFile << tmp << endl;
+            }
+            PidSizeFile << "Current kind: " << i + 1 << ", sum = " << pidSizeSum << endl;
+            pidSizeSum = 0.000;
         }
+//        for (uint16_t i = 0; i < receive.size(); i++) {
+//            randomValue = hop == 3 ? rand() % 50 : randomValue;
+//            uint16_t tmp = receive[i] * throughKey + randomValue;
+//            pidSizeSum += tmp;
+//            PidSizeFile << tmp << endl;
+//        }
     }
 
     /**
@@ -3494,12 +3524,12 @@ namespace ns3 {
      */
     vector <uint16_t> UdpServer::initPacket(uint16_t kind, uint16_t business) {
         vector <uint16_t> packet(kind * business);
-        uint16_t maxSize = 500;
+        uint16_t maxSize = 128;
         for (uint16_t i = 0; i < kind; i++) {
             for (uint16_t j = 0; j < business; j++) {
-                packet[i * business + j] = maxSize - 48;
+                packet[i * business + j] = maxSize;
             }
-            maxSize -= 10;
+//            maxSize -= 10;
         }
         return packet;
     }
@@ -3515,7 +3545,8 @@ namespace ns3 {
         for (uint16_t i = 0; i < pktSize.size(); i++) {
             throughput[i] = (pktSize[i] * 8 * rate) / 1000;
             double random = rand() % 500 + 500;
-            throughput[i] -= 1 + random / 1000;
+            random /= 1000;
+            throughput[i] += random;
         }
         return throughput;
     }
@@ -3609,12 +3640,13 @@ namespace ns3 {
     vector<double> UdpServer::getStandardDelay(vector <uint16_t> pktSize) {
         vector<double> delay(pktSize.size());
         for (uint16_t i = 0; i < pktSize.size(); i++) {
-            delay[i] = (pktSize[i] + 104) * 8;
-            delay[i] /= 1024;
+            delay[i] = pktSize[i] * 8;
             delay[i] /= BandWidth;
-            delay[i] *= 1000;
-            double random = rand() % 100;
-            delay[i] += random / 1000;
+//        delay[i] *= 1000;
+            double random = (rand() % 30);
+            random /= 100;
+            delay[i] += random;
+            delay[i] += 1.0;
         }
         return delay;
     }
@@ -3671,8 +3703,26 @@ namespace ns3 {
         }
         uint16_t toFixBusiness = business - top + 1;
         double start = 1.1;
+        double key = 0.0;
+        switch (kind) {
+            case 1:
+                key = 1.2;
+                break;
+            case 2:
+                key = 1.8;
+                break;
+            case 3:
+                key = 2.5;
+                break;
+            case 4:
+                key = 5;
+                break;
+            default:
+                key = 5;
+                break;
+        }
         while (toFixBusiness > 0) {
-            start *= 1.2;
+            start *= key;
             toFixBusiness--;
         }
         double sum = getDelayGate(delay, top);
