@@ -5,5 +5,5 @@ rm *xml
 rm delay*
 rm throu*
 rm pid*
-rm routingSwitch.txt
-./waf --run "scratch/NodeNum --kind=3 --business=1"
+rm routingSwitchFile.txt
+./waf --run "scratch/LinkErrorRate --kind=4 --business=1 --linkOpt=true"
