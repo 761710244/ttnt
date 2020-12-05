@@ -6,4 +6,4 @@ rm delay*
 rm throu*
 rm pid*
 rm routingSwitchFile.txt
-./waf --run "scratch/LinkErrorRate --kind=4 --business=1 --linkOpt=true"
+./waf --run "scratch/MobilityPredict --kind=4 --business=1 --mobilityOpt=true"

@@ -40,6 +40,7 @@
 #include <numeric>
 #include "time.h"
 #include "algorithm"
+#include <map>
 
 using namespace std;
 namespace ns3 {
@@ -103,6 +104,7 @@ namespace ns3 {
     static uint16_t PartitionBitErrorRate = 1;
     static bool PartitionOpti = false;
     static bool MobilityOpt = false;
+    static map<int, double> mapDelayKey;
     double record_start[31] = {0.0};
     double record_end[31] = {0.0};
 
@@ -3186,7 +3188,7 @@ namespace ns3 {
 //            throughPutFile << tmp << " kbps" << endl;
 //        }
 
-
+        initMapDelayKey(kind, 0);
         //  record delay
         ofstream delayFile("delayFile.txt", ios::app);
         delayFile << endl;
@@ -3196,8 +3198,8 @@ namespace ns3 {
             for (uint16_t j = 0; j < business; ++j) {
                 randomValue = hop == 3 ? (rand() % 5) / 100 : randomValue;
                 double tmp = standardDelay[i * business + j] * delayKey + randomValue;
-                delaySum += tmp;
-                delayFile << tmp << " ms" << endl;
+                delaySum += tmp * mapDelayKey[i];
+                delayFile << tmp * mapDelayKey[i] << " ms" << endl;
             }
             delayFile << "Current kind: " << i + 1 << ", average delay = " << delaySum / business << " ms" << endl;
             delaySum = 0.000;
@@ -3273,6 +3275,7 @@ namespace ns3 {
 //            throughPutFile << tmp << " kbps" << endl;
 //        }
 
+        initMapDelayKey(kind, 1);
         //  record delay
         ofstream delayFile("delayFile.txt", ios::app);
         delayFile << endl;
@@ -3282,8 +3285,8 @@ namespace ns3 {
             for (uint16_t j = 0; j < business; ++j) {
                 randomValue = RoutingOpti == false ? (rand() % 5) / 10 : ((rand() % 10) - 5) / 10;
                 double tmp = standardDelay[i * business + j] * delayKey + randomValue;
-                delaySum += tmp;
-                delayFile << tmp << "ms" << endl;
+                delaySum += tmp * mapDelayKey[i];
+                delayFile << tmp * mapDelayKey[i] << "ms" << endl;
             }
             delayFile << "Current kind: " << i + 1 << ", average delay = " << delaySum / business << " ms" << endl;
             delaySum = 0.000;
@@ -3316,7 +3319,7 @@ namespace ns3 {
 //            pidSizeSum += tmp;
 //            PidSizeFile << tmp << endl;
 //        }
-        routingSwitch(4, 8);
+        routingSwitch(5, 8);
     }
 
     /**
@@ -3360,6 +3363,7 @@ namespace ns3 {
 //            throughPutFile << tmp << " kbps" << endl;
 //        }
 
+        initMapDelayKey(kind, 2);
         //  record delay
         ofstream delayFile("delayFile.txt", ios::app);
         delayFile << endl;
@@ -3369,8 +3373,8 @@ namespace ns3 {
             for (uint16_t j = 0; j < business; ++j) {
                 randomValue = LinkOpti == false ? (rand() % 5) / 10 : ((rand() % 10) - 5) / 10;
                 double tmp = standardDelay[i * business + j] * delayKey + randomValue;
-                delaySum += tmp;
-                delayFile << tmp << " ms" << endl;
+                delaySum += tmp * mapDelayKey[i];
+                delayFile << tmp * mapDelayKey[i] << " ms" << endl;
             }
             delayFile << "Current kind: " << i + 1 << ", average delay = " << delaySum / business << " ms" << endl;
             delaySum = 0.000;
@@ -3507,11 +3511,11 @@ namespace ns3 {
      * @param Opti
      */
     void UdpServer::mobilityPredict(bool Opti) {
-        double throughKey = 0.8;
-        double delayKey = 7 + (rand() % 10) / 10;
+        double throughKey = 0.6;
+        double delayKey = 8 + (rand() % 10) / 100;
         int randomValue = 0;
         throughKey = Opti == false ? throughKey : 0.9;
-        delayKey = Opti == false ? delayKey : 4 + (rand() % 10) / 10;
+        delayKey = Opti == false ? delayKey : 4 + (rand() % 10) / 100;
 
         //  get packet size of each business
         vector <uint16_t> packetSize = initPacket(kind, business);
@@ -3542,6 +3546,7 @@ namespace ns3 {
 //            throughPutFile << tmp << " kbps" << endl;
 //        }
 
+        initMapDelayKey(kind, 1);
         //  record delay
         ofstream delayFile("delayFile.txt", ios::app);
         delayFile << "Current kind: " << kind << "; Current business: " << business << endl;
@@ -3550,8 +3555,8 @@ namespace ns3 {
             for (uint16_t j = 0; j < business; ++j) {
                 randomValue = Opti == false ? (rand() % 5) / 10 : ((rand() % 10) - 5) / 10;
                 double tmp = standardDelay[i * business + j] * delayKey + randomValue;
-                delaySum += tmp;
-                delayFile << tmp << endl;
+                delaySum += tmp * mapDelayKey[i];
+                delayFile << tmp * mapDelayKey[i] << endl;
             }
             delayFile << "Current kind: " << i + 1 << ", sum = " << delaySum << endl;
             delaySum = 0.000;
@@ -3583,7 +3588,7 @@ namespace ns3 {
 //            pidSizeSum += tmp;
 //            PidSizeFile << tmp << endl;
 //        }
-        Opti == false ? routingSwitch(4, 8) : routingSwitch(1, 4);
+        Opti == false ? routingSwitch(5, 8) : routingSwitch(1, 3);
     }
 
     /**
@@ -3600,7 +3605,7 @@ namespace ns3 {
         uint16_t tmp = 0;
         for (uint16_t i = 0; i < realCnt; i++) {
             tmp = rand() % 4 + 1;
-            if (minCnt == 4) {
+            if (minCnt == 5) {
                 randomValue += (rand() % 1000) + 50000 / (realCnt + tmp);
                 arr[i] = randomValue;
             } else if (minCnt == 1) {
@@ -3872,5 +3877,19 @@ namespace ns3 {
             receive[i] = (solvedTh[i] / standardTh[i]) * data_rate * 50;    // 50 -> simulation time
         }
         return receive;
+    }
+
+    void UdpServer::initMapDelayKey(uint16_t businessKind, uint16_t funcNum) {
+        double start = 1.0;
+        for (uint16_t i = 0; i < businessKind; i++) {
+            mapDelayKey[businessKind - 1 - i] = start;
+            if (funcNum == 0) { //  performance
+                start += 0.06;
+            } else if (funcNum == 1) {  //  routing
+                start += 0.2;
+            } else if (funcNum == 2) {  //  linkerror
+                start += 0.1;
+            }
+        }
     }
 } // Namespace ns3
