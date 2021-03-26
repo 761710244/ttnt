@@ -5,5 +5,5 @@ rm *xml
 rm delay*
 rm throu*
 rm pid*
-rm routingSwitch.txt
-./waf --run "scratch/MobilityPredict --kind=3 --business=2 --mobilityOpt=false"
+rm routingSwitchFile.txt
+./waf --run "scratch/MobilityPredict --kind=4 --business=1 --mobilityOpt=true"

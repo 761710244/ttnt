@@ -245,6 +245,8 @@ namespace ns3 {
         vector<double> solveDelay(vector<double> delay, uint16_t business, uint16_t top);
 
         vector <uint16_t> getReceivePackets(vector<double> standardTh, vector<double> solvedTh);
+
+        void initMapDelayKey(uint16_t businessKind, uint16_t funcNum);
     };
 
 } // namespace ns3
