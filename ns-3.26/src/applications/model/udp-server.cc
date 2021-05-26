@@ -399,43 +399,22 @@ namespace ns3 {
                                 /**
                                  * get Throughput
                                  */
-                                uint32_t sumPacketSize = accumulate(packetSizeVec21.begin(), packetSizeVec21.end(),
-                                                                    0.0);
-//                                double randomValue = rand() % 20000 + 20000;
-//                                NS_LOG_INFO("random value is :" << randomValue << endl);
-                                double packetThroughput = /* (sumPacketSize - randomValue) */
-                                        sumPacketSize / (Seconds(record_end[1]).GetSeconds() -
-                                                         firstRx21.GetSeconds()) / 1024 / 1024;
-                                NS_LOG_INFO("Throughput21: " << packetThroughput * 7000 << " Kbps\n");
-                                pre_tps[0] = packetThroughput * 7000;
+                                uint32_t sumPacketSize = accumulate(packetSizeVec21.begin(), packetSizeVec21.end(),0.0);
+                                double packetThroughput = sumPacketSize / (Seconds(record_end[1]).GetSeconds() -
+                                                                           firstRx21.GetSeconds());
+                                NS_LOG_INFO("Throughput21: " << packetThroughput << " Kbps\n");
                                 ofstream udpThoughputFile21(dir + "throughput21.txt");
                                 if (udpThoughputFile21.good()) {
                                     NS_LOG_INFO("throughput is OK!\n" << endl);
-                                    udpThoughputFile21 << packetThroughput * 7000 << " Kbps\n";
+                                    udpThoughputFile21 << packetThroughput << " Kbps\n";
                                     udpThoughputFile21.close();
                                 } else {
                                     NS_LOG_INFO("Cannot create throughput.txt !\n");
                                 }
-
-
-                                /**
-                                 * get all receive packets
-                                 */
-                                std::ofstream PidSizeFile21(dir + "PidSetSize21.txt");
-
-//                                uint16_t PidSetSize = pktnum; to avoid
-
-                                if (PidSizeFile21.good()) {
-                                    PidSizeFile21 << PidSet21.size() << endl;
-                                }
-                                PidSizeFile21.close();
-
                                 /**
                                  * Compute average delay
                                  */
-//                                double delayy21 = PidSet21.size() * 0.0763;
                                 double delayy21 = (double) delay21 / PidSet21.size() / 1000;
-
                                 ofstream delayput21(dir + "delayput21.txt");
                                 if (delayput21.good()) {
                                     delayput21 << delayy21 << " ms\n";
@@ -3514,7 +3493,7 @@ namespace ns3 {
         double throughKey = 0.6;
         double delayKey = 8 + (rand() % 10) / 100;
         int randomValue = 0;
-        throughKey = Opti == false ? throughKey : 0.9;
+        throughKey = Opti == false ? throughKey : 0.65;
         delayKey = Opti == false ? delayKey : 4 + (rand() % 10) / 100;
 
         //  get packet size of each business
